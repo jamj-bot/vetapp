@@ -1,0 +1,39 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Seeder;
+
+class UserSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $user1 = User::create([
+            'name' => 'Arturo Molina',
+            'phone' => '3336897418',
+            'email' => 'arturo@gmail.com',
+            'password' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'superadmin'
+        ]);
+        $user1->assignRole('superadmin');
+
+        $user2 = User::create([
+            'name' => 'Jorge Arturo Molina Juárez',
+            'phone' => '3345851719',
+            'email' => 'jorgearturomolina@gmail.com',
+            'password' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'admin'
+        ]);
+        $user2->assignRole('admin');
+
+        User::factory(5)->create();
+    }
+}
