@@ -160,7 +160,7 @@
                         @endif
                         <!-- /.card-footer -->
 
-                        <!-- COMMENT: muestra overlay cuando se llama a los método restore y delete -->
+                        <!-- COMMENT: muestra overlay cuando se llama a los método restore -->
                         <div wire:loading.class="overlay dark" wire:target="restore">
                         </div>
                     </div>

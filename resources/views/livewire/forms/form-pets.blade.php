@@ -1,5 +1,6 @@
-<div>
-	<form autocomplete="off">
+<form autocomplete="off" wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
+	@include('common.modal-header')
+
 		<div class="form-row">
 			<div class="form-group col-md-4">
 				<label for="inputDOB" class="form-label font-weight-normal">DOB *</label>
@@ -216,28 +217,5 @@
 		</div>
 		<!-- /. row -->
 
-
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<button wire:click.prevent="store()"
-					wire:loading.class="disabled"
-					wire:target="store"
-					type="button"
-					class="btn btn-primary btn-block shadow">
-						Save&nbsp;&nbsp;<i wire:loading wire:target="store" class="fas fa-spinner fa-spin"></i>
-				</button>
-			</div>
-			<div class="form-group col-md-6">
-				<button wire:click.prevent="resetUI"
-					wire:loading.class="disabled"
-					wire:target="resetUI"
-					type="button"
-					class="btn btn-danger btn-block shadow">
-					Cancel&nbsp;&nbsp;<i wire:loading wire:target="resetUI" class="fas fa-spinner fa-spin"></i>
-				</button>
-			</div>
-		</div>
-		<!-- /. row -->
-
-	</form>
-</div>
+	@include('common.modal-footer')
+</form>

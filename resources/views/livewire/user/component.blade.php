@@ -105,7 +105,12 @@
                                                 <i class="text-xs text-muted fas fa-sort"></i>
                                             @endif
                                         </th>
-                                        <th colspan="2" class="text-center">Actions</th>
+                                        <th>
+                                            <span class="sr-only">Edit</span>
+                                        </th>
+                                        <th>
+                                            <span class="sr-only">Delete</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -113,14 +118,14 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="pr-2">
-                                                        <img class="profile-user-img img-fluid img-circle shadow-sm"
+                                                    <p class="pr-2 mb-0">
+                                                        <img class="profile-user-img img-circle shadow-sm"
                                                             loading="lazy"
                                                             alt="avatar"
                                                             src="{{ $user->profile_photo_url }}"
                                                             style="width: 50px; height: 50px; object-fit: cover;">
                                                     </p>
-                                                    <p class="d-flex flex-column font-weight-light text-right text-nowrap">
+                                                    <p class="d-flex flex-column font-weight-light text-right mb-0">
                                                         <span>
                                                             @can('user_profile_show')
                                                                 <a href="{{route('admin.users.show', $user)}}" class="font-weight-normal">
@@ -138,7 +143,7 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="d-flex flex-column font-weight-light text-left">
+                                                    <p class="d-flex flex-column font-weight-light text-left mb-0">
                                                         <span class="text-uppercase ">
                                                             <i class="text-muted fas fa-fw fa-phone"></i>
                                                             {{ $user->phone }}
@@ -160,9 +165,9 @@
                                                     <a href="javascript:void(0)"
                                                         data-toggle="modal"
                                                         wire:click.prevent="edit({{ $user }})"
-                                                        title="edit"
-                                                        class="btn btn-app">
-                                                            <i class="fas fa-edit"></i> Edit
+                                                        title="Edit"
+                                                        class="btn btn-block btn-default shadow">
+                                                            <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -171,8 +176,8 @@
                                                     <a href="javascript:void(0)"
                                                         onclick="confirm('{{ $user->id }}', 'Are you sure you want delete this user?', 'You can recover it from Recycle Bin!', 'User', 'destroy')"
                                                         title="Delete"
-                                                        class="btn btn-app">
-                                                            <i class="fas fa-trash"></i> Delete
+                                                        class="btn btn-block btn-default shadow">
+                                                            <i class="fas fa-trash"></i>
                                                     </a>
                                                 @endcan
                                             </td>

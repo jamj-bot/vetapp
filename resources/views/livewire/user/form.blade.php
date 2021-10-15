@@ -1,52 +1,119 @@
 <form wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
 	@include('common.modal-header')
 
-	  	<div class="form-group">
-	    	<label for="inputName">Name</label>
-	    	<input wire:model.lazy="name" type="text" class="form-control" id="inputName" placeholder="John Doe">
-	    	@error('name') <span class="text-danger text-xs">{{ $message }}</span> @enderror
-	  	</div>
+		<div class="form-row">
+			<div class="form-group col-md-6">
+				<label for="inputName" class="form-label font-weight-normal">Name *</label>
+				<input wire:model.lazy="name"
+					type="text"
+					class="form-control form-control-sm {{ $errors->has('name') ? 'is-invalid':'' }}"
+					id="inputName"
+					placeholder="e.g. John Doe or Lehn Farms LLC"
+					aria-describedby="inputNameFeedback">
+
+				@error('name')
+					<div id="inputNameFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
+
+			</div>
+
+			<div class="form-group col-md-6">
+				<label for="inputPhone" class="form-label font-weight-normal">Phone *</label>
+				<input wire:model.lazy="phone"
+					type="text"
+					class="form-control form-control-sm {{ $errors->has('phone') ? 'is-invalid':'' }}"
+					id="inputPhone"
+					placeholder="e.g. 3314242817"
+					aria-describedby="inputPhoneFeedback">
+
+			   @error('phone')
+					<div id="inputPhoneFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
+
+			</div>
+		</div>
+		<!-- /. row -->
 
 		<div class="form-row">
-		  	<div class="form-group col-md-6">
-		    	<label for="inputPhone">Phone</label>
-		    	<input wire:model.lazy="phone" type="text" class="form-control" id="inputPhone" placeholder="3301020304">
-		    	@error('phone') <span class="text-danger text-xs">{{ $message }}</span> @enderror
-		  	</div>
-		  	<div class="form-group col-md-6">
-	      		<label for="inputEmail">Email</label>
-	      		<input wire:model.lazy="email" type="email" class="form-control" id="inputEmail" placeholder="Email@example.com">
-	      		@error('email') <span class="text-danger text-xs">{{ $message }}</span> @enderror
-	    	</div>
-	  	</div>
+			<div class="form-group col-md-6">
+				<label for="inputEmail" class="form-label font-weight-normal">Email *</label>
+				<input wire:model.lazy="email"
+					type="text"
+					class="form-control form-control-sm {{ $errors->has('email') ? 'is-invalid':'' }}"
+					id="inputEmail"
+					placeholder="e.g. john_doe@gmail.com"
+					aria-describedby="inputEmailFeedback">
 
+				@error('email')
+					<div id="inputEmailFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
 
-	  	<div class="form-row">
-	    	<div class="form-group col-md-6">
-	      		<label for="inputPassword">Password</label>
-	      		<input wire:model.lazy="password" type="password" class="form-control" id="inputPassword" placeholder="Password">
-	      		@error('password') <span class="text-danger text-xs">{{ $message }}</span> @enderror
-	    	</div>
-	    	<div class="form-group col-md-4">
-	      		<label for="inputUserType">User type</label>
-	      		<select wire:model.lazy="user_type" id="inputUserType" class="form-control">
-	        		<option value="choose" selected>Choose...</option>
-	        		@foreach($roles as $role)
-	        			<option value="{{ $role->name }}">{{ $role->name }}</option>
-	        		@endforeach
-	      		</select>
-	      		@error('user_type') <span class="text-danger text-xs">{{ $message }}</span> @enderror
-	    	</div>
-	    	<div class="form-group col-md-2">
-	      		<label for="inputStatus">Status</label>
-	      		<select wire:model.lazy="status" id="inputStatus" class="form-control">
+			</div>
+
+			<div class="form-group col-md-6">
+				<label for="inputPassword" class="form-label font-weight-normal">Password *</label>
+				<input wire:model.lazy="password"
+					type="text"
+					class="form-control form-control-sm {{ $errors->has('password') ? 'is-invalid':'' }}"
+					id="inputPassword"
+					placeholder=""
+					aria-describedby="inputPasswordFeedback">
+
+			   @error('password')
+					<div id="inputPasswordFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
+
+			</div>
+		</div>
+		<!-- /. row -->
+
+		<div class="form-row">
+			<div class="form-group col-md-6">
+				<label for="selectUserType" class="form-label font-weight-normal">User type *</label>
+				<select wire:model.lazy="user_type"
+					class="custom-select custom-select-sm {{ $errors->has('user_type') ? 'is-invalid':'' }}"
+					id="selectUserType"
+					aria-describedby="selectUserTypeFeedback">
+					<option value="choose" selected>Choose...</option>
+					@foreach($roles as $role)
+						<option value="{{ $role->name }}">{{ $role->name }}</option>
+					@endforeach
+				</select>
+
+				@error('user_type')
+					<div id="selectUserTypeFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
+			</div>
+
+			<div class="form-group col-md-6">
+				<label for="selectStatus" class="form-label font-weight-normal">Status *</label>
+				<select wire:model.lazy="status"
+					class="custom-select custom-select-sm {{ $errors->has('status') ? 'is-invalid':'' }}"
+					id="selectStatus"
+					aria-describedby="selectStatusFeedback">
 	        		<option value="choose" selected>Choose...</option>
 	        		<option value="active">Active</option>
 	        		<option value="locked">Locked</option>
-	      		</select>
-	      		@error('status') <span class="text-danger text-xs">{{ $message }}</span> @enderror
-	    	</div>
-	  	</div>
+				</select>
+
+				@error('status')
+					<div id="selectStatusFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
+			</div>
+		</div>
+		<!-- /. row -->
 
 	  	<div class="form-group">
 	    	<div class="form-check">

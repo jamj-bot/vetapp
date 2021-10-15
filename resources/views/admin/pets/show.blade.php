@@ -11,9 +11,10 @@
 				</div>
 				<div class="col-sm-6">
 					<ol class="breadcrumb float-sm-right">
-					  <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-					   <li class="breadcrumb-item"><a href="{{ route('admin.users')}}">Users</a></li>
-					  <li class="breadcrumb-item active">User Profile</li>
+					  <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Home</a></li>
+					   <li class="breadcrumb-item"><a href="{{ route('admin.users') }}">Users</a></li>
+					   <li class="breadcrumb-item"><a href="{{ route('admin.users.show', $pet->user) }}">{{ $pet->user->name }}</a></li>
+					  <li class="breadcrumb-item active">{{ $pet->name }}</li>
 					</ol>
 				</div>
 			</div>
@@ -25,12 +26,164 @@
 	<section class="content">
 		<div class="container-fluid">
 			<div class="row">
+
+				<div class="col-md-3">
+
+					<a href="mailbox.html" class="btn btn-primary btn-block btn-lg mb-3">
+						<i class="far fa-arrow-alt-circle-left"></i>
+						Back to Owner Profile
+					</a>
+{{-- 					<!-- Profile Image -->
+					<div class="card card-primary card-outline font-weight-light">
+						<div class="card-body box-profile">
+							<div class="text-center">
+								<img class="profile-user-img img-fluid img-circle shadow"
+									loading="lazy"
+									src="{{ $pet->user->profile_photo_url }}"
+									style="width: 100px; height: 100px; object-fit: cover;"
+									alt="User profile picture">
+							</div>
+
+							<h3 class="profile-username text-center"><a href="{{ route('admin.users.show', $pet->user) }}">{{ $pet->user->name }}</a></h3> --}}
+
+{{-- 							<p class="text-muted text-center mb-0">
+								{{ $pet->user->name }}
+							</p> --}}
+
+{{-- 							<ul class="list-group list-group-unbordered mb-3">
+								<li class="list-group-item">
+									<b>Vaccinations</b>
+									<a class="float-right text-primary">
+										{{-- $pet->pets->where('status', 'Alive')->count() --}}
+{{-- 									</a>
+								</li>
+								<li class="list-group-item">
+									<b>Appointments</b>
+									<a class="float-right text-danger">
+										{{-- $pet->pets->where('status', 'Dead')->count() --}}
+{{-- 									</a>
+								</li>
+								<li class="list-group-item">
+									<b>Consultations</b>
+									<a class="float-right">
+										{{-- $pet->pets->count() --}}
+{{-- 									</a>
+								</li>
+							</ul> --}}
+
+							{{-- <a href="#" class="btn btn-primary btn-block"><b>Create</b></a> --}}
+{{-- 						</div>
+						<!-- /.card-body -->
+					</div>
+					<!-- /.card --> --}}
+
+					<!-- About Me Box -->
+					<div class="card card-primary font-weight-light">
+						<div class="card-header">
+							<h3 class="card-title">About {{ $pet->name }}</h3>
+							<span class="float-right badge badge-dark">{{ $pet->status == 'Dead' ? 'Dead':''}}</span>
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body">
+							<strong><i class="fas fa-fw fa-fingerprint mr-1"></i> Code</strong>
+
+							<p class="text-muted">
+								{{ $pet->code }}
+							</p>
+
+							<hr>
+							<strong><i class="fas fa-fw fa-paw mr-1"></i> Species</strong>
+
+							<p class="text-muted">
+								{{ $pet->species->name }} / <span class="font-italic">{{ $pet->species->scientific_name }}</span>
+							</p>
+
+							<hr>
+							<strong><i class="fas fa-fw fa-award mr-1"></i> Breed</strong>
+
+							<p class="text-muted">
+								{{ $pet->breed }}
+							</p>
+
+							<hr>
+
+							<strong><i class="fas fa-fw fa-hard-hat mr-1"></i> Zootechnical function</strong>
+
+							<p class="text-muted">
+								{{ $pet->zootechnical_function }}
+							</p>
+
+							<hr>
+
+							<strong><i class="fas fa-fw fa-venus mr-1"></i> Sex</strong>
+
+							<p class="text-muted">
+								{{ $pet->sex }}
+							</p>
+
+							<hr>
+
+							<strong><i class="fas fa-fw fa-neuter mr-1"></i> Neutered</strong>
+
+							<p class="text-muted">
+								{{ $pet->neutered }}
+							</p>
+
+							<hr>
+
+							<strong><i class="fas fa-fw fa-birthday-cake mr-1"></i> DOB</strong>
+
+							<p class="text-muted">
+								{{ $pet->dob->format('d-M-Y') }} /
+
+								@if($pet->dob->diffInDays(\Carbon\Carbon::now()) < 59)
+									{{ $pet->dob->diffInDays(\Carbon\Carbon::now()) }} days
+								@elseif($pet->dob->diffInDays(\Carbon\Carbon::now()) >= 60 && $pet->dob->diffInMonths(\Carbon\Carbon::now()) < 24)
+									{{ $pet->dob->diffInMonths(\Carbon\Carbon::now())}} months
+								@elseif($pet->dob->diffInMonths(\Carbon\Carbon::now()) >= 24)
+									{{ $pet->dob->diffInYears(\Carbon\Carbon::now()) }} years
+								@endif
+							</p>
+
+							<hr>
+
+							<strong><i class="fas fa-fw fa-calendar mr-1"></i> Registered</strong>
+
+							<p class="text-muted">
+								{{ $pet->created_at->diffForHumans() }}
+							</p>
+
+							<hr>
+
+							<strong><i class="fas fa-fw fa-door-open mr-1"></i> Items</strong>
+
+							<p class="text-muted">
+								<span class="tag tag-danger">UI Design</span>
+								<span class="tag tag-success">Coding</span>
+								<span class="tag tag-info">Javascript</span>
+								<span class="tag tag-warning">PHP</span>
+								<span class="tag tag-primary">Node.js</span>
+							</p>
+
+							<hr>
+
+							<strong><i class="far fa-file-alt mr-1"></i> Diseases</strong>
+
+							<p class="text-muted">{{ $pet->diseases }}</p>
+						</div>
+						<!-- /.card-body -->
+					</div>
+					<!-- /.card -->
+				</div>
+				<!-- /.col -->
+
+
 				<div class="col-md-9">
 					<div class="card">
 						<div class="card-header p-2">
 							<ul class="nav nav-pills">
 								<li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
-								<li class="nav-item"><a class="nav-link" href="#pets" data-toggle="tab">Pets</a></li>
+								<li class="nav-item"><a class="nav-link" href="#vaccinations" data-toggle="tab">Vaccinations</a></li>
 								<li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
 								<li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
 							</ul>
@@ -152,8 +305,8 @@
 								</div>
 								<!-- /.tab-pane -->
 
-								<div class="tab-pane" id="pets">
-									{{--@livewire('show-users', ['user' => $user])--}}
+								<div class="tab-pane" id="vaccinations">
+									@livewire('vaccinations', ['pet' => $pet])
 								</div>
 								<!-- /.tab-pane -->
 
@@ -309,114 +462,10 @@
 					<!-- /.card -->
 				</div>
 				<!-- /.col -->
-
-				<div class="col-md-3">
-
-					<!-- Profile Image -->
-					<div class="card card-success card-outline font-weight-light">
-						<div class="card-body box-profile">
-							<div class="text-center">
- 								<img class="profile-user-img img-fluid img-circle shadow"
-									loading="lazy"
-									src="{{-- $user->profile_photo_url --}}"
-									style="width: 100px; height: 100px; object-fit: cover;"
-									alt="User profile picture">
-							</div>
-
-							<h3 class="profile-username text-center">{{ $pet->name }}</h3>
-
-							<p class="text-muted text-center">{{ $pet->user_type }}</p>
-
-							<ul class="list-group list-group-unbordered mb-3">
-								<li class="list-group-item">
-									<b>Live pets</b>
-									<a class="float-right text-success">
-										{{-- $pet->pets->where('status', 'Alive')->count() --}}
-									</a>
-								</li>
-								<li class="list-group-item">
-									<b>Dead pets</b>
-									<a class="float-right text-danger">
-										{{-- $pet->pets->where('status', 'Dead')->count() --}}
-									</a>
-								</li>
-								<li class="list-group-item">
-									<b>Total pets</b>
-									<a class="float-right">
-										{{-- $pet->pets->count() --}}
-									</a>
-								</li>
-							</ul>
-
-							<a href="#" class="btn btn-success btn-block"><b>Create</b></a>
-						</div>
-						<!-- /.card-body -->
-					</div>
-					<!-- /.card -->
-
-					<!-- About Me Box -->
-					<div class="card card-success font-weight-light">
-						<div class="card-header">
-							<h3 class="card-title">About Me</h3>
-						</div>
-						<!-- /.card-header -->
-						<div class="card-body">
-							<strong><i class="fas fa-fw fa-envelope mr-1"></i> Email</strong>
-
-							<p class="text-muted">
-								{{ $pet->email }}
-							</p>
-
-							<hr>
-
-							<strong><i class="fas fa-fw fa-phone mr-1"></i> Phone</strong>
-
-							<p class="text-muted">
-								{{ $pet->phone }}
-							</p>
-
-							<hr>
-
-							<strong><i class="fas fa-fw fa-calendar mr-1"></i> Registered</strong>
-
-							<p class="text-muted">
-								{{ $pet->created_at->diffForHumans() }}
-							</p>
-
-							<hr>
-
-							<strong><i class="fas fa-fw fa-calendar mr-1"></i> Updated</strong>
-
-							<p class="text-muted">
-								{{ $pet->updated_at->diffForHumans() }}
-							</p>
-
-							<hr>
-
-							<strong><i class="fas fa-fw fa-door-open mr-1"></i> Items</strong>
-
-							<p class="text-muted">
-								<span class="tag tag-danger">UI Design</span>
-								<span class="tag tag-success">Coding</span>
-								<span class="tag tag-info">Javascript</span>
-								<span class="tag tag-warning">PHP</span>
-								<span class="tag tag-primary">Node.js</span>
-							</p>
-
-							<hr>
-
-							<strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
-
-							<p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p>
-						</div>
-						<!-- /.card-body -->
-					</div>
-					<!-- /.card -->
-				</div>
-				<!-- /.col -->
 			</div>
 			<!-- /.row -->
-		</div><!-- /.container-fluid -->
+		</div>
+		<!-- /.container-fluid -->
 	</section>
 @stop
 

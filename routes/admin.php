@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserProfileController;
 use App\Http\Livewire\AssignPermissionsController;
 use App\Http\Livewire\PermissionController;
 use App\Http\Livewire\RoleController;
+use App\Http\Livewire\SpeciesController;
 use App\Http\Livewire\TrashController;
 use App\Http\Livewire\UserController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,9 @@ Route::get('permissions', PermissionController::class)->name('admin.permissions'
 
 // Assign Permissions
 Route::get('assign-permissions', AssignPermissionsController::class)->name('admin.assign-permissions');
+
+// Species
+Route::get('species', SpeciesController::class)->name('admin.species');
 
 // Credits route
 Route::get('credits', function(){

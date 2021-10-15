@@ -60,6 +60,15 @@ class UserController extends Component
     }
 
     /**
+     *  Real time validation
+     *
+    **/
+    public function updated($propertyName)
+    {
+        $this->validateOnly($propertyName);
+    }
+
+    /**
      *  Funtion to reset pagination when a user writtes in search field
      *
     **/

@@ -315,7 +315,7 @@ return [
                 [
                     'text'  => 'Index',
                     'route' => 'admin.users',
-                    'active'      => ['admin/users*'],
+                    'active'      => ['admin/users*', 'admin/pets*'],
                     'icon'  => 'fas fa-fw fa-address-book',
                     'can'   => 'users_index',
                 ],
@@ -326,6 +326,13 @@ return [
                     'can'   => 'trash_index',
                 ],
             ],
+        ],
+        ['header' => 'VETAPP CONFIG'],
+        [
+            'text'  => 'Species',
+            'icon'  => 'fas fa-fw fa-paw',
+            'can'   => 'species_index',
+            'route' => 'admin.species',
         ],
         ['header' => 'MANAGE PERMISSIONS'],
         [

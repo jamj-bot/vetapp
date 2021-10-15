@@ -85,7 +85,7 @@
                             <tr>
                                 <td>
                                     {{--<div class="d-flex justify-content-between align-items-center">
-                                        <p class="pr-2">
+                                        <p class="pr-2 mb-0">
                                             <img class="img-circle shadow shadow-sm"
                                                 alt="avatar"
                                                 src="{{ $item->profile_photo_url }}"
@@ -104,7 +104,7 @@
                                 <td>
                                     {{--
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <p class="d-flex flex-column font-weight-light text-left">
+                                        <p class="d-flex flex-column font-weight-light text-left mb-0">
                                             <span class="text-uppercase ">
                                                 <i class="text-muted fas fa-fw fa-phone"></i>
                                                 {{ $item->phone }}

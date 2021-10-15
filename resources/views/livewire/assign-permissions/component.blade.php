@@ -91,7 +91,7 @@
                         <!-- /.card-header -->
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-sm table-hover">
+                            <table class="table table-head-fixed table-hover">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -105,11 +105,11 @@
                                             @else
                                                 <i class="text-xs text-muted fas fa-sort"></i>
                                             @endif
-                                                        @if($this->role_id == 'choose')
-                                                            <span class="float-right text-sm mr-2 text-muted">
-                                                                Please, select a role
-                                                            </span>
-                                                        @endif
+                                            @if($this->role_id == 'choose')
+                                                <span class="float-right text-sm mr-2 text-muted">
+                                                    Please, select a role
+                                                </span>
+                                            @endif
                                         </th>
                                     </tr>
                                 </thead>
@@ -121,7 +121,7 @@
                                                     <p class="font-weight-light">
                                                         {{ $permission->name }}
                                                     </p>
-                                                    <p class="d-flex flex-row  text-right text-nowrap">
+                                                    <p class="d-flex flex-row  text-right text-nowrap mb-0">
                                                         <span>
                                                             <label>
                                                                 <input  @cannot('assign_permissions_sync') disabled @endcannot

@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Pet;
+use App\Models\Vaccination;
 use Illuminate\Database\Seeder;
 
-class PetSeeder extends Seeder
+class VaccinationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +14,6 @@ class PetSeeder extends Seeder
      */
     public function run()
     {
-        Pet::factory(25)->create();
+        Vaccination::factory(10)->create();
     }
 }

@@ -20,9 +20,9 @@ class UserSeeder extends Seeder
             'email' => 'arturo@gmail.com',
             'password' => bcrypt('1234567890'),
             'status' => 'active',
-            'user_type' => 'superadmin'
+            'user_type' => 'Superadmin'
         ]);
-        $user1->assignRole('superadmin');
+        $user1->assignRole('Superadmin');
 
         $user2 = User::create([
             'name' => 'Jorge Arturo Molina Juárez',
@@ -30,10 +30,10 @@ class UserSeeder extends Seeder
             'email' => 'jorgearturomolina@gmail.com',
             'password' => bcrypt('1234567890'),
             'status' => 'active',
-            'user_type' => 'admin'
+            'user_type' => 'Admin'
         ]);
         $user2->assignRole('admin');
 
-        User::factory(5)->create();
+        User::factory(1)->create();
     }
 }

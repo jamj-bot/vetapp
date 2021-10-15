@@ -96,7 +96,12 @@
                                             @endif
                                             --}}
                                         </th>
-                                        <th colspan="2" class="text-center">Actions</th>
+                                        <th>
+                                            <span class="sr-only">Edit</span>
+                                        </th>
+                                        <th>
+                                            <span class="sr-only">Delete</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -104,7 +109,7 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="d-flex flex-column font-weight-light text-left text-nowrap">
+                                                    <p class="d-flex flex-column font-weight-light text-left text-nowrap mb-0">
                                                         <span>
                                                             {{ $permission->name }}
                                                         </span>
@@ -140,9 +145,9 @@
                                                     <a href="javascript:void(0)"
                                                         data-toggle="modal"
                                                         wire:click.prevent="edit({{ $permission }})"
-                                                        title="edit"
-                                                        class="btn btn-app">
-                                                            <i class="fas fa-edit"></i> Edit
+                                                        title="Edit"
+                                                        class="btn btn-block btn-default shadow">
+                                                            <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -151,15 +156,15 @@
                                                     <a href="javascript:void(0)"
                                                         onclick="confirm('{{ $permission->id }}', 'Are you sure you want delete this Item?', 'You won\'t be able to revert this!', 'Item', 'destroy')"
                                                         title="Delete"
-                                                        class="btn btn-app">
-                                                            <i class="fas fa-trash"></i> Delete
+                                                        class="btn btn-block btn-default shadow">
+                                                            <i class="fas fa-trash"></i>
                                                     </a>
                                                 @endcan
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5">
+                                            <td colspan="4">
                                                 @if(strlen($search) <= 0)
                                                 <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
                                                     <div class="col-12 d-flex justify-content-center align-items-center text-muted">

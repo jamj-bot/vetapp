@@ -23,6 +23,7 @@ class Pet extends Model
         'code',
         'name',
         'breed',
+        'zootechnical_function',
         'sex',
         'dob',
         'neutered',
@@ -30,6 +31,13 @@ class Pet extends Model
         'allergies',
         'status'
     ];
+
+    /**
+    * The attributes that should be mutated to dates.
+    *
+    * @var array
+    */
+    protected $dates = ['dob'];
 
     /**
      * Get the user that owns the pet.
@@ -46,4 +54,13 @@ class Pet extends Model
     {
         return $this->belongsTo(Species::class);
     }
+
+    /**
+     * Get the Vaccine doses of the pet.
+     */
+    public function vaccinations()
+    {
+        return $this->hasMany(Vaccination::class);
+    }
+
 }

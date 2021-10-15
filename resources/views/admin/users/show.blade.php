@@ -13,7 +13,7 @@
 					<ol class="breadcrumb float-sm-right">
 					  <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
 					   <li class="breadcrumb-item"><a href="{{ route('admin.users')}}">Users</a></li>
-					  <li class="breadcrumb-item active">User Profile</li>
+					  <li class="breadcrumb-item active">{{ $user->name }}</li>
 					</ol>
 				</div>
 			</div>
@@ -357,13 +357,14 @@
 
 								<div class="tab-pane" id="pets">
 
-									@livewire('index-pets', ['user' => $user])
+									{{-- @livewire('index-pets', ['user' => $user]) --}}
+									@livewire('pets', ['user' => $user])
 
 								</div>
 								<!-- /.tab-pane -->
 
 								<div class="tab-pane" id="add_pet">
-									@livewire('store-pets', ['user' => $user])
+									{{-- @livewire('store-pets', ['user' => $user]) --}}
 								</div>
 								<!-- /.tab-pane -->
 							</div>
@@ -384,14 +385,5 @@
 @stop
 
 @section('js')
-	<script>
-		window.addEventListener('stored', event => {
-	        notify(event)
-	    });
-
-		// debo recibir el evento de que debo refresh index.pets desde store.pets
-			// ->debo enviar el evento hacia index.pets para que se refresh el componente
-	</script>
-
 	@include('admin.layout.scripts')
 @stop

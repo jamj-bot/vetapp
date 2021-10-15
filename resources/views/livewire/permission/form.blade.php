@@ -1,24 +1,26 @@
 <form wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
 	@include('common.modal-header')
 
-        <div class="form-group row">
-            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-            <div class="col-sm-10">
-                <input wire:model.lazy="name"
-                    type="text"
-                    class="form-control {{ $errors->has('name') ? 'is-invalid':'' }}"
-                    id="inputName"
-                    placeholder="e.g. users_index"
-                    aria-describedby="inputNameFeedback">
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="inputName" class="form-label font-weight-normal">Name *</label>
+            <input wire:model.lazy="name"
+                type="text"
+                class="form-control form-control-sm {{ $errors->has('name') ? 'is-invalid':'' }}"
+                id="inputName"
+                placeholder="e.g. permissions_index"
+                aria-describedby="inputNameFeedback">
 
-                @error('name')
-                    <div id="inputNameFeedback" class="invalid-feedback">
-                        {{ $message }}
-                    </div>
-                @enderror
+            @error('name')
+                <div id="inputNameFeedback" class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
 
-            </div>
         </div>
+    </div>
+    <!-- /. row -->
+
 
 	@include('common.modal-footer')
 </form>

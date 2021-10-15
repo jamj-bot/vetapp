@@ -20,18 +20,18 @@
     <section class="content">
         <div class="container-fluid">
 
-
             <!-- Buttons -->
             <div class="form-row d-flex justify-content-end">
                 <div class="form-group col-md-3">
-                    @can('roles_store')
+                    @can('species_store')
                         <!-- Button trigger modal -->
                         <button type="button" class="btn bg-gradient-primary btn-block shadow" data-toggle="modal" data-target="#modalForm">
-                               <i class="fas fa-fw fa-plus"></i> Add Role
+                           <i class="fas fa-fw fa-plus"></i> Add Species
                         </button>
                     @endcan
                 </div>
             </div>
+
 
             <!--Datatable -->
             <div class="row">
@@ -50,8 +50,9 @@
                                             </div>
                                             <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
                                                 <option disabled>Choose...</option>
-                                                <option selected value="5">5 items</option>
                                                 <option value="10">10 items</option>
+                                                <option selected value="25">25 items</option>
+                                                <option value="50">50 items</option>
                                             </select>
                                         </div>
                                     </div>
@@ -60,7 +61,6 @@
                                     </div>
                                 </div>
                                 <!-- /.Datatable filters -->
-
                             </div>
                         </div>
                         <!-- /.card-header -->
@@ -70,8 +70,21 @@
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
-                                            Role
+                                            Name
+
                                             @if($sort == 'name')
+                                                @if($direction == 'asc')
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
+                                                @else
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
+                                                @endif
+                                            @else
+                                                <i class="text-xs text-muted fas fa-sort"></i>
+                                            @endif
+                                        </th>
+                                        <th wire:click="order('scientific_name')">
+                                            Scientific name
+                                            @if($sort == 'scientific_name')
                                                 @if($direction == 'asc')
                                                     <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
                                                 @else
@@ -90,35 +103,33 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($roles as $role)
+                                    @forelse($species as $specie)
                                         <tr>
                                             <td>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="d-flex flex-column font-weight-light text-left text-nowrap mb-0">
-                                                        <span>
-                                                            {{ $role->name }}
-                                                        </span>
-                                                        <span class="text-xs text-uppercase">
-                                                            <b>{{ $role->created_at->diffForHumans() }}</b>
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                    {{ $specie->name }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="d-flex flex-column font-weight-light font-italic mb-0">
+                                                    {{ $specie->scientific_name }}
+                                                </p>
                                             </td>
                                             <td width="10px">
-                                                @can('roles_update')
+                                                @can('species_update')
                                                     <a href="javascript:void(0)"
                                                         data-toggle="modal"
-                                                        wire:click.prevent="edit({{ $role }})"
-                                                        title="Edit"
+                                                        wire:click.prevent="edit({{ $specie }})"
+                                                        title="edit"
                                                         class="btn btn-block btn-default shadow">
                                                             <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endcan
                                             </td>
                                             <td width="10px">
-                                                @can('roles_destroy')
+                                                @can('species_destroy')
                                                     <a href="javascript:void(0)"
-                                                        onclick="confirm('{{ $role->id }}', 'Are you sure you want delete this Role?', 'You won\'t be able to revert this!', 'Role', 'destroy')"
+                                                        onclick="confirm('{{ $specie->id }}', 'Are you sure you want delete this Item?', 'You won\'t be able to revert this!', 'Item', 'destroy')"
                                                         title="Delete"
                                                         class="btn btn-block btn-default shadow">
                                                             <i class="fas fa-trash"></i>
@@ -128,7 +139,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5">
+                                            <td colspan="4">
                                                 @if(strlen($search) <= 0)
                                                 <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
                                                     <div class="col-12 d-flex justify-content-center align-items-center text-muted">
@@ -161,10 +172,15 @@
                                 </tbody>
                             </table>
 
-                            @if(count($roles))
+                            <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
+                            <div class="d-flex justify-content-center">
+                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                            </div>
+
+                            @if(count($species))
                                 <div class="ml-4">
-                                    @if($roles->hasPages())
-                                        {{ $roles->links() }}
+                                    @if($species->hasPages())
+                                        {{ $species->links() }}
                                     @endif
                                 </div>
                             @endif
@@ -177,7 +193,7 @@
         </div><!-- /.container-fluid -->
     </section>
 
-    @include('livewire.role.form')
+    @include('livewire.species.form')
 </div>
 
 
@@ -189,6 +205,11 @@
     window.addEventListener('updated', event => {
         notify(event)
     });
+
+    window.addEventListener('destroy-error', event => {
+        notify(event)
+    });
+
 
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {

@@ -12,8 +12,8 @@ class StorePets extends Component
 
     public $user;
 
-    // Attributes to create model instances
-    public $species_id, $code, $name, $breed, $sex, $dob, $neutered, $diseases, $allergies, $status;
+    // Crude Atributes
+    public $species_id, $code, $name, $breed, $zootechnical_function, $sex, $dob, $neutered, $diseases, $allergies, $status;
 
     /**
      *  Function that returns the validation rules
@@ -26,6 +26,7 @@ class StorePets extends Component
             'code' => "required|numeric|digits:10|unique:pets,code",
             'name' => 'required|min:3|max:140',
             'breed' => 'nullable|max:140',
+            'zootechnical_function' => 'nullable|max:140',
             'sex' => 'required|in:"Male","Female","Unknown"',
             'dob' => 'required|date',
             'neutered' => 'required|in:"Yes", "No", "Unknown',
@@ -33,13 +34,6 @@ class StorePets extends Component
             'allergies' => 'nullable|max:2000',
             'status' => 'required|in:"Alive","Dead"'
         ];
-    }
-
-    public function render()
-    {
-        $species = Species::orderBy('name', 'desc')->get();
-
-        return view('livewire.store-pets', compact('species'));
     }
 
     /**
@@ -51,6 +45,12 @@ class StorePets extends Component
         $this->validateOnly($propertyName);
     }
 
+    public function render()
+    {
+        $species = Species::orderBy('name', 'desc')->get();
+
+        return view('livewire.store-pets', compact('species'));
+    }
 
     public function store()
     {
@@ -79,6 +79,7 @@ class StorePets extends Component
         $this->code = '';
         $this->name = '';
         $this->breed = '';
+        $this->zootechnical_function = '';
         $this->sex = 'choose';
         $this->dob = '';
         $this->neutered = 'choose';

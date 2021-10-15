@@ -29,6 +29,7 @@ class PetFactory extends Factory
             'code'       => $this->faker->unique()->numerify('##########'),
             'name'       => $this->faker->firstName('male'|'female'),
             'breed'      => $this->faker->randomElement(['Weimaraner', 'Sardo Negro', 'Angus', 'Angora', null]),
+            'zootechnical_function' => $this->faker->randomElement(['Beef Cattle', 'Dairy Cattle', 'Companion', 'Assistance', 'Farm']),
             'sex'        => $this->faker->randomElement(['Male', 'Female', 'Unknown']),
             'dob'        => $this->faker->dateTimeBetween('2010-01-01', '2021-01-01'),
             'neutered'   => $this->faker->randomElement(['Yes', 'No', 'Unknown']),

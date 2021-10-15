@@ -21,6 +21,7 @@ class CreatePetsTable extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->string('breed')->nullable();
+            $table->string('zootechnical_function')->nullable();
             $table->enum('sex', ['Male', 'Female', 'Unknown']);
             $table->date('dob');
             $table->enum('neutered', ['Yes', 'No', 'Unknown']);
