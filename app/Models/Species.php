@@ -31,4 +31,17 @@ class Species extends Model
     {
         return $this->hasMany(Pet::class);
     }
+
+    /**
+     * The vaccines that belong to the species.
+     */
+    public function species()
+    {
+       //return $this->belongsToMany(RelatedModel, pivot_table_name, foreign_key_of_current_model_in_pivot_table, foreign_key_of_other_model_in_pivot_table);
+    return $this->belongsToMany(
+            Species::class,
+            'vaccines_species',
+            'species_id',
+            'vaccine_id');
+    }
 }

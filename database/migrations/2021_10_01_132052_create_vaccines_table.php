@@ -15,7 +15,7 @@ class CreateVaccinesTable extends Migration
     {
         Schema::create('vaccines', function (Blueprint $table) {
             $table->id();
-            $table->string('recommended_for'); // en qué especies usar
+            $table->string('target_species'); // en qué especies usar
             $table->string('name'); //nombre de la vacuna
             $table->string('type'); // tipo de vacuna: virus inactuvado, adn mensajero // <----------------
             $table->string('manufacturer'); // fabricante de la vacuna // <----------------

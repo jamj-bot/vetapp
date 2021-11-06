@@ -115,7 +115,7 @@ class AssignPermissionsController extends Component
             }
         }
 
-        $roles =Role::orderBy('id', 'asc')->get();
+        $roles = Role::orderBy('id', 'asc')->get();
 
         return view('livewire.assign-permissions.component', compact('roles', 'permissions'))
             ->extends('admin.layout.app')

@@ -41,7 +41,7 @@ class Vaccinations extends Component
 		return [
 			'vaccine_id' => 'required|not_in:choose',
 			'type' => 'required|not_in:choose',
-			'batch_number' => 'nullable|regex:/([a-zA-Z0-9]{3})([-. ]?)([a-zA-Z0-9]{3})([-. ]?)([a-zA-Z0-9]{3})/',
+			'batch_number' => 'nullable|regex:/([a-zA-Z0-9]{3})([-. ]?)([a-zA-Z0-9]{2})([-. ]?)([a-zA-Z0-9]{4})/',
 			'dose_number' => 'required|integer|between:1,5',
 			'doses_required' => 'required|integer|between:1,5',
 			'done' => 'required|date',

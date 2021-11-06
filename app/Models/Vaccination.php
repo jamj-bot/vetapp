@@ -46,12 +46,5 @@ class Vaccination extends Model
         return $this->belongsTo(Vaccine::class);
     }
 
-    // public function children(){
-    //   return $this->hasMany(VaccineDoses::class, 'parent', 'id' );
-    // }
-
-    // public function parent(){
-    //   return $this->hasOne(VaccineDoses::class, 'id', 'parent' );
-    // }
 
 }

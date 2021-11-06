@@ -30,10 +30,10 @@ class UserSeeder extends Seeder
             'email' => 'jorgearturomolina@gmail.com',
             'password' => bcrypt('1234567890'),
             'status' => 'active',
-            'user_type' => 'Admin'
+            'user_type' => 'Veterinarian'
         ]);
         $user2->assignRole('admin');
 
-        User::factory(1)->create();
+        User::factory(0)->create();
     }
 }

@@ -24,7 +24,7 @@ class CreatePetsTable extends Migration
             $table->string('zootechnical_function')->nullable();
             $table->enum('sex', ['Male', 'Female', 'Unknown']);
             $table->date('dob');
-            $table->enum('neutered', ['Yes', 'No', 'Unknown']);
+            $table->enum('neuteredOrSpayed', ['Neutered or spayed', 'Not neutered or spayed', 'Unknown neutered or spayed status']);
             $table->string('diseases')->nullable();
             $table->string('allergies')->nullable();
             $table->enum('status', ['Alive', 'Dead'])->default('Alive');

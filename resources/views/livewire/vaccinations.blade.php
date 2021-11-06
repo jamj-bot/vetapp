@@ -47,7 +47,7 @@
 
         <div class="card-body p-0" style="display: block;">
             <div class="table-responsive">
-                <table class="table m-0 table-hover font-weight-light">
+                <table class="table m-0 table-hover text-sm">
                     <thead>
                         <tr>
                             <th wire:click="order('name')">
@@ -92,8 +92,8 @@
                         @forelse($vaccinations as $vaccination)
                             <tr>
                                 <td>
-                                    <div class="d-flex justify-content-end align-items-center">
-                                        <p class="d-flex flex-column font-weight-light text-right text-sm text-nowrap mb-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <p class="d-flex flex-column font-weight-light text-left text-sm text-nowrap mb-0">
                                             <span class="text-uppercase ">
                                                 {{ $vaccination->name}}
                                             </span>
@@ -114,7 +114,7 @@
                                             @if($vaccination->batch_number)
                                                 <span class="text-sm">{{ $vaccination->batch_number }}</span>
                                             @else
-                                                <span class="text-sm">Pendiente</span>
+                                                <span class="text-sm">Pending...</span>
                                             @endif
                                         </p>
                                     </div>
@@ -126,7 +126,7 @@
                                                 wire:click.prevent="apply({{ $vaccination }})"
                                                 title="Undo Apply Vaccine"
                                                 class="btn btn-sm btn-default shadow-sm">
-                                                    <i class="fas fa-fw fa-syringe text-success"></i>
+                                                    <i class="fas fa-fw fa-flag text-success"></i>
                                                     {{ $vaccination->done->format('d-M-Y') }}
                                             </button>
                                         @endcan
@@ -137,7 +137,7 @@
                                                     wire:click.prevent="apply({{ $vaccination }})"
                                                     title="Apply Vaccine"
                                                     class="btn btn-sm btn-default shadow-sm">
-                                                        <i class="fas fa-fw fa-times text-danger"></i>
+                                                        <i class="fas fa-fw fa-flag text-danger"></i>
                                                         {{ $vaccination->done->format('d-M-Y') }}
                                                 </button>
                                             @endcan
@@ -147,7 +147,7 @@
                                                     wire:click.prevent="apply({{ $vaccination }})"
                                                     title="Apply Vaccine"
                                                     class="btn btn-sm btn-default shadow-sm">
-                                                        <i class="fas fa-fw fa-exclamation text-warning"></i>
+                                                        <i class="fas fa-fw fa-flag text-warning"></i>
                                                         {{ $vaccination->done->format('d-M-Y') }}
                                                 </button>
                                             @endcan
@@ -176,25 +176,25 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td width="10px">
                                     @can('vaccinations_update')
                                         <a href="javascript:void(0)"
                                             data-toggle="modal"
                                             wire:click.prevent="edit({{ $vaccination }})"
                                             title="Edit"
-                                            class="btn btn-sm btn-block btn-default shadow-sm">
-                                                <i class="fas fa-edit"></i>
+                                            class="btn btn-sm btn-link border border-0">
+                                                <i class="fas fa-edit text-muted"></i>
                                         </a>
                                     @endcan
                                 </td>
-                                <td>
+                                <td width="10px">
                                     @can('vaccinations_destroy')
                                         <a href="javascript:void(0)"
                                             data-toggle="modal"
                                             wire:click.prevent="destroy({{ $vaccination }})"
                                             title="Delete"
-                                            class="btn btn-sm btn-block btn-default shadow-sm">
-                                                <i class="fas fa-trash"></i>
+                                            class="btn btn-sm btn-link border border-0">
+                                                <i class="fas fa-trash text-muted"></i>
                                         </a>
                                     @endcan
                                 </td>
@@ -275,7 +275,6 @@
         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
         <div wire:loading.class="overlay dark" wire:target="apply, update, destroy">
         </div>
-
 
     </div>
     @include('livewire.forms.form-vaccinations')

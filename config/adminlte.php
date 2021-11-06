@@ -307,32 +307,43 @@ return [
         ],
         ['header' => 'MANAGE USERS'],
         [
-            'text'        => 'Users',
-            'url'         => '#',
-
-            'icon'        => 'fas fa-fw fa-users',
-            'submenu'     => [
-                [
-                    'text'  => 'Index',
-                    'route' => 'admin.users',
-                    'active'      => ['admin/users*', 'admin/pets*'],
-                    'icon'  => 'fas fa-fw fa-address-book',
-                    'can'   => 'users_index',
-                ],
-                [
-                    'text'  => 'Recycle Bin',
-                    'route' => 'admin.users.recycle-bin',
-                    'icon'  => 'fas fa-fw fa-trash',
-                    'can'   => 'trash_index',
-                ],
-            ],
+            'text'  => 'Users',
+            'route' => 'admin.users',
+            'icon'  => 'fas fa-fw fa-address-book',
+            'can'   => 'users_index',
         ],
+        // [
+        //     'text'        => 'Users',
+        //     'url'         => '#',
+        //     'icon'        => 'fas fa-fw fa-users',
+        //     'submenu'     => [
+        //         [
+        //             'text'  => 'Index',
+        //             'route' => 'admin.users',
+        //             'active'      => ['admin/users*', 'admin/pets*'],
+        //             'icon'  => 'fas fa-fw fa-address-book',
+        //             'can'   => 'users_index',
+        //         ],
+        //     ],
+        // ],
         ['header' => 'VETAPP CONFIG'],
         [
             'text'  => 'Species',
             'icon'  => 'fas fa-fw fa-paw',
             'can'   => 'species_index',
             'route' => 'admin.species',
+        ],
+        [
+            'text'  => 'Vaccines',
+            'icon'  => 'fas fa-fw fa-syringe',
+            'can'   => 'vaccines_index',
+            'route' => 'admin.vaccines',
+        ],
+        [
+            'text'  => 'Recycle Bin',
+            'route' => 'admin.recycle-bin',
+            'icon'  => 'fas fa-fw fa-trash',
+            'can'   => 'trash_index',
         ],
         ['header' => 'MANAGE PERMISSIONS'],
         [

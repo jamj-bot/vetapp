@@ -2,6 +2,39 @@
     <!-- Datatable's filters -->
     <div class="row mb-2 mr-1">
         <div class="col-md-3">
+{{--             <div class="input-group input-group-sm m-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelect02">Only</label>
+                </div>
+                <select wire:model="filter" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
+                    <option disabled>Choose...</option>
+                    <option selected value="Alive">Live pets</option>
+                    <option value="Dead">Dead Pets</option>
+                </select>
+            </div> --}}
+            <div class="form-group form-row align-items-center my-2 float-right">
+                <div class="custom-control custom-radio">
+                    <input class="custom-control-input custom-control-input-success custom-control-input-outline"
+                        wire:model="filter"
+                        value="Alive"
+                        type="radio"
+                        id="customRadio4"
+                        name="customRadio2"
+                        checked="">
+                    <label for="customRadio4" class="font-weight-light text-sm custom-control-label">Alive</label>
+                </div>
+                <div class="ml-2 custom-control custom-radio">
+                    <input class="custom-control-input custom-control-input-danger custom-control-input-outline"
+                        wire:model="filter"
+                        value="Dead"
+                        type="radio"
+                        id="customRadio5"
+                        name="customRadio2">
+                    <label for="customRadio5" class="font-weight-light text-sm custom-control-label">Dead</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
             <div class="input-group input-group-sm m-1">
                 <div class="input-group-prepend">
                     <label class="input-group-text" for="inputGroupSelect01">Show</label>
@@ -15,23 +48,11 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="input-group input-group-sm m-1">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="inputGroupSelect02">Only</label>
-                </div>
-                <select wire:model="filter" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                    <option disabled>Choose...</option>
-                    <option selected value="Alive">Live pets</option>
-                    <option value="Dead">Dead Pets</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-3">
             @include('common.search')
         </div>
         <div class="col-md-3">
             <div class="input-group input-group-sm m-1">
-                @can('vaccinations_store')
+                @can('pets_store')
                     <!-- Button trigger modal -->
                     <button type="button" class="btn bg-gradient-primary btn-sm btn-block shadow" data-toggle="modal" data-target="#modalForm">
                        <i class="fas fa-fw fa-plus"></i> Add Pet
@@ -59,7 +80,7 @@
 
         <div class="card-body p-0" style="display: block;">
             <div class="table-responsive">
-                <table class="table m-0 table-hover font-weight-light">
+                <table class="table m-0 table-hover text-sm">
                     <thead>
                         <tr>
                             <th wire:click="order('code')">
@@ -122,7 +143,9 @@
                         @forelse($pets as $pet)
                             <tr>
                                 <td>
-                                    {{ $pet->code }}
+                                    <p class="d-flex flex-column font-weight-light mb-0">
+                                        {{ $pet->code }}
+                                    </p>
                                 </td>
                                 <td>
                                     <a class="font-weight-bold btn-block {{ $pet->status == 'Alive' ? 'text-warning':'text-muted'}}"
@@ -131,39 +154,41 @@
                                     </a>
                                 </td>
                                 <td>
-                                    {{ $pet->breed != null ? $pet->breed :  'Unknown' }}
+                                    <p class="d-flex flex-column font-weight-light mb-0">
+                                        {{ $pet->breed != null ? $pet->breed :  'Unknown or mixed-breed' }}
+                                    </p>
                                 </td>
                                 <td>
-                                    {{ $pet->common_name}} / <span class="font-italic text-muted">{{ $pet->scientific_name }}</span>
+                                    <span class="font-weight-light">{{ $pet->common_name}} /</span> <span class="font-weight-light font-italic text-muted">{{ $pet->scientific_name }}</span>
                                 </td>
                                 <td>
-                                    {{-- @can('vaccinations_update') --}}
+                                    @can('pets_update')
                                         <a href="javascript:void(0)"
                                             data-toggle="modal"
                                             wire:click.prevent="edit({{ $pet }})"
                                             title="Edit"
-                                            class="btn btn-sm btn-block btn-default shadow-sm">
-                                                <i class="fas fa-edit"></i>
+                                            class="btn btn-sm btn-link border border-0">
+                                                <i class="fas fa-edit text-muted"></i>
                                         </a>
-                                   {{--  @endcan --}}
+                                    @endcan
                                 </td>
                                 <td>
-                                    {{-- @can('vaccinations_destroy') --}}
+                                    @can('pets_destroy')
                                         <a href="javascript:void(0)"
                                             data-toggle="modal"
                                             wire:click.prevent="destroy({{ $pet }})"
                                             title="Delete"
-                                            class="btn btn-sm btn-block btn-default shadow-sm">
-                                                <i class="fas fa-trash"></i>
+                                            class="btn btn-sm btn-link border border-0">
+                                                <i class="fas fa-trash text-muted"></i>
                                         </a>
-                                   {{--  @endcan --}}
+                                    @endcan
                                 </td>
                             </tr>
                         @empty
                             <!-- COMMENT: Muestra cuando el componente esta readyToLoad -->
                             @if($readyToLoad == true)
                                 <tr>
-                                    <td colspan="4">
+                                    <td colspan="6">
                                         @if(strlen($search) <= 0)
                                         <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
                                             <div class="col-12 d-flex justify-content-center align-items-center text-muted">

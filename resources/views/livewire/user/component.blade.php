@@ -66,7 +66,7 @@
                         <!-- /.card-header -->
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover">
+                            <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -119,11 +119,11 @@
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <p class="pr-2 mb-0">
-                                                        <img class="profile-user-img img-circle shadow-sm"
+                                                        <img class="{{-- profile-user-img --}} img-circle elevation-3 shadow"
                                                             loading="lazy"
                                                             alt="avatar"
                                                             src="{{ $user->profile_photo_url }}"
-                                                            style="width: 50px; height: 50px; object-fit: cover;">
+                                                            style="width: 40px; height: 40px; object-fit: cover;">
                                                     </p>
                                                     <p class="d-flex flex-column font-weight-light text-right mb-0">
                                                         <span>
@@ -166,8 +166,8 @@
                                                         data-toggle="modal"
                                                         wire:click.prevent="edit({{ $user }})"
                                                         title="Edit"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-edit"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-edit text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -176,8 +176,8 @@
                                                     <a href="javascript:void(0)"
                                                         onclick="confirm('{{ $user->id }}', 'Are you sure you want delete this user?', 'You can recover it from Recycle Bin!', 'User', 'destroy')"
                                                         title="Delete"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-trash"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-trash text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>

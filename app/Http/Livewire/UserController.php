@@ -17,13 +17,13 @@ class UserController extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    // Attributes to datatable
+    // Datatable attributes
     public $paginate = '10', $sort = 'name', $direction = 'asc', $readyToLoad = false, $search = '';
 
-    // General attributes to component
+    // General attributes
     public $pageTitle, $modalTitle;
 
-    // Attributes to CRUD
+    // CRUD attributes
     public $name, $phone, $email, $password, $status, $user_type, $selected_id;
 
     // Listeners
@@ -136,7 +136,6 @@ class UserController extends Component
             } else {
                 $users = User::orderBy($this->sort, $this->direction)->paginate($this->paginate);
             }
-
         } else {
             $users = [];
         }

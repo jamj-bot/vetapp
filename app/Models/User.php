@@ -101,4 +101,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pet::class);
     }
+
+    /**
+     * Get the consultation of the pet.
+     */
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class);
+    }
 }

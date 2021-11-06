@@ -66,7 +66,7 @@
                         <!-- /.card-header -->
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover">
+                            <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -97,6 +97,9 @@
                                             --}}
                                         </th>
                                         <th>
+                                            Created at
+                                        </th>
+                                        <th>
                                             <span class="sr-only">Edit</span>
                                         </th>
                                         <th>
@@ -108,20 +111,15 @@
                                     @forelse($permissions as $permission)
                                         <tr>
                                             <td>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="d-flex flex-column font-weight-light text-left text-nowrap mb-0">
-                                                        <span>
-                                                            {{ $permission->name }}
-                                                        </span>
-                                                        <span class="text-xs text-uppercase">
-                                                            <b>{{ $permission->created_at->diffForHumans() }}</b>
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                    <span>
+                                                        {{ $permission->name }}
+                                                    </span>
+                                                </p>
                                             </td>
                                             <td>
                                                 @foreach($permission->roles as $role)
-                                                    <span class="badge badge-pill badge-primary">
+                                                    <span class="text-uppercase badge badge badge-primary">
                                                         {{ $role->name }}
                                                     </span>
                                                 @endforeach
@@ -140,14 +138,19 @@
                                                 </div>
                                                 --}}
                                             </td>
+                                            <td>
+                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                    {{ $permission->created_at->diffForHumans() }}
+                                                </p>
+                                            </td>
                                             <td width="10px">
                                                 @can('permissions_update')
                                                     <a href="javascript:void(0)"
                                                         data-toggle="modal"
                                                         wire:click.prevent="edit({{ $permission }})"
                                                         title="Edit"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-edit"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-edit text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -156,15 +159,15 @@
                                                     <a href="javascript:void(0)"
                                                         onclick="confirm('{{ $permission->id }}', 'Are you sure you want delete this Item?', 'You won\'t be able to revert this!', 'Item', 'destroy')"
                                                         title="Delete"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-trash"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-trash text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4">
+                                            <td colspan="5">
                                                 @if(strlen($search) <= 0)
                                                 <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
                                                     <div class="col-12 d-flex justify-content-center align-items-center text-muted">
@@ -202,6 +205,10 @@
                                 <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
                             </div>
 
+                        </div>
+                          <!-- /.card-body -->
+
+                        <div class="card-footer clearfix" style="display: block;">
                             @if(count($permissions))
                                 <div class="ml-4">
                                     @if($permissions->hasPages())
@@ -210,7 +217,12 @@
                                 </div>
                             @endif
                         </div>
-                          <!-- /.card-body -->
+                        <!-- /.card-footer -->
+
+                        <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        </div>
+
                     </div>
                     <!-- /.card -->
                 </div>

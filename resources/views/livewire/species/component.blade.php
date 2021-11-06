@@ -66,7 +66,7 @@
                         <!-- /.card-header -->
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover">
+                            <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -120,9 +120,9 @@
                                                     <a href="javascript:void(0)"
                                                         data-toggle="modal"
                                                         wire:click.prevent="edit({{ $specie }})"
-                                                        title="edit"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-edit"></i>
+                                                        title="Edit"
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-edit text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -131,8 +131,8 @@
                                                     <a href="javascript:void(0)"
                                                         onclick="confirm('{{ $specie->id }}', 'Are you sure you want delete this Item?', 'You won\'t be able to revert this!', 'Item', 'destroy')"
                                                         title="Delete"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-trash"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-trash text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -176,7 +176,10 @@
                             <div class="d-flex justify-content-center">
                                 <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
                             </div>
+                        </div>
+                          <!-- /.card-body -->
 
+                        <div class="card-footer clearfix" style="display: block;">
                             @if(count($species))
                                 <div class="ml-4">
                                     @if($species->hasPages())
@@ -185,7 +188,11 @@
                                 </div>
                             @endif
                         </div>
-                          <!-- /.card-body -->
+                        <!-- /.card-footer -->
+
+                        <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        </div>
                     </div>
                     <!-- /.card -->
                 </div>

@@ -14,8 +14,8 @@ class VaccineSeeder extends Seeder
      */
     public function run()
     {
-        Vaccine::create([
-            'recommended_for'        => 'Bovinos, Ovinos',
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Bovinos, ovinos.',
             'name'                   => 'COVEXIN® 10',
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
@@ -27,9 +27,11 @@ class VaccineSeeder extends Seeder
             'revaccination_interval' => 'Anual',
             'revaccination_doses'    => 1
         ]);
+        // Uso la relación para definir a qué especies está relacionada la vacuna
+        $vaccine->species()->attach([3, 4]);
 
-        Vaccine::create([
-            'recommended_for'        => 'Bovinos, Ovinos, Caprinos',
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Bovinos, ovinos, caprinos.',
             'name'                   => 'BOBACT 8®',
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
@@ -41,9 +43,10 @@ class VaccineSeeder extends Seeder
             'revaccination_interval' => '6 meses',
             'revaccination_doses'    => 1
         ]);
+        $vaccine->species()->attach([3, 4, 5]);
 
-        Vaccine::create([
-            'recommended_for'        => 'Bovinos (hembras)',
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Bovinos (hembras).',
             'name'                   => 'BOVILIS® RB-51',
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
@@ -55,9 +58,10 @@ class VaccineSeeder extends Seeder
             'revaccination_interval' => 'Una vez en la vida',
             'revaccination_doses'    => 0
         ]);
+        $vaccine->species()->attach([3]);
 
-        Vaccine::create([
-            'recommended_for'        => 'Bovinos (hembras)',
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Bovinos (hembras).',
             'name'                   => 'BOVILIS® VISTA 5 L5 SQ',
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
@@ -69,9 +73,10 @@ class VaccineSeeder extends Seeder
             'revaccination_interval' => '14-60 días antes de la monta',
             'revaccination_doses'    => 1
         ]);
+        $vaccine->species()->attach([3]);
 
-        Vaccine::create([
-            'recommended_for'        =>  'Perros',
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Perros',
             'name'                   => 'NOBIVAC® DAPPv+L4',
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
@@ -83,9 +88,10 @@ class VaccineSeeder extends Seeder
             'revaccination_interval' => 'Anual',
             'revaccination_doses'    => 1
         ]);
+        $vaccine->species()->attach([1]);
 
-        Vaccine::create([
-            'recommended_for'        => 'Perros, Gatos, Hurones',
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Perros, gatos, hurones.',
             'name'                   => 'NOBIVAC® RABIA',
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
@@ -97,6 +103,36 @@ class VaccineSeeder extends Seeder
             'revaccination_interval' => 'Anual',
             'revaccination_doses'    => 1
         ]);
+        $vaccine->species()->attach([1, 2]);
 
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Vacunos, equinos, ovinos y caprinos.',
+            'name'                   => 'Rabigen® GE',
+            'type'                   => 'Virus inactivado',
+            'manufacturer'           => 'Virbac',
+            'description'            => 'La inmunización contra la Rabia Paralítica o Derriengue en bovinos y equinos sanos, en suspensión lista para aplicarse.',
+            'dose'                   => '2 ml',
+            'administration'         => 'Intramuscular profunda exclusivamente.',
+            'primary_vaccination'    => 'Edad: 0+ dias.',
+            'primary_doses'          => 1,
+            'revaccination_interval' => 'Anual',
+            'revaccination_doses'    => 1
+        ]);
+        $vaccine->species()->attach([3, 4, 5]);
+
+        $vaccine = Vaccine::create([
+            'target_species'         => 'Bovinos, ovinos y caprinos.',
+            'name'                   => 'CLOSTRIGEN® P',
+            'type'                   => 'Virus inactivado',
+            'manufacturer'           => 'Virbac',
+            'description'            => 'Para prevenir las infecciones por C. chauvoei, C. septicum, C. noyvi tipo B, C. haemolyticum, C. perfringens tipo D, C. sordellii, Manheimia haemolytica y P. multocida tipo A.',
+            'dose'                   => 'Bovinos: Administrar 5 ml. Ovinos y caprinos: 2 ml.',
+            'administration'         => 'Intramuscular o subcutánea.',
+            'primary_vaccination'    => 'Edad: 15+ dias / +2 meses (madre vacunada). Repetir: [21, 30) días / [21, 30) días antes del parto.',
+            'primary_doses'          => 2,
+            'revaccination_interval' => 'Anual / [21, 30) días antes del parto.',
+            'revaccination_doses'    => 1
+        ]);
+        $vaccine->species()->attach([3, 4, 5]);
     }
 }

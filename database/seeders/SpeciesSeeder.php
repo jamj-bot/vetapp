@@ -28,20 +28,26 @@ class SpeciesSeeder extends Seeder
         ]);
 
         Species::create([
-            'name' => 'Ganado Vacuno',
+            'name' => 'Ganado Bovino',
             'scientific_name' => 'Bos taurus',
             'deleted_at' => null
         ]);
 
         Species::create([
-            'name' => 'Ganado Cebú',
-            'scientific_name' => 'Bos taurus indicus',
+            'name' => 'Ganado Ovino',
+            'scientific_name' => 'Ovis orientalis aries',
             'deleted_at' => null
         ]);
 
         Species::create([
             'name' => 'Ganado Caprino',
             'scientific_name' => 'Capra aegagrus hircus',
+            'deleted_at' => null
+        ]);
+
+        Species::create([
+            'name' => 'Conejo',
+            'scientific_name' => 'Oryctolagus cuniculus',
             'deleted_at' => now()
         ]);
     }

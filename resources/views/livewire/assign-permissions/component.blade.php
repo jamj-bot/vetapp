@@ -91,7 +91,7 @@
                         <!-- /.card-header -->
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover">
+                            <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -118,7 +118,7 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="font-weight-light">
+                                                    <p class="font-weight-light mb-0">
                                                         {{ $permission->name }}
                                                     </p>
                                                     <p class="d-flex flex-row  text-right text-nowrap mb-0">
@@ -181,7 +181,10 @@
                             <div class="d-flex justify-content-center">
                                 <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
                             </div>
+                        </div>
+                          <!-- /.card-body -->
 
+                        <div class="card-footer clearfix" style="display: block;">
                             @if(count($permissions))
                                 <div class="ml-4">
                                     @if($permissions->hasPages())
@@ -190,7 +193,12 @@
                                 </div>
                             @endif
                         </div>
-                          <!-- /.card-body -->
+                        <!-- /.card-footer -->
+
+                        <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        </div>
+
                     </div>
                     <!-- /.card -->
                 </div>

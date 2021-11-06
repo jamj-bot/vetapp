@@ -47,7 +47,7 @@
 					type="text"
 					class="form-control form-control-sm {{ $errors->has('batch_number') ? 'is-invalid':'' }}"
 					id="inputBatchNumber"
-					placeholder="e.g. 000-MZ5-12O"
+					placeholder="e.g. 123-MP-1L2O"
 					aria-describedby="inputBatchNumberFeedback">
 
 				@error('batch_number')

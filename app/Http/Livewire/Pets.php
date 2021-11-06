@@ -24,7 +24,7 @@ class Pets extends Component
     public $modalTitle;
 
     // Crude Atributes
-    public $selected_id, $species_id, $code, $name, $breed, $zootechnical_function, $sex, $dob, $neutered, $diseases, $allergies, $status;
+    public $selected_id, $species_id, $code, $name, $breed, $zootechnical_function, $sex, $dob, $neuteredOrSpayed, $diseases, $allergies, $status;
 
     // Listeners
     protected $listeners = [
@@ -39,17 +39,17 @@ class Pets extends Component
     protected function rules()
     {
         return [
-            'species_id' => 'required|not_in:choose',
-            'code' => "required|numeric|digits:10|unique:pets,code,{$this->selected_id}",
-            'name' => 'required|min:3|max:140',
-            'breed' => 'nullable|max:140',
+            'species_id'            => 'required|not_in:choose',
+            'code'                  => "required|numeric|digits:10|unique:pets,code,{$this->selected_id}",
+            'name'                  => 'required|min:3|max:140',
+            'breed'                 => 'nullable|max:140',
             'zootechnical_function' => 'nullable|max:140',
-            'sex' => 'required|in:"Male","Female","Unknown"',
-            'dob' => 'required|date',
-            'neutered' => 'required|in:"Yes", "No", "Unknown',
-            'diseases' => 'nullable|max:2000',
-            'allergies' => 'nullable|max:2000',
-            'status' => 'required|in:"Alive","Dead"'
+            'sex'                   => 'required|in:"Male","Female","Unknown"',
+            'dob'                   => 'required|date',
+            'neuteredOrSpayed'      => 'required|in:"Neutered or spayed", "Not neutered or spayed", "Unknown neutered or spayed status"',
+            'diseases'              => 'nullable|max:2000',
+            'allergies'             => 'nullable|max:2000',
+            'status'                => 'required|in:"Alive","Dead"'
         ];
     }
 
@@ -115,7 +115,7 @@ class Pets extends Component
 
     public function render()
     {
-        //$this->authorize('pets_index');
+        $this->authorize('pets_index');
 
         if ($this->readyToLoad) {
             if (strlen($this->search) > 0) {
@@ -168,7 +168,7 @@ class Pets extends Component
 
     public function store()
     {
-        //$this->authorize('store_pets')
+        $this->authorize('pets_store');
 
         $validatedData = $this->validate();
 
@@ -197,7 +197,7 @@ class Pets extends Component
         $this->zootechnical_function = $pet->zootechnical_function;
         $this->sex = $pet->sex;
         $this->dob = $pet->dob->format('Y-m-d');
-        $this->neutered = $pet->neutered;
+        $this->neuteredOrSpayed = $pet->neuteredOrSpayed;
         $this->diseases = $pet->diseases;
         $this->allergies = $pet->allergies;
         $this->status = $pet->status;
@@ -207,6 +207,8 @@ class Pets extends Component
 
     public function update()
     {
+        $this->authorize('pets_update');
+
         $validatedData = $this->validate();
         $pet = Pet::find($this->selected_id);
         $pet->update($validatedData);
@@ -251,7 +253,7 @@ class Pets extends Component
         $this->zootechnical_function = '';
         $this->sex = 'choose';
         $this->dob = '';
-        $this->neutered = 'choose';
+        $this->neuteredOrSpayed = 'choose';
         $this->diseases = '';
         $this->allergies = '';
         $this->status = 'choose';

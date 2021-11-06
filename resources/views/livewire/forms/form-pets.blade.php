@@ -38,20 +38,21 @@
 				@enderror
 			</div>
 			<div class="form-group col-md-4">
-				<label for="selectNeutered" class="form-label font-weight-normal">Neutered *</label>
-				<select wire:model.lazy="neutered"
+				<label for="selectNeuteredOrSpayed" class="form-label font-weight-normal">Neutered / Spayed *</label>
+				<select wire:model.lazy="neuteredOrSpayed"
 					class="custom-select custom-select-sm {{ $errors->has('neutered') ? 'is-invalid':''}}"
-					id="selectNeutered"
-					aria-describedby="selectNeuteredFeedback">
+					id="selectNeuteredOrSpayed"
+					aria-describedby="selectNeuteredOrSpayedFeedback">
 
 						<option value="choose" selected>Choose...</option>
-						<option value="Unknown">Unknown</option>
-						<option value="Yes">Yes</option>
-						<option value="No">No</option>
+						<option value="Unknown neutered or spayed status">Unknown</option>
+						<option value="Neutered or spayed">Neutered or spayed</option>
+						<option value="Not neutered or spayed">Not neutered or spayed</option>
+
 				</select>
 
-				@error('neutered')
-					<div id="selectNeuteredFeedback" class="invalid-feedback">
+				@error('neuteredOrSpayed')
+					<div id="selectNeuteredOrSpayedFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
 				@enderror
@@ -155,7 +156,7 @@
 				<textarea wire:model.lazy="diseases"
 				class="form-control form-control-sm {{ $errors->has('diseases') ? 'is-invalid':'' }}"
 				id="textareaDiseases"
-				placeholder="e.g. Idiopathic epilepsy, diabetes."
+				placeholder="e.g. Pre-existing conditions and past treatments: Idiopathic epilepsy, diabetes."
 				aria-describedby="textareaDiseasesFeedback">
 				</textarea>
 
@@ -186,6 +187,7 @@
 
 
 		<div class="form-row">
+
 			<div class="form-group col-md-6">
 				<label for="selectStatus" class="form-label font-weight-normal">Status *</label>
 	   			<select wire:model.lazy="status"
@@ -197,22 +199,11 @@
 						<option value="Dead">Dead</option>
 				</select>
 
-	{{--   <div class="custom-control custom-radio">
-	    <input type="radio" class="custom-control-input" id="customControlValidation2" name="radio-stacked" required checked="">
-	    <label class="custom-control-label" for="customControlValidation2">Alive</label>
-	  </div>
-	  <div class="custom-control custom-radio mb-3">
-	    <input type="radio" class="custom-control-input" id="customControlValidation3" name="radio-stacked" required>
-	    <label class="custom-control-label" for="customControlValidation3">Dead</label>
-	    <div class="invalid-feedback">More example invalid feedback text</div>
-	  </div> --}}
-
 				@error('status')
 					<div id="selectStatusFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
 				@enderror
-
 			</div>
 		</div>
 		<!-- /. row -->

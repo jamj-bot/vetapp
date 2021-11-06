@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Pet;
+use App\Models\Consultation;
 use Illuminate\Database\Seeder;
 
-class PetSeeder extends Seeder
+class ConsultationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +14,6 @@ class PetSeeder extends Seeder
      */
     public function run()
     {
-        Pet::factory(1)->create();
+        Consultation::factory(5)->create();
     }
 }

@@ -66,7 +66,7 @@
                         <!-- /.card-header -->
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover">
+                            <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -82,6 +82,9 @@
                                             @endif
                                         </th>
                                         <th>
+                                            Created at
+                                        </th>
+                                        <th>
                                             <span class="sr-only">Edit</span>
                                         </th>
                                         <th>
@@ -93,16 +96,16 @@
                                     @forelse($roles as $role)
                                         <tr>
                                             <td>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="d-flex flex-column font-weight-light text-left text-nowrap mb-0">
-                                                        <span>
-                                                            {{ $role->name }}
-                                                        </span>
-                                                        <span class="text-xs text-uppercase">
-                                                            <b>{{ $role->created_at->diffForHumans() }}</b>
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                    <span>
+                                                        {{ $role->name }}
+                                                    </span>
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                    {{ $role->created_at->diffForHumans() }}
+                                                </p>
                                             </td>
                                             <td width="10px">
                                                 @can('roles_update')
@@ -110,8 +113,8 @@
                                                         data-toggle="modal"
                                                         wire:click.prevent="edit({{ $role }})"
                                                         title="Edit"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-edit"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-edit text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -120,8 +123,8 @@
                                                     <a href="javascript:void(0)"
                                                         onclick="confirm('{{ $role->id }}', 'Are you sure you want delete this Role?', 'You won\'t be able to revert this!', 'Role', 'destroy')"
                                                         title="Delete"
-                                                        class="btn btn-block btn-default shadow">
-                                                            <i class="fas fa-trash"></i>
+                                                        class="btn btn-sm btn-link border border-0">
+                                                            <i class="fas fa-trash text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
@@ -160,7 +163,10 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+                          <!-- /.card-body -->
 
+                        <div class="card-footer clearfix" style="display: block;">
                             @if(count($roles))
                                 <div class="ml-4">
                                     @if($roles->hasPages())
@@ -169,7 +175,12 @@
                                 </div>
                             @endif
                         </div>
-                          <!-- /.card-body -->
+                        <!-- /.card-footer -->
+
+                        <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        </div>
+
                     </div>
                     <!-- /.card -->
                 </div>

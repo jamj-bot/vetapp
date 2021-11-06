@@ -26,7 +26,7 @@ class Pet extends Model
         'zootechnical_function',
         'sex',
         'dob',
-        'neutered',
+        'neuteredOrSpayed',
         'diseases',
         'allergies',
         'status'
@@ -56,11 +56,20 @@ class Pet extends Model
     }
 
     /**
-     * Get the Vaccine doses of the pet.
+     * Get the Vaccinations of the pet.
      */
     public function vaccinations()
     {
         return $this->hasMany(Vaccination::class);
+    }
+
+
+    /**
+     * Get the consultation of the pet.
+     */
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class);
     }
 
 }

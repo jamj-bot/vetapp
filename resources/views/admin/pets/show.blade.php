@@ -29,10 +29,13 @@
 
 				<div class="col-md-3">
 
-					<a href="mailbox.html" class="btn btn-primary btn-block btn-lg mb-3">
+					<a href="{{ route('admin.users.show', $pet->user) }}"
+						class="btn btn-block btn-default mb-3">
 						<i class="far fa-arrow-alt-circle-left"></i>
-						Back to Owner Profile
+						Owner
 					</a>
+
+
 {{-- 					<!-- Profile Image -->
 					<div class="card card-primary card-outline font-weight-light">
 						<div class="card-body box-profile">
@@ -123,10 +126,10 @@
 
 							<hr>
 
-							<strong><i class="fas fa-fw fa-neuter mr-1"></i> Neutered</strong>
+							<strong><i class="fas fa-fw fa-neuter mr-1"></i> Neutered / Spayed</strong>
 
 							<p class="text-muted">
-								{{ $pet->neutered }}
+								{{ $pet->neuteredOrSpayed }}
 							</p>
 
 							<hr>
@@ -156,7 +159,9 @@
 							<hr>
 
 							<strong><i class="fas fa-fw fa-door-open mr-1"></i> Items</strong>
-
+							<p class="text-muted">
+								<a href="{{ route('admin.pets.consultations', $pet) }}">Consultas de la mascota</a>
+							</p>
 							<p class="text-muted">
 								<span class="tag tag-danger">UI Design</span>
 								<span class="tag tag-success">Coding</span>
@@ -179,19 +184,54 @@
 
 
 				<div class="col-md-9">
+
+                    @if($pet->diseases)
+						<div class="callout callout-warning alert alert-dismissible">
+							<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                  			<h5>Pre-existing conditions</h5>
+                  			{{ $pet->diseases }}
+                		</div>
+                    @endif
+                    @if($pet->allergies)
+                        <div class="callout callout-danger alert alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5>Allergies</h5>
+                            {{ $pet->allergies }}
+                        </div>
+                    @endif
+
 					<div class="card">
 						<div class="card-header p-2">
 							<ul class="nav nav-pills">
-								<li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
+								<li class="nav-item"><a class="nav-link active" href="#consultations" data-toggle="tab">Consultations</a></li>
 								<li class="nav-item"><a class="nav-link" href="#vaccinations" data-toggle="tab">Vaccinations</a></li>
 								<li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
-								<li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
+								<li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Deworming</a></li>
 							</ul>
 						</div><!-- /.card-header -->
 						<div class="card-body">
 							<div class="tab-content">
-								<div class="active tab-pane" id="activity">
-									<!-- Post -->
+								<div class="active tab-pane" id="consultations">
+
+									<!-- Consultations link -->
+									<div class="small-box font-weight-light">
+						              	<div class="inner">
+						                	<h4>{{ $consultations_quantity }} registered consultations</h4>
+						                	<p>{{$open_consultations_quantity}} open consultation</p>
+						              	</div>
+
+						              	<div class="icon">
+						                	<i class="fas fa-stethoscope"></i>
+						              	</div>
+
+						              	<a href="{{ route('admin.pets.consultations', $pet) }}" class="small-box-footer">
+						                	<span class="text-muted">Go to consultations <i class="fas fa-arrow-circle-right"></i></span>
+						              	</a>
+						            </div>
+									<!-- ./ Consultations link -->
+
+
+{{-- 									<!-- Post -->
 									<div class="post">
 										<div class="user-block">
 											<img class="img-circle img-bordered-sm" src="{{ $pet->profile_photo_url }}" alt="user image">
@@ -301,7 +341,7 @@
 
 										<input class="form-control form-control-sm" type="text" placeholder="Type a comment">
 									</div>
-									<!-- /.post -->
+									<!-- /.post --> --}}
 								</div>
 								<!-- /.tab-pane -->
 
@@ -407,7 +447,7 @@
 								<!-- /.tab-pane -->
 
 								<div class="tab-pane" id="settings">
-									<form class="form-horizontal">
+{{-- 									<form class="form-horizontal">
 										<div class="form-group row">
 											<label for="inputName" class="col-sm-2 col-form-label">Name</label>
 											<div class="col-sm-10">
@@ -452,7 +492,7 @@
 												<button type="submit" class="btn btn-danger">Submit</button>
 											</div>
 										</div>
-									</form>
+									</form> --}}
 								</div>
 								<!-- /.tab-pane -->
 							</div>

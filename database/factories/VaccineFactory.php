@@ -22,7 +22,7 @@ class VaccineFactory extends Factory
     public function definition()
     {
         return [
-            'recommended_for'        => $this->faker->word,
+            'target_species'         => $this->faker->word,
             'name'                   => $this->faker->word,
             'type'                   => $this->faker->word,
             'manufacturer'           => $this->faker->word,

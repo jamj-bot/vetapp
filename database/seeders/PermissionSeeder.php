@@ -20,8 +20,21 @@ class PermissionSeeder extends Seeder
         // role 4 = veterinarian
         // role 5 = guest
 
+        //------ Vaccines permissions ------
+        Permission::create([
+            'name' => 'vaccines_update'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'vaccines_store'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'vaccines_index'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'vaccines_destroy'
+        ])->syncRoles(1);
 
-        //------ VaccineDoses permissions ------
+        //------ Vaccinations permissions ------
         Permission::create([
             'name' => 'vaccinations_update'
         ])->syncRoles(1);
@@ -49,6 +62,19 @@ class PermissionSeeder extends Seeder
             'name' => 'species_destroy'
         ])->syncRoles(1);
 
+        //------ Vaccines permissions ------
+        Permission::create([
+            'name' => 'pets_update'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'pets_store'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'pets_index'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'pets_destroy'
+        ])->syncRoles(1);
 
         //------ Users permissions ------
         Permission::create([

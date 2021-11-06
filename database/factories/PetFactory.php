@@ -24,18 +24,18 @@ class PetFactory extends Factory
     public function definition()
     {
         return [
-            'user_id'    => User::all()->random()->id,
-            'species_id' => Species::all()->random()->id,
-            'code'       => $this->faker->unique()->numerify('##########'),
-            'name'       => $this->faker->firstName('male'|'female'),
-            'breed'      => $this->faker->randomElement(['Weimaraner', 'Sardo Negro', 'Angus', 'Angora', null]),
+            'user_id'               => User::all()->random()->id,
+            'species_id'            => Species::all()->random()->id,
+            'code'                  => $this->faker->unique()->numerify('##########'),
+            'name'                  => $this->faker->firstName('male'|'female'),
+            'breed'                 => $this->faker->randomElement(['Weimaraner', 'Sardo Negro', 'Angus', 'Angora', null]),
             'zootechnical_function' => $this->faker->randomElement(['Beef Cattle', 'Dairy Cattle', 'Companion', 'Assistance', 'Farm']),
-            'sex'        => $this->faker->randomElement(['Male', 'Female', 'Unknown']),
-            'dob'        => $this->faker->dateTimeBetween('2010-01-01', '2021-01-01'),
-            'neutered'   => $this->faker->randomElement(['Yes', 'No', 'Unknown']),
-            'diseases'   => $this->faker->sentence(),
-            'allergies'  => $this->faker->text(50),
-            'status'     => $this->faker->randomElement(['Alive', 'Dead']),
+            'sex'                   => $this->faker->randomElement(['Male', 'Female', 'Unknown']),
+            'dob'                   => $this->faker->dateTimeBetween('2010-01-01', '2021-01-01'),
+            'neuteredOrSpayed'      => $this->faker->randomElement(['Neutered or spayed', 'Not neutered or spayed', 'Unknown neutered or spayed status']),
+            'diseases'              => $this->faker->sentence(),
+            'allergies'             => $this->faker->text(50),
+            'status'                => $this->faker->randomElement(['Alive', 'Dead']),
         ];
     }
 }
