@@ -25,7 +25,7 @@
 					type="text"
 					class="form-control form-control-sm {{ $errors->has('phone') ? 'is-invalid':'' }}"
 					id="inputPhone"
-					placeholder="e.g. 3314242817"
+					placeholder="e.g. 3301020304"
 					aria-describedby="inputPhoneFeedback">
 
 			   @error('phone')
