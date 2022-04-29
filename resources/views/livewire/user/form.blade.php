@@ -33,7 +33,7 @@
 					{{ $errors->has('phone') ? 'is-invalid':'' }}
 					{{ $errors->has('phone') == false && $this->phone != null ? 'is-valid border-success':'' }}"
 					id="inputPhone"
-					placeholder="e.g. 3314242817"
+					placeholder="e.g. 3301020304"
 					aria-describedby="inputPhoneFeedback">
 
 			   @error('phone')
