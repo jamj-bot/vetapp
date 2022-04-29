@@ -37,7 +37,7 @@
                 </div>
             </div>
             <div class="card-body" style="display: block;">
-                <div>
+ {{--                <div>
                     <img src="{{url('vendor/adminlte/dist/img/veterinary.png')}}" class="img-rounded elevation-4 shadow shadow-sm mr-1" style="width: 20px; height: 20px; object-fit: cover;">
                     Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
                 </div>
@@ -48,11 +48,27 @@
                 <div>
                     <img src="{{url('vendor/adminlte/dist/img/veterinary.png')}}" class="img-rounded elevation-4 shadow shadow-sm mr-1" style="width: 20px; height: 20px; object-fit: cover;">
                     Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-                </div>
+                </div> --}}
                 <div>
-                    <img src="{{url('vendor/adminlte/dist/img/veterinary.png')}}" class="img-rounded elevation-4 shadow shadow-sm mr-1" style="width: 20px; height: 20px; object-fit: cover;">
+                    <img src="{{url('vendor/adminlte/dist/img/veterinary.png')}}" class="img-rounded elevation-4 shadow shadow-sm mr-1" style="width: 48px; height: auto; object-fit: cover;">
                     Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
                 </div>
+                <br>
+{{--                 <div>
+                    <img src="{{ url('vendor/adminlte/dist/img/doc.png') }}" class="img-rounded elevation-4 shadow shadow-sm mr-1" style="width: 48px; height: auto; object-fit: cover;">
+                    Icon made by <a href="https://www.flaticon.com/free-icons/document" title="document icons">Document icons created by Smashicons - Flaticon</a>
+                </div>
+                <br>
+                <div>
+                    <img src="{{ url('vendor/adminlte/dist/img/pdf.png') }}" class="img-rounded elevation-4 shadow shadow-sm mr-1" style="width: 48px; height: auto; object-fit: cover;">
+                    Icon made by <a href="https://www.flaticon.com/free-icons/pdf" title="pdf icons">Pdf icons created by Smashicons - Flaticon</a>
+                </div> --}}
+
+                <a href="https://www.flaticon.com/free-icons/file" title="file icons">File icons created by Roman Káčerek - Flaticon</a> <br>
+                <a href="https://www.flaticon.com/free-icons/excel" title="excel icons">Excel icons created by Roman Káčerek - Flaticon</a> <br>
+                <a href="https://www.flaticon.com/free-icons/file" title="file icons">File icons created by Roman Káčerek - Flaticon</a> <br>
+                <a href="https://www.flaticon.com/free-icons/pdf" title="pdf icons">Pdf icons created by Roman Káčerek - Flaticon</a> <br>
+
             </div>
             <!-- /.card-body -->
             <div class="card-footer" style="display: block;">

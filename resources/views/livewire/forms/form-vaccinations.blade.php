@@ -5,7 +5,9 @@
 			<div class="form-group col-md-4">
 				<label for="selectVaccine" class="form-label font-weight-normal">Vaccine *</label>
 				<select wire:model.lazy="vaccine_id"
-					class="custom-select custom-select-sm {{ $errors->has('vaccine_id') ? 'is-invalid':'' }}"
+					class="custom-select custom-select-sm
+					{{ $errors->has('vaccine_id') ? 'is-invalid':'' }}
+					{{ $errors->has('vaccine_id') == false && $this->vaccine_id != 0 ? 'is-valid border-success':'' }}"
 					id="selectVaccine"
 					aria-describedby="selectVaccineFeedback">
 					<option value="choose" selected>Choose...</option>
@@ -18,6 +20,10 @@
 					<div id="selectVaccineFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="selectVaccineFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
@@ -25,7 +31,9 @@
 			<div class="form-group col-md-4">
 				<label for="selectType" class="form-label font-weight-normal">Type *</label>
 				<select wire:model.lazy="type"
-					class="custom-select custom-select-sm {{ $errors->has('type') ? 'is-invalid':'' }}"
+					class="custom-select custom-select-sm
+					{{ $errors->has('type') ? 'is-invalid':'' }}
+					{{ $errors->has('type') == false && $this->type != 'choose' ? 'is-valid border-success':'' }}"
 					id="selectType"
 					aria-describedby="selectTypeFeedback">
 
@@ -38,14 +46,20 @@
 					<div id="selectTypeFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="selectTypeFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
 			<div class="form-group col-md-4">
-				<label for="inputBatchNumber" class="form-label font-weight-normal">Batch Number *</label>
+				<label for="inputBatchNumber" class="form-label font-weight-normal">Batch Number</label>
 				<input wire:model.lazy="batch_number"
 					type="text"
-					class="form-control form-control-sm {{ $errors->has('batch_number') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('batch_number') ? 'is-invalid':'' }}
+					{{ $errors->has('batch_number') == false && $this->batch_number != null ? 'is-valid border-success':'' }}"
 					id="inputBatchNumber"
 					placeholder="e.g. 123-MP-1L2O"
 					aria-describedby="inputBatchNumberFeedback">
@@ -54,6 +68,10 @@
 					<div id="inputBatchNumberFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="inputBatchNumberFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
@@ -66,7 +84,9 @@
 				<label for="inputDoseNumber" class="form-label font-weight-normal">Dose *</label>
 				<input wire:model.lazy="dose_number"
 					type="number"
-					class="form-control disabled form-control-sm {{ $errors->has('dose_number') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('dose_number') ? 'is-invalid':'' }}
+					{{ $errors->has('dose_number') == false && $this->dose_number != null ? 'is-valid border-success':'' }}"
 					id="inputDoseNumber"
 					placeholder="1"
 					aria-describedby="inputDoseNumberFeedback">
@@ -75,6 +95,10 @@
 					<div id="inputDoseNumberFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="inputDoseNumberFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
@@ -82,7 +106,9 @@
 				<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required *</label>
 				<input wire:model.lazy="doses_required"
 					type="number"
-					class="form-control disabled form-control-sm {{ $errors->has('doses_required') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('doses_required') ? 'is-invalid':'' }}
+					{{ $errors->has('doses_required') == false && $this->doses_required != null ? 'is-valid border-success':'' }}"
 					id="inputDosesRequired"
 					placeholder="3"
 					aria-describedby="inputDosesRequiredFeedback">
@@ -91,54 +117,20 @@
 					<div id="inputDosesRequiredFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="inputDosesRequiredFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
-
-{{-- 			<div class="form-group col-md-3">
-				<label for="selectDoseNumber" class="form-label font-weight-normal">Dose number *</label>
-				<select wire:model.lazy="dose_number"
-					class="custom-select custom-select-sm {{ $errors->has('dose_number') ? 'is-invalid':'' }}"
-					id="selectDoseNumber"
-					aria-describedby="selectDoseNumberFeedback">
-
-					<option selected value="choose">Choose</option>
-					<option value="1">1</option>
-					<option value="2">2</option>
-					<option value="3">3</option>
-				</select>
-
-				@error('dose_number')
-					<div id="selectDoseNumberFeedback" class="invalid-feedback">
-						{{ $message }}
-					</div>
-				@enderror
-			</div>
-
-			<div class="form-group col-md-3">
-				<label for="selectDosesRequired" class="form-label font-weight-normal">Doses required *</label>
-				<select wire:model.lazy="doses_required"
-					class="custom-select custom-select-sm {{ $errors->has('doses_required') ? 'is-invalid':'' }}"
-					id="selectDosesRequired"
-					aria-describedby="selectDosesRequiredFeedback">
-
-					<option selected value="choose">Choose</option>
-					<option value="1">1</option>
-					<option value="2">2</option>
-					<option value="3">3</option>
-				</select>
-
-				@error('doses_required')
-					<div id="selectDosesRequiredFeedback" class="invalid-feedback">
-						{{ $message }}
-					</div>
-				@enderror
-			</div> --}}
 
 			<div class="form-group col-md-6">
-				<label for="inputDone" class="form-label font-weight-normal">Done</label>
+				<label for="inputDone" class="form-label font-weight-normal">Done *</label>
 				<input wire:model.lazy="done"
 					type="date"
-					class="form-control form-control-sm {{ $errors->has('done') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('done') ? 'is-invalid':'' }}
+					{{ $errors->has('done') == false && $this->done != null ? 'is-valid border-success':'' }}"
 					id="inputDone"
 					placeholder="Done"
 					aria-describedby="inputDoneFeedback">
@@ -147,13 +139,19 @@
 					<div id="inputDoneFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="inputDoneFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
 			<div class="form-group col-md-2">
 				<label for="selectApplied" class="form-label font-weight-normal">Applied *</label>
 				<select wire:model.lazy="applied"
-					class="custom-select custom-select-sm {{ $errors->has('applied') ? 'is-invalid':'' }}"
+					class="custom-select custom-select-sm
+					{{ $errors->has('applied') ? 'is-invalid':'' }}
+					{{ $errors->has('applied') == false && $this->applied != null ? 'is-valid border-success':'' }}"
 					id="selectApplied"
 					aria-describedby="selectAppliedFeedback">
 
@@ -166,52 +164,19 @@
 					<div id="selectAppliedFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+                @else
+                    <div id="selectAppliedFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
-{{-- 			@if($last_dose == 0)
-				<div class="form-group col-md-6">
-					<label for="inputNext" class="form-label font-weight-normal">Next</label>
-					<input wire:model.lazy="next"
-						type="date"
-						class="form-control disabled form-control-sm {{ $errors->has('next') ? 'is-invalid':'' }}"
-						id="inputNext"
-						placeholder="Next"
-						aria-describedby="inputNextFeedback">
-
-					@error('next')
-						<div id="inputNextFeedback" class="invalid-feedback">
-							{{ $message }}
-						</div>
-					@enderror
-				</div>
-			@endif --}}
 		</div>
 		<!-- /. row -->
 
-		{{-- @if($selected_id > 0) --}}
-			<div class="form-row">
-{{-- 	 			<div class="form-group col-md-12">
-					<label for="selectApplied" class="form-label font-weight-normal">Applied</label>
-					<select wire:model.lazy="applied"
-						class="custom-select custom-select-sm {{ $errors->has('applied') ? 'is-invalid':'' }}"
-						id="selectApplied"
-						aria-describedby="selectAppliedFeedback">
-
-						<option value="1">Yes</option>
-						<option selected value="0">No</option>
-
-					</select>
-
-					@error('applied')
-						<div id="selectAppliedFeedback" class="invalid-feedback">
-							{{ $message }}
-						</div>
-					@enderror
-				</div> --}}
-			</div>
-			<!-- /. row -->
-		{{-- @endif --}}
+		<div class="form-row">
+		</div>
+		<!-- /. row -->
 
 	@include('common.modal-footer')
 

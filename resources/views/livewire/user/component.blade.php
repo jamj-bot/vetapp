@@ -65,8 +65,9 @@
                         </div>
                         <!-- /.card-header -->
 
+
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover text-sm">
+                            <table class="table table-head-fixed table-hover">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -119,16 +120,33 @@
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <p class="pr-2 mb-0">
-                                                        <img class="{{-- profile-user-img --}} img-circle elevation-3 shadow"
+                                                        <img class="{{-- profile-user-img --}} img-circle elevation-3"
                                                             loading="lazy"
-                                                            alt="avatar"
-                                                            src="{{ $user->profile_photo_url }}"
+                                                        	alt="avatar"
+                      										src="{{ $user->profile_photo_url }}"
                                                             style="width: 40px; height: 40px; object-fit: cover;">
+
+                                                        <!-- Session message -->
+                                                        @if (session()->has('user_id'))
+                                                            @if( session('user_id') == $user->id)
+                                                                @if (session()->has('message'))
+                                                                    <span x-data="{ show: true }"
+                                                                        x-show="show"
+                                                                        x-init="setTimeout(() => show = false, 10000)"
+                                                                        x-transition.duration.1500ms
+                                                                        class="text- float-right ml-2">
+                                                                        {{ session('message') }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
+                                                        @endif
+                                                        <!-- ./ Session message -->
                                                     </p>
-                                                    <p class="d-flex flex-column font-weight-light text-right mb-0">
+                                                    <p class="d-flex flex-column text-right mb-0">
                                                         <span>
                                                             @can('user_profile_show')
-                                                                <a href="{{route('admin.users.show', $user)}}" class="font-weight-normal">
+                                                                <a href="{{route('admin.users.show', $user)}}"
+                                                                    class="" title="{{ $user->name }}'s profile">
                                                                     {{ $user->name }}
                                                                 </a>
                                                             @else
@@ -143,7 +161,7 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="d-flex flex-column font-weight-light text-left mb-0">
+                                                    <p class="d-flex flex-column text-left mb-0">
                                                         <span class="text-uppercase ">
                                                             <i class="text-muted fas fa-fw fa-phone"></i>
                                                             {{ $user->phone }}

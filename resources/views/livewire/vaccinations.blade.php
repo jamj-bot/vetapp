@@ -28,7 +28,6 @@
             </div>
         </div>
     </div>
-
     <!-- /.Datatable filters -->
 
     <div class="card">
@@ -38,9 +37,10 @@
             </h3>
 
             <div class="card-tools">
-              <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
-              </button>
+                <!-- Maximize Button -->
+                <button type="button" class="btn btn-tool pt-3" data-card-widget="maximize">
+                    <i class="fas fa-expand"></i>
+                </button>
             </div>
         </div>
         <!-- /.card-header -->
@@ -103,53 +103,48 @@
                                         </p>
                                     </div>
                                 </td>
-{{--                                 <td>
-                                    <span class="d-inline-block text-truncate text-sm" title="{{ $vaccination->vaccine->description }}" style="max-width: 200px;">
-                                        {{ $vaccination->type }}
-                                    </span>
-                                </td> --}}
                                 <td>
                                     <div class="d-flex justify-content-start align-items-center">
                                         <p class="d-flex flex-column font-weight-light text-sm mb-0">
-                                            @if($vaccination->batch_number)
-                                                <span class="text-sm">{{ $vaccination->batch_number }}</span>
-                                            @else
-                                                <span class="text-sm">Pending...</span>
-                                            @endif
+                                            <span class="text-sm">{{ $vaccination->batch_number }}</span>
                                         </p>
                                     </div>
                                 </td>
                                 <td class="text-nowrap">
                                     @if($vaccination->applied)
                                         @can('vaccinations_update')
-                                            <button
-                                                wire:click.prevent="apply({{ $vaccination }})"
-                                                title="Undo Apply Vaccine"
-                                                class="btn btn-sm btn-default shadow-sm">
-                                                    <i class="fas fa-fw fa-flag text-success"></i>
-                                                    {{ $vaccination->done->format('d-M-Y') }}
-                                            </button>
+                                                <!-- Button trigger modal -->
+                                                <a href="javascript:void(0)"
+                                                    data-toggle="modalApply"
+                                                    wire:click.prevent="editApply({{ $vaccination }})"
+                                                    title="Undo Apply Vaccine"
+                                                    class="btn btn-sm btn-default shadow-sm">
+                                                        <i class="fas fa-fw fa-flag text-success"></i>
+                                                        {{ $vaccination->done->format('d-M-Y') }}
+                                                </a>
                                         @endcan
                                     @elseif(!$vaccination->applied)
                                         @if($vaccination->done->isPast())
                                             @can('vaccinations_update')
-                                                <button
-                                                    wire:click.prevent="apply({{ $vaccination }})"
-                                                    title="Apply Vaccine"
+                                                <a href="javascript:void(0)"
+                                                    data-toggle="modal"
+                                                    wire:click.prevent="editApply({{ $vaccination }})"
+                                                    title="Undo Apply Vaccine"
                                                     class="btn btn-sm btn-default shadow-sm">
                                                         <i class="fas fa-fw fa-flag text-danger"></i>
                                                         {{ $vaccination->done->format('d-M-Y') }}
-                                                </button>
+                                                </a>
                                             @endcan
                                         @else
                                             @can('vaccinations_update')
-                                                <button
-                                                    wire:click.prevent="apply({{ $vaccination }})"
+                                                <a href="javascript:void(0)"
+                                                    data-toggle="modal"
+                                                    wire:click.prevent="editApply({{ $vaccination }})"
                                                     title="Apply Vaccine"
                                                     class="btn btn-sm btn-default shadow-sm">
                                                         <i class="fas fa-fw fa-flag text-warning"></i>
                                                         {{ $vaccination->done->format('d-M-Y') }}
-                                                </button>
+                                                </a>
                                             @endcan
                                         @endif
                                     @endif
@@ -190,9 +185,7 @@
                                 <td width="10px">
                                     @can('vaccinations_destroy')
                                         <a href="javascript:void(0)"
-                                            data-toggle="modal"
-                                            wire:click.prevent="destroy({{ $vaccination }})"
-                                            title="Delete"
+                                            onclick="confirm('{{$vaccination->id}}', 'Are you sure you want delete this vaccination?', 'You won\'t be able to revert this!', 'Vaccination', 'destroy')"title="Delete"
                                             class="btn btn-sm btn-link border border-0">
                                                 <i class="fas fa-trash text-muted"></i>
                                         </a>
@@ -269,6 +262,17 @@
                     @endif
                 </div>
             @endif
+
+            <div class="mailbox-controls with-border text-center">
+                <a href="{{ route('admin.pets.vaccinations.export', ['pet' => $pet]) }}"
+                    class="btn btn-default btn-sm"
+                    target="_blank"
+                    rel="noopener"
+                    title="Print">
+                    <i class="far fa-fw fa-file-pdf"></i> Export
+                </a>
+            </div>
+            <!-- /.mailbox-controls -->
         </div>
         <!-- /.card-footer -->
 
@@ -277,7 +281,13 @@
         </div>
 
     </div>
+
+    <!-- Add and edit vaccinations -->
     @include('livewire.forms.form-vaccinations')
+
+    <!-- Apply vaccinations -->
+    @include('livewire.forms.form-apply-vaccinations')
+
 </div>
 
 <script>
@@ -305,6 +315,12 @@
         });
         window.livewire.on('hide-modal', msg =>  {
             $('#modalForm').modal('hide')
+        });
+        window.livewire.on('show-modal-apply', msg =>  {
+            $('#modalFormApply').modal('show')
+        });
+        window.livewire.on('hide-modal-apply', msg =>  {
+            $('#modalFormApply').modal('hide')
         });
     });
 </script>

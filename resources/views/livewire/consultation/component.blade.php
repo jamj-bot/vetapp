@@ -1,17 +1,26 @@
-<div wire:init="loadItems()">
+<div wire:init="loadItems">
     <!--Content header (Page header)-->
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="display-4">{{ $pageTitle }}</h1>
+                    <h1 class="display-4">
+                        {{ $pageTitle }}: {{ $pet->name != null ? $pet->name : $pet->code }}
+                        @if($pet->status == 'Dead')
+                            <sup><i class="fas fa-cross"></i></sup>
+                        @endif
+                    </h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">...</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.users') }}">...</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.users.show', $pet->user) }}">{{ $pet->user->name }}</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.pets.show', $pet) }}">{{ $pet->name }}</a></li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.pets.show', $pet) }}">
+                                @if($pet->name) {{ $pet->name }} @else {{ $pet->code }} @endif
+                            </a>
+                        </li>
                         <li class="breadcrumb-item active">{{ $pageTitle }}</li>
                     </ol>
                 </div>
@@ -25,22 +34,34 @@
             <div class="row">
 
                 <div class="col-md-3">
-                    <a href="{{ route('admin.pets.show', $pet) }}"
-                        class="btn btn-block btn-default mb-3">
-                        <i class="far fa-arrow-alt-circle-left"></i>
-                        Pet
-                    </a>
-                    <!-- Button trigger modal -->
-                    <button type="button"
-                        class="btn bg-gradient-primary btn-block mb-3"
-                        data-toggle="modal"
-                        data-target="#modalForm">
-                       <i class="fas fa-fw fa-plus"></i> Add Consultation
-                    </button>
+                    @can('pets_show')
+                        <a href="{{ route('admin.pets.show', $pet) }}"
+                            class="btn btn-block btn-default mb-3">
+                            <i class="far fa-arrow-alt-circle-left"></i>
+                            Pet
+                        </a>
+                    @endcan
+
+                    @can('consultations_update')
+                        <a href="javascript:void(0)"
+                            wire:click.prevent="loadDobField()"
+                            onclick="bindTextareas()"
+                            title="Create"
+                            class="btn bg-gradient-primary btn-block mb-3">
+                                <span wire:loading.remove wire:target="loadDobField">
+                                   <i class="fas fa-fw fa-plus"></i>
+                                   Add Consultation
+                                </span>
+                                <span wire:loading wire:target="loadDobField">
+                                    <i class="fas fa-fw fa-spinner fa-spin"></i>
+                                     Please, wait...
+                                </span>
+                        </a>
+                    @endcan
 
                     <div class="card card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Folders</h3>
+                            <h3 class="card-title">Filters</h3>
 
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -51,31 +72,26 @@
 
                         <div class="card-body p-0">
                             <ul class="nav nav-pills flex-column">
-                                <li class="nav-item active">
-                                    <a href="#" class="nav-link">
-                                        <i class="fas fa-inbox"></i> Inbox
-                                        <span class="badge bg-primary float-right">12</span>
+                                <li wire:click="$set('filter', 'All')"
+                                    class="nav-item {{ $filter == 'All' ? 'font-weight-bold' : ''}}">
+                                    <a href="javascript:void(0)"
+                                        class="nav-link">
+                                        <i class="fas fa-fw fa-inbox mr-1"></i><span> All</span>
+                                        @if($filter == 'All' )
+                                            <i class="fas fa-caret-right ml-1"></i>
+                                        @endif
+                                        <span class="badge bg-primary float-right">{{ $consultations_quantity }}</span>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-envelope"></i> Sent
-                                     </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-file-alt"></i> Drafts
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="fas fa-filter"></i> Junk
-                                        <span class="badge bg-warning float-right">65</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-trash-alt"></i> Trash
+                                <li wire:click="$set('filter', 'Trash')"
+                                    class="nav-item {{ $filter == 'Trash' ? 'font-weight-bold' : ''}}">
+                                    <a href="javascript:void(0)"
+                                        class="nav-link">
+                                        <i class="far fa-fw fa-trash-alt mr-1"></i><span> Trash</span>
+                                         @if($filter == 'Trash' )
+                                            <i class="fas fa-caret-right ml-1"></i>
+                                        @endif
+                                        <span class="badge bg-danger float-right">{{ $deleted_consultations_quantity }}</span>
                                     </a>
                                 </li>
                             </ul>
@@ -84,87 +100,26 @@
                     </div>
                     <!-- /.card -->
 
-                    <div class="card card-primary card-outline font-weight-light">
-                        <div class="card-header">
-                            <h3 class="card-title">About {{ $pet->name }}</h3>
-
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-fingerprint mr-1 text-muted"></i>
-                                    {{ $pet->code }}
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-paw mr-1 text-maroon"></i>
-                                    {{ $pet->species->name }} / <span class="font-italic">{{ $pet->species->scientific_name }}</span>
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-award mr-1 text-lime"></i>
-                                    {{ $pet->breed != null ? $pet->breed :  'Unknown or mixed-breed' }}
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-venus mr-1 text-lightblue"></i>
-                                    {{ $pet->sex }}
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-neuter mr-1 text-purple"></i>
-                                    {{$pet->neuteredOrSpayed }}
-
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-birthday-cake mr-1 text-pink"></i>
-                                    @if($pet->dob->diffInDays(\Carbon\Carbon::now()) < 59)
-                                        {{ $pet->dob->diffInDays(\Carbon\Carbon::now()) }} days old
-                                    @elseif($pet->dob->diffInDays(\Carbon\Carbon::now()) >= 60 && $pet->dob->diffInMonths(\Carbon\Carbon::now()) < 24)
-                                        {{ $pet->dob->diffInMonths(\Carbon\Carbon::now())}} months old
-                                    @elseif($pet->dob->diffInMonths(\Carbon\Carbon::now()) >= 24)
-                                        {{ $pet->dob->diffInYears(\Carbon\Carbon::now()) }} years old
-                                    @endif
-                                     / {{ $pet->dob->format('d-M-y') }}
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-hard-hat mr-1 text-warning"></i>
-                                    {{ $pet->zootechnical_function }}
-                                </li>
-                                <li class="list-group-item">
-                                    <i class="fas fa-fw fa-calendar mr-1 text-navy"></i>
-                                    Registered {{ $pet->created_at->diffForHumans() }}
-                                </li>
-                            </ul>
-                        </div>
-                        <!-- /.card-body -->
-                    </div>
+                    <!-- about card -->
+                    @include('common.about-card')
                     <!-- /.card -->
+
                 </div>
                 <!-- /.col -->
 
 
                 <div class="col-md-9">
-                    @if($pet->diseases)
-                        <div class="callout callout-warning alert alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                            <h5>Pre-existing conditions</h5>
-                            {{ $pet->diseases }}
-                        </div>
-                    @endif
-                    @if($pet->allergies)
-                        <div class="callout callout-danger alert alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                            <h5>Allergies</h5>
-                            {{ $pet->allergies }}
-                        </div>
-                    @endif
+                    <!-- Alerts -->
+                    @include('common.alerts')
+                    <!-- /.Alerts -->
 
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Inbox</h3>
+                            @if($this->filter == 'All')
+                                <h3 class="card-title">Consultations</h3>
+                            @elseif($this->filter == 'Trash')
+                                <h3 class="card-title">Trashed consultations</h3>
+                            @endif
 
                             <div class="card-tools">
                                 <!-- Datatable's filters -->
@@ -194,88 +149,160 @@
 
                         <div class="card-body p-0">
                             <div class="mailbox-controls">
-
                                 <!-- Check all button -->
-                                <button type="button" class="btn btn-default btn-sm checkbox-toggle"><i class="far fa-square"></i>
-                                </button>
+                                <div class="btn btn-default btn-sm checkbox-toggle">
+                                    <input type="checkbox"
+                                        class=""
+                                        id="check8"
+                                        wire:model="checkAllConsultations"
+                                        wire:click.prevent="updateCheckAllConsultations"
+                                        name="check8">
+                                    <label for="check8" class="sr-only">Check all</label>
+                                </div>
+
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <i class="far fa-trash-alt"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <i class="fas fa-reply"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <i class="fas fa-share"></i>
-                                    </button>
+                                    @if($this->filter == 'All')
+                                        @can('consultations_destroy')
+                                            <!-- Delete Checked button -->
+                                            <button type="button" class="btn btn-default btn-sm"
+                                                onclick="confirmDeleteConsultations('Are you sure you want delete this consultations?', 'You can recover it from Recycle Bin!', 'Consultations', 'deleteChecked')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
+                                    @elseif($this->filter == 'Trash')
+                                        @can('consultations_destroy')
+                                            <!-- Delete Checked button -->
+                                            <button type="button" class="btn btn-default btn-sm"
+                                                onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyChecked')">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </button>
+                                        @endcan
+                                    @endif
+
+                                    @if($this->filter == 'Trash')
+                                        @can('consultations_destroy')
+                                             <!-- Delete Checked button -->
+                                            <button type="button" class="btn btn-default btn-sm"
+                                                onclick="confirmRestoreConsultations('Are you sure you want restore this consultations???', 'This action can be undone!', 'Consultations', 'restoreChecked')">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                        @endcan
+                                    @endif
                                 </div>
                                 <!-- /.btn-group -->
-
-                                <button type="button" class="btn btn-default btn-sm">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <div class="float-right">
-                                    1-50/200
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-default btn-sm">
-                                            <i class="fas fa-chevron-left"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-default btn-sm">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                      <!-- /.btn-group -->
-                                </div>
-                                <!-- /.float-right -->
                             </div>
 
                             <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped font-weight-light">
+                                <table class="table table-hover table-striped">
                                     <tbody>
                                         @forelse($consultations as $consultation)
-                                            <tr>
+                                            <tr id="r{{ $consultation->id }}" class="{{ $this->checkAllConsultations == true ? 'bg-gradient-light disabled' : '' }}">
                                                 <td>
                                                     <div class="icheck-primary">
-{{--                                                         <input type="checkbox" value="" id="check6">
-                                                        <label for="check6"></label> --}}
-                                                    <a href="javascript:void(0)"
-                                                        data-toggle="modal"
-                                                        wire:click.prevent="edit({{ $consultation }})"
-                                                        title="Edit"
-                                                        class="btn btn-sm btn-link border border-0">
-                                                            <i class="fas fa-edit text-muted"></i>
-                                                    </a>
+                                                        <input type="checkbox"
+                                                            value="{{ $consultation->id }}"
+                                                            id="c{{ $consultation->id }}"
+                                                            wire:model.defer="checkedConsultations"
+                                                            onchange="changeBackground(this.id)"
+                                                            {{ $this->checkAllConsultations == true ? 'disabled' : '' }}>
+                                                        <label for="check6"></label>
                                                     </div>
                                                 </td>
-                                                <td class="mailbox-star">
-                                                    @if($consultation->consult_status == 'Closed')
-                                                        <i class="fas fa-check-double text-success"></i>
-                                                    @else
-                                                        <i class="fas fa-exclamation-triangle text-warning" title="{{ $consultation->consult_status }}"></i>
-                                                    @endif
-                                                    {{-- <a href="#"><i class="fas fa-check-double text-success"></i></a> --}}
+                                                <td class="mailbox-star" title="{{ $consultation->consult_status }}">
+                                                    <i class="fas fa-star text-xs {{ $consultation->consult_status == 'Closed' ? 'text-warning' : 'text-muted'}}">
+                                                    </i>
                                                 </td>
-                                                <td class="mailbox-name">{{-- <a href="read-mail.html"> --}}{{ $consultation->user->name }}{{-- </a> --}}
+                                                <td class="mailbox-name text-sm" title="{{ $consultation->user->name }}">
+                                                    @if( strlen($consultation->user->name) > 18)
+                                                        {{ substr($consultation->user->name, 0, 15) }}...
+                                                    @else
+                                                        {{ $consultation->user->name }}
+                                                    @endif
+                                                </td>
+                                                <td title="{{ $consultation->prognosis }}">
+                                                    <span class="fa-stack fa-1x m-0">
+                                                        <i class="fas fa-circle fa-stack-2x {{ $consultation->color }}"></i>
+                                                        <i class="fas fa-heartbeat fa-stack-1x fa-inverse text-light"></i>
+                                                    </span>
                                                 </td>
                                                 <td class="mailbox-subject">
-                                                    <a href="{{ route('admin.pets.consultations.show', ['pet' => $pet, 'consultation' => $consultation]) }}">
-                                                        <b>{{ $consultation->diagnosis }}</b> - {{ $consultation->prognosis }}
+                                                    <a href="{{ route('admin.pets.consultations.show', ['pet' => $pet, 'consultation' => $consultation]) }}"
+                                                        class="{{-- text-warning font-weight-bolder --}}">
+                                                        @if($consultation->diagnosis)
+                                                            @if( strlen($consultation->diagnosis) > 38)
+                                                                {{ substr($consultation->diagnosis, 0, 35) }}...
+                                                            @else
+                                                                {{ $consultation->diagnosis }}
+                                                            @endif
+                                                        @else
+                                                            Undetermined diagnosis
+                                                        @endif
                                                     </a>
-{{--                                                     <a href="">
-                                                        <b>{{ $consultation->diagnosis }}</b> - {{ $consultation->prognosis }}
-                                                    </a>
- --}}                                                </td>
-                                                <td class="mailbox-attachment">
-                                                    <i class="fas fa-paperclip text-muted"></i>
-                                                    <i class="fas fa-images text-muted"></i>
                                                 </td>
-                                                <td class="mailbox-date"><small>{{ $consultation->updated_at->diffForHumans() }}</small></td>
+                                                <td class="mailbox-attachment text-xs">
+                                                    @if($consultation->images()->count())
+                                                        <i class="fas fa-images text-muted"></i>
+                                                    @endif
+                                                    @if($consultation->tests()->count())
+                                                        <i class="fas fa-paperclip text-muted"></i>
+                                                    @endif
+                                                </td>
+                                                <td class="mailbox-date">
+                                                    <small class="text-xs">{{ $consultation->updated_at->diffForHumans() }}</small>
+                                                </td>
+                                                <td width="5px">
+                                                    <!-- COMMENT: Muestra opciones de editar y eliminar registros activos -->
+                                                    @if($this->filter == 'All')
+                                                        <div class="btn-group">
+{{--                                                             @can('consultations_update')
+                                                                <a href="javascript:void(0)"
+                                                                    wire:click.prevent="edit({{ $consultation }})"
+                                                                    title="Edit"
+                                                                    class="btn btn-sm btn-link p-1 border border-0">
+                                                                        <i class="fas fa-edit text-muted"></i>
+                                                                </a>
+                                                            @endcan --}}
+
+                                                            @can('consultations_destroy')
+                                                                <a href="javascript:void(0)"
+                                                                    onclick="confirm('{{$consultation->id}}', 'Are you sure you want delete this consultation?', 'You can recover it from Recycle Bin!', 'Consultation', 'destroy')"
+                                                                    {{-- wire:click.prevent="destroy({{ $consultation }})" --}}
+                                                                    title="Delete"
+                                                                    class="btn btn-sm btn-link p-1 border border-0">
+                                                                        <i class="fas fa-trash text-muted"></i>
+                                                                </a>
+                                                            @endcan
+                                                        </div>
+                                                    @endif
+                                                    <!-- COMMENT: Muestra opciones de restaurar o destruir los registros de la papelea -->
+                                                    @if($this->filter == 'Trash')
+                                                        <div class="btn-group">
+                                                            @can('consultations_restore')
+                                                                <a href="javascript:void(0)"
+                                                                    wire:click.prevent="restore({{ $consultation->id }})"
+                                                                    title="Restore"
+                                                                    class="btn btn-sm btn-link border border-0">
+                                                                    <i class="fas fa-history text-muted"></i>
+                                                                </a>
+                                                            @endcan
+
+                                                            @can('consultations_delete')
+                                                                <a href="javascript:void(0)"
+                                                                    onclick="confirm('{{$consultation->id}}', 'Are you sure you want delete this consultation?', 'You won\'t be able to revert this!', 'Consultation', 'forceDelete')"
+                                                                    title="Destroy"
+                                                                    class="btn btn-sm btn-link p-1 border border-0">
+                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            @endcan
+                                                        </div>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @empty
                                             <!-- COMMENT: Muestra cuando el componente esta readyToLoad -->
                                             @if($readyToLoad == true)
                                                 <tr>
-                                                    <td colspan="6">
+                                                    <td colspan="7">
                                                         @if(strlen($search) <= 0)
                                                         <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
                                                             <div class="col-12 d-flex justify-content-center align-items-center text-muted">
@@ -317,6 +344,52 @@
 
                             </div>
                             <!-- /.mail-box-messages -->
+
+                            @if(count($consultations) > 10)
+                                <div class="mailbox-controls">
+                                    <!-- Check all button -->
+                                    <div class="btn btn-default btn-sm checkbox-toggle">
+                                        <input type="checkbox"
+                                            class=""
+                                            id="check9"
+                                            wire:model="checkAllConsultations"
+                                            wire:click.prevent="updateCheckAllConsultations"
+                                            name="check9">
+                                        <label for="check9" class="sr-only">Check all</label>
+                                    </div>
+
+                                    <div class="btn-group">
+                                        @if($this->filter == 'All')
+                                            @can('consultations_destroy')
+                                                <!-- Delete Checked button -->
+                                                <button type="button" class="btn btn-default btn-sm"
+                                                    onclick="confirmDeleteConsultations('Are you sure you want delete this consultations?', 'You can recover it from Recycle Bin!', 'Consultations', 'deleteChecked')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
+                                        @elseif($this->filter == 'Trash')
+                                            @can('consultations_destroy')
+                                                <!-- Delete Checked button -->
+                                                <button type="button" class="btn btn-default btn-sm"
+                                                    onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyChecked')">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </button>
+                                            @endcan
+                                        @endif
+
+                                        @if($this->filter == 'Trash')
+                                            @can('consultations_destroy')
+                                                 <!-- Delete Checked button -->
+                                                <button type="button" class="btn btn-default btn-sm"
+                                                    onclick="confirmRestoreConsultations('Are you sure you want restore this consultations???', 'This action can be undone!', 'Consultations', 'restoreChecked')">
+                                                    <i class="fas fa-history"></i>
+                                                </button>
+                                            @endcan
+                                        @endif
+                                    </div>
+                                    <!-- /.btn-group -->
+                                </div>
+                            @endif
                         </div>
                         <!-- /.card-body -->
 
@@ -325,7 +398,7 @@
 
                             <div class="mailbox-controls">
                                 <!-- Check all button -->
-                                <button type="button" class="btn btn-default btn-sm checkbox-toggle">
+{{--                                 <button type="button" class="btn btn-default btn-sm checkbox-toggle">
                                     <i class="far fa-square"></i>
                                 </button>
 
@@ -339,12 +412,12 @@
                                     <button type="button" class="btn btn-default btn-sm">
                                         <i class="fas fa-share"></i>
                                     </button>
-                                </div>
+                                </div> --}}
                                 <!-- /.btn-group -->
 
-                                <button type="button" class="btn btn-default btn-sm">
+{{--                                 <button type="button" class="btn btn-default btn-sm">
                                     <i class="fas fa-sync-alt"></i>
-                                </button>
+                                </button> --}}
 
                                 <div class="float-right pagination pagination-sm">
                                     @if(count($consultations))
@@ -370,7 +443,7 @@
                         </div>
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
-                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, delete, restore">
                         </div>
                     </div>
                     <!-- /.card -->
@@ -379,9 +452,10 @@
             </div>
         </div><!-- /.container-fluid -->
     </section>
-    @include('livewire.consultation.form')
-</div>
 
+    @include('livewire.consultation.form')
+
+</div>
 
 <script src="https://cdn.ckeditor.com/ckeditor5/30.0.0/classic/ckeditor.js"></script>
 
@@ -409,6 +483,20 @@
 </script>
 
 
+{{--  <script>
+    ClassicEditor
+        .create(document.querySelector('#treatment_plan'))
+        .then(editor => {
+            editor.model.document.on('change:data', () => {
+                @this.set('treatment_plan', editor.getData());
+            })
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+ --}}
+
 <script>
     window.addEventListener('updated', event => {
         notify(event)
@@ -416,6 +504,100 @@
     window.addEventListener('stored', event => {
         notify(event)
     });
+    window.addEventListener('deleted', event => {
+        notify(event)
+    });
+
+
+    // window.addEventListener('swal:deleteConsultations', event => {
+    //     Swal.fire({
+    //         title:event.detail.title,
+    //         html:event.detail.html,
+    //         type: 'warning',
+    //         showCloseButton:true,
+    //         showCancelButton:true,
+    //         cancelButtonText:'No',
+    //         cancelButtonColor:'#d33',
+    //         confirmButtonText:'Yes',
+    //         confirmButtonColor:'#3085d6',
+    //         allowOutsideClick: false,
+    //     }).then(function(result){
+    //         if(result.value){
+    //             window.livewire.emit('deleteChecked', event.detail.checkIDs);
+    //             Swal.fire(
+    //                 'Deleted!',
+    //                 'Consultations has been deleted.',
+    //                 'success'
+    //             )
+    //         }
+    //     });
+    // });
+
+        {{-- Funtion to confirm the deletion of items --}}
+    function confirmDeleteConsultations(title, text, model, event) {
+        Swal.fire({
+            title: title,
+            text: text,
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.value) {
+                window.livewire.emit(event),
+                Swal.fire(
+                    'Deleted!',
+                     model + ' has been deleted.',
+                    'success'
+                )
+            }
+        })
+    }
+
+    {{-- Funtion to confirm the deletion of items --}}
+    function confirmDestroyConsultations(title, text, model, event) {
+        Swal.fire({
+            title: title,
+            text: text,
+            type: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.value) {
+                window.livewire.emit(event),
+                Swal.fire(
+                    'Destroyed!',
+                     model + ' has been deleted.',
+                    'success'
+                )
+            }
+        })
+    }
+
+    {{-- Funtion to confirm restore --}}
+    function confirmRestoreConsultations(title, text, model, event) {
+        Swal.fire({
+            title: title,
+            text: text,
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, restore it!'
+        }).then((result) => {
+            if (result.value) {
+                window.livewire.emit(event),
+                Swal.fire(
+                    'Restored!',
+                     model + ' has been restored.',
+                    'success'
+                )
+            }
+        })
+    }
 
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {
@@ -424,11 +606,42 @@
         window.livewire.on('hide-modal', msg =>  {
             $('#modalForm').modal('hide')
         });
-
         window.livewire.on('reset-ckeditor', msg =>  {
             // buscar la manera de resetear el textarea usado por el ck editor porque de esta manera no se puede :(
             document.getElementById("ckeditor").value = "";
         });
     });
+
+
+    // Función para agregar/quitar un backgroung al seleccionar un checkbox
+    function changeBackground(id) {
+
+        var partial_id = document.getElementById(id).value;
+        var row = document.getElementById("r"+partial_id);
+
+        row.classList.toggle("bg-gradient-light");
+        row.classList.toggle("disabled");
+        // if(id != undefined){
+
+        // }
+
+        // if(id == undefined){
+        //     window.alert("undefined");
+        //     var x = document.getElementsByTagName("tr");
+        //     var i;
+        //     for (i = 0; i < x.length; i++) {
+        //         x[i].classList.toggle("bg-gradient-light");
+        //         x[i].classList.toggle("disabled");
+        //     }
+        // }
+    }
+
+    function bindTextareas() {
+        document.getElementById('textareaProblemStatement').value = document.getElementById('ckeditor').value
+    }
+
 </script>
 
+
+<!-- Alpine Plugins -->
+<script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>

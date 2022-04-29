@@ -146,6 +146,8 @@
                                                             <i class="fas fa-square text-purple"></i>
                                                         @elseif($item->model == 4)
                                                             <i class="fas fa-square text-orange"></i>
+                                                        @elseif($item->model == 5)
+                                                            <i class="fas fa-square text-lightblue"></i>
                                                         @endif
                                                         {{ $item->name }}
                                                     </span>
@@ -167,6 +169,9 @@
                                                         @elseif($item->model == 4)
                                                             <i class="text-muted fas fa-fw fa-syringe"></i>
                                                             Vaccine
+                                                        @elseif($item->model == 5)
+                                                            <i class="text-muted fas fa-fw fa-bug"></i>
+                                                            Parasiticide
                                                         @endif
                                                     </span>
                                                 </p>

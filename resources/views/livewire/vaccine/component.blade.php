@@ -1,6 +1,5 @@
 <div wire:init="loadItems()">
     <!--Content header (Page header)-->
-
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -96,10 +95,10 @@
                                                 <i class="text-xs text-muted fas fa-sort"></i>
                                             @endif
                                         </th>
-                                        <th wire:click="order('target_species')">
+                                        <th wire:click="order('manufacturer')">
                                             Target species
 
-                                            @if($sort == 'target_species')
+                                            @if($sort == 'manufacturer')
                                                 @if($direction == 'asc')
                                                     <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
                                                 @else
@@ -113,6 +112,19 @@
                                             Type
 
                                             @if($sort == 'type')
+                                                @if($direction == 'asc')
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
+                                                @else
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
+                                                @endif
+                                            @else
+                                                <i class="text-xs text-muted fas fa-sort"></i>
+                                            @endif
+                                        </th>
+                                        <th wire:click="order('status')">
+                                            Status
+
+                                            @if($sort == 'status')
                                                 @if($direction == 'asc')
                                                     <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
                                                 @else
@@ -155,24 +167,29 @@
                                                 </p>
                                             </td>
                                             <td>
+                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                    {{ $vaccine->status }}
+                                                </p>
+                                            </td>
+                                            <td>
                                                 <i class="fas fa-arrows-alt-v"></i>
                                             </td>
                                         </tr>
                                         <tr class="expandable-body d-none">
-                                            <td colspan="5">
+                                            <td colspan="6">
                                                 <div style="display: none;">
                                                     <dl class="row pl-3 pr-3 font-weight-light">
                                                         <dt class="col-sm-3 text-uppercase">Description</dt>
                                                         <dd class="col-sm-9">{{ $vaccine->description }}</dd>
-                                                        <dt class="col-sm-3 text-uppercase">Dose</dt>
-                                                        <dd class="col-sm-8">{{ $vaccine->dose }}</dd>
+                                                        <dt class="col-sm-3 text-uppercase">Dosage</dt>
+                                                        <dd class="col-sm-8">{{ $vaccine->dosage }}</dd>
 
                                                         <dt class="col-sm-3 text-uppercase">Route of administration</dt>
                                                         <dd class="col-sm-9">{{ $vaccine->administration }}</dd>
-                                                        <dt class="col-sm-3 text-uppercase">Primary vaccination</dt>
-                                                        <dd class="col-sm-9">{{ $vaccine->primary_doses }} dosis. {{ $vaccine->primary_vaccination }}</dd>
-                                                        <dt class="col-sm-3 text-uppercase">Revaccination interval</dt>
-                                                        <dd class="col-sm-9">{{ $vaccine->revaccination_doses }} dosis. {{ $vaccine->revaccination_interval }}</dd>
+                                                        <dt class="col-sm-3 text-uppercase">Vaccination schedule</dt>
+                                                        <dd class="col-sm-9">{{ $vaccine->vaccination_schedule }} [{{ $vaccine->primary_doses }} dosis. ]</dd>
+                                                        <dt class="col-sm-3 text-uppercase">Revaccination schedule</dt>
+                                                        <dd class="col-sm-9">{{ $vaccine->revaccination_schedule }} [{{ $vaccine->revaccination_doses }} dosis.]</dd>
                                                         <dd class="col-sm-9 offset-sm-3">
                                                             @can('vaccines_update')
                                                                 <a href="javascript:void(0)"

@@ -19,13 +19,20 @@ class Vaccinations extends Component
 	public $pet;
 
 	// Datatable attributes
-	public $paginate = '50', $sort = 'vaccine_id', $direction = 'asc', $readyToLoad = false, $search = '';
+	public $paginate = '50',
+		$sort = 'done',
+		$direction = 'desc',
+		$readyToLoad = false,
+		$search = '';
 
 	// General attrbibutes to component
-	public $modalTitle;
+	public $modalTitle, $modalApplyTitle = 'Vaccination';
 
 	// CRUD attributes
 	public $selected_id, $vaccine_id, $type = 'choose', $batch_number, $dose_number, $doses_required, $done, $applied = 0;
+
+	// Attributes for modal
+	public $vaccine_name, $vaccine_type, $vaccine_manufacturer, $vaccine_dosage, $vaccine_administration;
 
 	// Listeners
 	protected $listeners = [
@@ -33,19 +40,19 @@ class Vaccinations extends Component
 	];
 
 	/**
-	 *  Function that returns the validation rules [-. ]* \(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/      /[a-zA-Z0-9\s]+/
+	 *  Function that returns the validation rules |regex:/([a-zA-Z0-9]{3})([-. ]?)([a-zA-Z0-9]{2})([-. ]?)([a-zA-Z0-9]{4})/
 	 *
 	**/
 	protected function rules()
 	{
 		return [
-			'vaccine_id' => 'required|not_in:choose',
+			'vaccine_id' => 'required|exists:vaccines,id',
 			'type' => 'required|not_in:choose',
-			'batch_number' => 'nullable|regex:/([a-zA-Z0-9]{3})([-. ]?)([a-zA-Z0-9]{2})([-. ]?)([a-zA-Z0-9]{4})/',
 			'dose_number' => 'required|integer|between:1,5',
 			'doses_required' => 'required|integer|between:1,5',
 			'done' => 'required|date',
 			'applied' => 'required|boolean',
+			'batch_number' => 'required_if:applied,1',
 		];
 	}
 
@@ -113,11 +120,6 @@ class Vaccinations extends Component
 		$this->authorize('vaccinations_index');
 
 		if ($this->readyToLoad) {
-        // $this->details = SaleDetail::join('products as p', 'p.id', 'sale_details.product_id')
-        //     ->select('sale_details.id', 'sale_details.price', 'sale_details.quantity', 'p.name as product')
-        //     ->where('sale_details.sale_id', $saleId)
-        //     ->get();
-
 			if (strlen($this->search) > 0) {
 				$vaccinations = $this->pet->vaccinations()
 					->join('vaccines as v', 'v.id', 'vaccinations.vaccine_id')
@@ -130,13 +132,13 @@ class Vaccinations extends Component
 						'vaccinations.doses_required',
 						'v.name as name',
 						'v.description as description',
-						'v.primary_vaccination',
+						'v.vaccination_schedule',
 						'v.primary_doses',
 						'v.revaccination_doses',
-						'v.revaccination_interval')
+						'v.revaccination_schedule')
 					->where('name', 'like', '%' . $this->search .'%')
 			 		->orderBy($this->sort, $this->direction)
-			 		->simplePaginate($this->paginate);
+			 		->paginate($this->paginate);
 			} else {
 				$vaccinations = $this->pet->vaccinations()
 					->join('vaccines as v', 'v.id', 'vaccinations.vaccine_id')
@@ -149,19 +151,18 @@ class Vaccinations extends Component
 						'vaccinations.doses_required',
 						'v.name as name',
 						'v.description as description',
-						'v.primary_vaccination',
+						'v.vaccination_schedule',
 						'v.primary_doses',
 						'v.revaccination_doses',
-						'v.revaccination_interval')
+						'v.revaccination_schedule')
 			 		->orderBy($this->sort, $this->direction)
-			 		->simplePaginate($this->paginate);
+			 		->paginate($this->paginate);
 			}
 		} else {
 			$vaccinations = [];
 		}
 
 		$vaccines = Vaccine::orderBy('description', 'asc')->get();
-
 
 		// FOR FORM
 		if ($this->vaccine_id) {
@@ -199,12 +200,41 @@ class Vaccinations extends Component
 	}
 
 
-	public function apply(Vaccination $vaccination)
+	public function editApply(Vaccination $vaccination)
 	{
 		$this->authorize('vaccinations_update');
 
-		if ($vaccination->applied == 0) {
+		$this->selected_id = $vaccination->id;
+		$this->vaccine_id = $vaccination->vaccine_id;
+		$this->type = $vaccination->type;
+		$this->batch_number = $vaccination->batch_number;
+		$this->dose_number = $vaccination->dose_number;
+		$this->doses_required = $vaccination->doses_required;
+		$this->done = $vaccination->done->format('Y-m-d');
+		$this->applied = $vaccination->applied;
 
+		$vaccine = Vaccine::findOrFail($this->vaccine_id);
+		$this->vaccine_name = $vaccine->name;
+		$this->vaccine_type = $vaccine->type;
+		$this->vaccine_manufacturer = $vaccine->manufacturer;
+		$this->vaccine_dosage = $vaccine->dosage;
+		$this->vaccine_administration = $vaccine->administration;
+
+		$this->emit('show-modal-apply', 'show-modal-apply');
+	}
+
+	public function apply()
+	{
+		$this->authorize('vaccinations_update');
+
+		$this->validate([
+			'batch_number' => 'required|regex:/([a-zA-Z0-9]{3})([-. ]?)([a-zA-Z0-9]{2})([-. ]?)([a-zA-Z0-9]{4})/'
+        ]);
+
+		$vaccination = Vaccination::findOrFail($this->selected_id);
+
+		if ($vaccination->applied == 0) {
+			$vaccination->batch_number = $this->batch_number;
 			$vaccination->applied = 1;
 			$vaccination->save();
 
@@ -218,6 +248,7 @@ class Vaccinations extends Component
 			]);
 
 		} elseif ($vaccination->applied == 1) {
+			$vaccination->batch_number = '';
 			$vaccination->applied = 0;
 			$vaccination->save();
 
@@ -231,12 +262,9 @@ class Vaccinations extends Component
 			]);
 		}
 
-
+		$this->emit('hide-modal-apply', 'hide-modal-apply');
 		$this->resetUI();
-
-		// $this->emit('show-modal', 'show-modal');
 	}
-
 
 	public function edit(Vaccination $vaccination)
 	{
@@ -257,7 +285,7 @@ class Vaccinations extends Component
 		$this->authorize('vaccinations_update');
 
 		$validatedData = $this->validate();
-		$vaccination = Vaccination::find($this->selected_id);
+		$vaccination = Vaccination::findOrFail($this->selected_id);
 		$vaccination->update($validatedData);
 
 		$this->emit('hide-modal', 'hide-modal');
@@ -291,6 +319,7 @@ class Vaccinations extends Component
 
 	public function resetUI()
 	{
+		// CRUD attributes
 		$this->selected_id = '';
 		$this->vaccine_id = 'choose';
 		$this->type = 'choose';
@@ -300,6 +329,13 @@ class Vaccinations extends Component
 		$this->done = '';
 		$this->applied = 0;
 		$this->resetValidation();
+
+		// Other attributes
+		$this->vaccine_name = '';
+		$this->vaccine_type = '';
+		$this->vaccine_manufacturer = '';
+		$this->vaccine_dose = '';
+		$this->vaccine_administration = '';
 	}
 
 }

@@ -22,16 +22,16 @@ class VaccineFactory extends Factory
     public function definition()
     {
         return [
-            'target_species'         => $this->faker->word,
             'name'                   => $this->faker->word,
             'type'                   => $this->faker->word,
             'manufacturer'           => $this->faker->word,
             'description'            => $this->faker->sentence,
-            'dose'                   => $this->faker->word,
+            'status'                 => $this->faker->randomElement(['Recommended', 'Optional']),
+            'dosage'                 => $this->faker->word,
             'administration'         => $this->faker->sentence,
-            'primary_vaccination'    => $this->faker->sentence,
-            'primary_doses'          => $this->faker->randomElement([1, 2, 3]);,
-            'revaccination_interval' => $this->faker->sentence,
+            'vaccination_schedule'   => $this->faker->sentence,
+            'primary_doses'          => $this->faker->randomElement([1, 2, 3]),
+            'revaccination_schedule' => $this->faker->sentence,
             'revaccination_doses'    => $this->faker->randomElement([1, 2, 3]);
         ];
     }

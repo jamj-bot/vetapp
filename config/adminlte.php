@@ -88,8 +88,8 @@ return [
 
     'layout_topnav' => null,
     'layout_boxed' => null,
-    'layout_fixed_sidebar' => false,
-    'layout_fixed_navbar' => true,
+    'layout_fixed_sidebar' => true,
+    'layout_fixed_navbar' => false,
     'layout_fixed_footer' => null,
     'layout_dark_mode' => null,
 
@@ -149,7 +149,7 @@ return [
     */
 
     'sidebar_mini' => 'lg',
-    'sidebar_collapse' => false,
+    'sidebar_collapse' => true,
     'sidebar_collapse_auto_size' => false,
     'sidebar_collapse_remember' => false,
     'sidebar_collapse_remember_no_transition' => true,
@@ -241,7 +241,7 @@ return [
         [
             'type'         => 'darkmode-widget',
             'topnav_right' => true, // Or "topnav => true" to place on the left.
-            'color_enabled' => 'warning',
+            'color_enabled' => 'secondary',
             // 'icon_enabled': The Font Awesome icon to use when dark mode is enabled ('fas fa-moon' by default).
             // 'icon_disabled': The Font Awesome icon to use when dark mode is disabled ('far fa-moon' by default).
             // 'color_enabled': The AdminLTE color to use for the icon when dark mode is enabled (for example 'primary').
@@ -299,13 +299,13 @@ return [
             //     ],
             // ],
         ],
-        ['header' => 'account_settings'],
+        // ['header' => 'account_settings'],
         [
             'text' => 'profile',
             'url'  => 'user/profile',
             'icon' => 'fas fa-fw fa-user',
         ],
-        ['header' => 'MANAGE USERS'],
+        // ['header' => 'MANAGE USERS'],
         [
             'text'  => 'Users',
             'route' => 'admin.users',
@@ -326,7 +326,7 @@ return [
         //         ],
         //     ],
         // ],
-        ['header' => 'VETAPP CONFIG'],
+        // ['header' => 'VETAPP CONFIG'],
         [
             'text'  => 'Species',
             'icon'  => 'fas fa-fw fa-paw',
@@ -340,12 +340,18 @@ return [
             'route' => 'admin.vaccines',
         ],
         [
+            'text'  => 'Parasiticides',
+            'icon'  => 'fas fa-fw fa-bug',
+            'can'   => 'parasiticides_index',
+            'route' => 'admin.parasiticides',
+        ],
+        [
             'text'  => 'Recycle Bin',
             'route' => 'admin.recycle-bin',
             'icon'  => 'fas fa-fw fa-trash',
             'can'   => 'trash_index',
         ],
-        ['header' => 'MANAGE PERMISSIONS'],
+        // ['header' => 'ACCESS CONTROL'],
         [
             'text'    => 'Permissions',
             'icon'    => 'fas fa-fw fa-lock',
@@ -368,41 +374,41 @@ return [
                     'can'   => 'assign_permissions_index',
                     'route' => 'admin.assign-permissions',
                 ],
-                [
-                    'text'    => 'level_one',
-                    'url'     => '#',
-                    'submenu' => [
-                        [
-                            'text' => 'level_two',
-                            'url'  => '#',
-                        ],
-                        [
-                            'text'    => 'level_two',
-                            'url'     => '#',
-                            'submenu' => [
-                                [
-                                    'text' => 'level_three',
-                                    'url'  => '#',
-                                ],
-                                [
-                                    'text' => 'level_three',
-                                    'url'  => '#',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'text' => 'level_one',
-                    'url'  => '#',
-                ],
+                // [
+                //     'text'    => 'level_one',
+                //     'url'     => '#',
+                //     'submenu' => [
+                //         [
+                //             'text' => 'level_two',
+                //             'url'  => '#',
+                //         ],
+                //         [
+                //             'text'    => 'level_two',
+                //             'url'     => '#',
+                //             'submenu' => [
+                //                 [
+                //                     'text' => 'level_three',
+                //                     'url'  => '#',
+                //                 ],
+                //                 [
+                //                     'text' => 'level_three',
+                //                     'url'  => '#',
+                //                 ],
+                //             ],
+                //         ],
+                //     ],
+                // ],
+                // [
+                //     'text' => 'level_one',
+                //     'url'  => '#',
+                // ],
             ],
         ],
-        [
-            'text'       => 'Credits',
-            'icon_color' => 'red',
-            'route'        => 'admin.credits',
-        ],
+        // [
+        //     'text'       => 'Credits',
+        //     'icon_color' => 'red',
+        //     'route'        => 'admin.credits',
+        // ],
         // [
         //     'text'       => 'warning',
         //     'icon_color' => 'yellow',

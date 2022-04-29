@@ -67,7 +67,12 @@
     <div class="card">
         <div class="card-header border-transparent">
             <h3 class="card-title">
-                {{ $filter == 'Alive' ? 'Live Pets ':'Dead Pets' }}
+                {{ $filter == 'Alive' ? 'Live Pets ':'Dead Pets ' }}
+
+                @if($filter == 'Dead')
+                    <sup><i class="fas fa-cross"></i></sup>
+                @endif
+
             </h3>
 
             <div class="card-tools">
@@ -148,10 +153,17 @@
                                     </p>
                                 </td>
                                 <td>
-                                    <a class="font-weight-bold btn-block {{ $pet->status == 'Alive' ? 'text-warning':'text-muted'}}"
-                                        href="{{ route('admin.pets.show', $pet->id) }}">
-                                        {{ $pet->name}}
-                                    </a>
+                                    @if($pet->name != null)
+                                        <a class="font-weight-bold btn-block text-uppercase {{ $pet->status == 'Alive' ? 'text-warning':'text-muted'}}"
+                                            href="{{ route('admin.pets.show', $pet->id) }}">
+                                            {{ $pet->name }}
+                                        </a>
+                                    @elseif($pet->name == null)
+                                        <a class="font-weight-bold btn-block {{ $pet->status == 'Alive' ? 'text-warning':'text-muted'}}"
+                                            href="{{ route('admin.pets.show', $pet->id) }}">
+                                            Nameless
+                                        </a>
+                                    @endif
                                 </td>
                                 <td>
                                     <p class="d-flex flex-column font-weight-light mb-0">

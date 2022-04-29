@@ -26,7 +26,9 @@ class Pet extends Model
         'zootechnical_function',
         'sex',
         'dob',
-        'neuteredOrSpayed',
+        'desexed',
+        'desexing_candidate',
+        'alerts',
         'diseases',
         'allergies',
         'status'
@@ -41,6 +43,7 @@ class Pet extends Model
 
     /**
      * Get the user that owns the pet.
+     *
      */
     public function user()
     {
@@ -49,6 +52,7 @@ class Pet extends Model
 
     /**
      * Get the species of the pet.
+     *
      */
     public function species()
     {
@@ -57,19 +61,54 @@ class Pet extends Model
 
     /**
      * Get the Vaccinations of the pet.
+     *
      */
     public function vaccinations()
     {
         return $this->hasMany(Vaccination::class);
     }
 
+    /**
+     * Get the Vaccinations of the pet.
+     *
+     */
+    public function dewormings()
+    {
+        return $this->hasMany(Deworming::class);
+    }
+
 
     /**
      * Get the consultation of the pet.
+     *
      */
     public function consultations()
     {
         return $this->hasMany(Consultation::class);
+    }
+
+    /**
+     *  Get all the images for the pet
+     *
+     **/
+    public function images()
+    {
+        return $this->hasManyThrough(
+            Image::class, # El primer argumento pasado al método es el nombre del modelo final al que deseamos acceder
+            Consultation::class, # el segundo argumento es el nombre del modelo intermedio
+            'pet_id', # El tercer argumento es el nombre de la clave externa en el modelo intermedio,
+            'imageable_id'  #El cuarto argumento es el nombre de la clave externa en el modelo final.
+        );
+    }
+
+    public function tests()
+    {
+        return $this->hasManyThrough(
+            Test::class,
+            Consultation::class,
+            'pet_id',
+            'testable_id'
+        );
     }
 
 }

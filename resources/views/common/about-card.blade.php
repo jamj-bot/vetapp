@@ -1,0 +1,99 @@
+<div class="card card-primary card-outline font-weight-light">
+    <div class="card-header">
+        <h3 class="card-title">About
+            @if($pet->name)
+                {{ $pet->name }}
+            @else
+                Nameless <span class="text-muted text-xs">{{ $pet->code }}</span>
+            @endif
+        </h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+
+{{--             <li class="list-group-item" x-data="{ open: false }">
+                <span @click="open = ! open" title="More" style="cursor: pointer">
+                    <i class="fas fa-fw fa-birthday-cake mr-1" style="color: #5f85d5" title="Date of birth"></i>
+                    <span class="sr-only">Date of birth</span>
+                    {{ $pet->dob->format('d-M-y') }}
+                    <span class="float-right"><i class="fas fa-caret-down text-xs text-muted"></i></span>
+                </span>
+
+            </li> --}}
+
+            <li class="list-group-item">
+                <i class="fas fa-fw fa-barcode mr-1" style="color: #3784b9" title="Code"></i>
+                <span class="sr-only">Code</span>
+                {{ $pet->code }}
+            </li>
+            <li class="list-group-item">
+                <div x-data="{ open: false }">
+                    <span @click="open = ! open" title="More" style="cursor: pointer">
+                        <i class="fas fa-fw fa-birthday-cake mr-1" style="color: #5f85d5" title="Date of birth"></i>
+                        <span class="sr-only">Date of birth</span>
+                        {{ $pet->dob->format('d-m-Y') }}
+                        <span class="float-right"><i class="fas fa-caret-down text-xs text-muted"></i></span>
+                    </span>
+
+                    <p x-show="open" class="mb-0" x-collapse.duration.750ms>
+                        <i class="fas fa-fw fa-birthday-cake mr-1 mt-3" style="color: #7d83de" title="Age"></i>
+                        <span class="sr-only">Age</span>
+                        {{ \Carbon\Carbon::createFromDate($pet->dob)->diff(\Carbon\Carbon::now())->format('%y years, %m months and %d days') }}
+                    </p>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <div x-data="{ open: false }">
+                    <span @click="open = ! open" title="More"  style="cursor: pointer">
+                        <i class="fas fa-fw fa-paw mr-1" style="color: #9d7ee3" title="Species"></i>
+                        <span class="sr-only">Species</span>
+                        {{ $pet->species->name }}
+                        <span class="float-right"><i class="fas fa-caret-down text-xs text-muted"></i></span>
+                    </span>
+
+                    <p x-show="open" class="mb-0 font-italic" x-collapse.duration.750ms>
+                        <i class="fas fa-fw fa-paw mr-1 mt-3" style="color: #be77e1" title="Scientific name"></i>
+                        <span class="sr-only">Scientific name</span>
+                        {{ $pet->species->scientific_name }}
+                    </p>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <i class="fas fa-fw fa-award mr-1" style="color: #de6dda" title="Breed"></i>
+                <span class="sr-only">Breed</span>
+                {{ $pet->breed != null ? $pet->breed :  'Unknown or mixed-breed' }}
+            </li>
+            <li class="list-group-item">
+                <i class="fas fa-fw fa-hard-hat mr-1" style="color: #ff5a9d" title="Zootechnical function"></i>
+                <span class="sr-only">Zootechnical function</span>
+                {{ $pet->zootechnical_function }}
+            </li>
+            <li class="list-group-item">
+                <i class="fas fa-fw fa-venus mr-1" style="color: #eb6f52" title="Sex"></i>
+                <span class="sr-only">Sex</span>
+                {{ $pet->sex }}
+            </li>
+            <li class="list-group-item">
+                <i class="fas fa-fw fa-neuter mr-1" style="color: #b28733" title="Desexed"></i>
+                <span class="sr-only">Desexed</span>
+                {{ $pet->desexed }}
+                @if( $pet->desexed != 'Desexed')
+                    {{$pet->desexing_candidate ? '(candidate)' : '(not candidate)'}}
+                @endif
+            </li>
+            <li class="list-group-item">
+                <i class="fas fa-fw fa-calendar mr-1" style="color: #78914a" title="Registered at"></i>
+                <span class="sr-only">Registered</span>
+                Registered {{ $pet->created_at->diffForHumans() }}
+            </li>
+        </ul>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->

@@ -24,7 +24,7 @@ class UserController extends Component
     public $pageTitle, $modalTitle;
 
     // CRUD attributes
-    public $name, $phone, $email, $password, $status, $user_type, $selected_id;
+    public $name, $phone, $email, $password, $status = 'choose', $user_type = 'choose', $selected_id;
 
     // Listeners
     protected $listeners = [
@@ -169,6 +169,9 @@ class UserController extends Component
             'image' => auth()->user()->profile_photo_url,
             'body' => '¡User has been stored correctly! You can find it in the user list.'
         ]);
+
+        session()->flash('user_id', $user->id);
+        session()->flash('message', 'Saved.');
     }
 
     public function edit(User $user)
@@ -179,7 +182,7 @@ class UserController extends Component
         $this->email = $user->email;
         $this->password = "";
         $this->status = $user->status;
-        $this->user_type = $user->user_type;
+        $this->user_type = $user->user_type; #user->role->name
 
         $this->emit('show-modal', 'show-modal');
     }
@@ -217,6 +220,10 @@ class UserController extends Component
             'image' => auth()->user()->profile_photo_url,
             'body' => 'User information has been updated correctly.'
         ]);
+
+
+        session()->flash('user_id', $user->id);
+        session()->flash('message', 'Updated.');
     }
 
     public function destroy(User $user)

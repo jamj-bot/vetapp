@@ -34,6 +34,17 @@ class UserSeeder extends Seeder
         ]);
         $user2->assignRole('admin');
 
-        User::factory(0)->create();
+        $user3 = User::create([
+            'name' => 'Pablo Donato Bernal Mizrahi',
+            'phone' => '3345897845',
+            'email' => 'padobemi@gmail.com',
+            'password' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'Client'
+        ]);
+        $user3->assignRole('Client');
+
+        // User::factory(25)->create();
+
     }
 }

@@ -31,7 +31,7 @@ class Vaccination extends Model
     protected $dates = ['done'];
 
     /**
-     * Get the species of the pet.
+     * Get the pet of the vaccination.
      */
     public function pet()
     {
@@ -39,7 +39,7 @@ class Vaccination extends Model
     }
 
     /**
-     * Get the vaccine of the vaccineDoses.
+     * Get the vaccine of the vaccination.
      */
     public function vaccine()
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Parasiticide;
 use App\Models\Pet;
 use App\Models\Species;
 use App\Models\User;
@@ -146,7 +147,11 @@ class TrashController extends Component
                     ->select('id', 'name', 'deleted_at', DB::raw("4 as model"))
                     ->get();
 
-                $items = $users->concat($species)->concat($pets)->concat($vaccines)
+                $parasiticides = Parasiticide::onlyTrashed()
+                    ->select('id', 'name', 'deleted_at', DB::raw("5 as model"))
+                    ->get();
+
+                $items = $users->concat($species)->concat($pets)->concat($vaccines)->concat($parasiticides)
                     ->sortByDesc([[$this->sort, $this->direction]])
                     ->paginate($this->paginate);
             }
@@ -175,6 +180,8 @@ class TrashController extends Component
                 $item = Pet::onlyTrashed()->find($id);
             } elseif ($model == 4) {
                 $item = Vaccine::onlyTrashed()->find($id);
+            } elseif ($model == 5) {
+                $item = Parasiticide::onlyTrashed()->find($id);
             }
 
             $item->restore();
@@ -192,6 +199,7 @@ class TrashController extends Component
             $species = Species::onlyTrashed()->restore();
             $pets = Pet::onlyTrashed()->restore();
             $vaccines = Vaccine::onlyTrashed()->restore();
+            $parasiticides = Parasiticide::onlyTrashed()->restore();
 
             $this->dispatchBrowserEvent('restored', [
                 'title' => 'Restored',
@@ -240,9 +248,11 @@ class TrashController extends Component
                 // Delete 'image' from database
                 $user->forceDelete();
             }
+
             $species = Species::onlyTrashed()->forceDelete();
             $pets = Pet::onlyTrashed()->forceDelete();
             $vaccine = Vaccine::onlyTrashed()->forceDelete();
+            $parasiticides = Parasiticide::onlyTrashed()->forceDelete();
         }
     }
 }

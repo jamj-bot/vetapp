@@ -24,7 +24,20 @@ class Pets extends Component
     public $modalTitle;
 
     // Crude Atributes
-    public $selected_id, $species_id, $code, $name, $breed, $zootechnical_function, $sex, $dob, $neuteredOrSpayed, $diseases, $allergies, $status;
+    public $selected_id,
+        $species_id = 'choose',
+        $code,
+        $name,
+        $breed,
+        $zootechnical_function,
+        $sex = 'choose',
+        $dob,
+        $desexed = 'choose',
+        $desexing_candidate = 1,
+        $alerts,
+        $diseases,
+        $allergies,
+        $status = 'choose';
 
     // Listeners
     protected $listeners = [
@@ -41,14 +54,16 @@ class Pets extends Component
         return [
             'species_id'            => 'required|not_in:choose',
             'code'                  => "required|numeric|digits:10|unique:pets,code,{$this->selected_id}",
-            'name'                  => 'required|min:3|max:140',
+            'name'                  => 'nullable|min:3|max:140',
             'breed'                 => 'nullable|max:140',
             'zootechnical_function' => 'nullable|max:140',
-            'sex'                   => 'required|in:"Male","Female","Unknown"',
+            'sex'                   => 'required|in:"Male", "Female", "Unknown"',
             'dob'                   => 'required|date',
-            'neuteredOrSpayed'      => 'required|in:"Neutered or spayed", "Not neutered or spayed", "Unknown neutered or spayed status"',
-            'diseases'              => 'nullable|max:2000',
-            'allergies'             => 'nullable|max:2000',
+            'desexed'               => 'required|in:"Desexed", "Not desexed", "Unknown"',
+            'desexing_candidate'    => 'nullable|boolean',
+            'alerts'                => 'nullable|max:255',
+            'diseases'              => 'nullable|max:255',
+            'allergies'             => 'nullable|max:255',
             'status'                => 'required|in:"Alive","Dead"'
         ];
     }
@@ -134,22 +149,7 @@ class Pets extends Component
                     })
                     ->orderBy($this->sort, $this->direction)
                     ->paginate($this->paginate);
-
-                // $pets = $this->user->pets()->where('status', $this->filter)
-                //     ->where(function($query){
-                //         $query->where('code' , 'like', '%' . $this->search . '%')
-                //             ->orWhere('name' , 'like', '%' . $this->search . '%')
-                //             ->orWhere('status' , 'like', '%' . $this->search . '%')
-                //             ->orWhere('species_id' , 'like', '%' . $this->search . '%');
-                //     })
-                //     ->orderBy($this->sort, $this->direction)
-                //     ->paginate($this->paginate);
             } else {
-                 // $pets = $this->user->pets()->where('status', $this->filter)
-                 //    ->orderBy($this->sort, $this->direction)
-                 //    ->simplePaginate($this->paginate);
-
-
                 $pets = $this->user->pets()
                     ->join('species as s', 's.id', 'pets.species_id')
                     ->select('pets.id', 'pets.code', 'pets.name', 'pets.breed', 'pets.status', 's.name as common_name', 's.scientific_name')
@@ -197,7 +197,9 @@ class Pets extends Component
         $this->zootechnical_function = $pet->zootechnical_function;
         $this->sex = $pet->sex;
         $this->dob = $pet->dob->format('Y-m-d');
-        $this->neuteredOrSpayed = $pet->neuteredOrSpayed;
+        $this->desexed = $pet->desexed;
+        $this->desexing_candidate = $pet->desexing_candidate;
+        $this->alerts = $pet->alerts;
         $this->diseases = $pet->diseases;
         $this->allergies = $pet->allergies;
         $this->status = $pet->status;
@@ -229,7 +231,7 @@ class Pets extends Component
 
     public function destroy(Pet $pet)
     {
-        //$this->authorize('vaccinations_destroy');
+        $this->authorize('pets_destroy');
 
         $pet->delete();
 
@@ -253,7 +255,9 @@ class Pets extends Component
         $this->zootechnical_function = '';
         $this->sex = 'choose';
         $this->dob = '';
-        $this->neuteredOrSpayed = 'choose';
+        $this->desexed = 'choose';
+        $this->desexing_candidate = 1;
+        $this->alerts = '';
         $this->diseases = '';
         $this->allergies = '';
         $this->status = 'choose';

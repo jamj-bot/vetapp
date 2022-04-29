@@ -43,8 +43,8 @@ class SpeciesController extends Component
      protected function rules()
      {
          return [
-            'name' => "required|string|max:140|unique:species,name,{$this->selected_id}",
-            'scientific_name' => "required|string|max:140|unique:species,scientific_name,{$this->selected_id}",
+            'name' => "required|string|min:3|max:140|unique:species,name,{$this->selected_id}",
+            'scientific_name' => "required|string|min:3|max:140|unique:species,scientific_name,{$this->selected_id}",
          ];
      }
 

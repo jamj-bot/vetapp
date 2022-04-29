@@ -17,6 +17,12 @@ class DatabaseSeeder extends Seeder
         Storage::deleteDirectory('public/profile-photos');
         Storage::makeDirectory('public/profile-photos');
 
+        Storage::deleteDirectory('public/medical-imaging');
+        Storage::makeDirectory('public/medical-imaging');
+
+        Storage::deleteDirectory('public/tests');
+        Storage::makeDirectory('public/tests');
+
         $this->call(RoleSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(UserSeeder::class);
@@ -24,6 +30,8 @@ class DatabaseSeeder extends Seeder
         $this->call(PetSeeder::class);
         $this->call(VaccineSeeder::class);
         $this->call(VaccinationSeeder::class);
+        $this->call(ParasiticideSeeder::class);
+        $this->call(DewormingSeeder::class);
         $this->call(ConsultationSeeder::class);
 
     }

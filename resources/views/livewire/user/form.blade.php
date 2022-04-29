@@ -6,7 +6,9 @@
 				<label for="inputName" class="form-label font-weight-normal">Name *</label>
 				<input wire:model.lazy="name"
 					type="text"
-					class="form-control form-control-sm {{ $errors->has('name') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('name') ? 'is-invalid':'' }}
+					{{ $errors->has('name') == false && $this->name != null ? 'is-valid border-success':'' }}"
 					id="inputName"
 					placeholder="e.g. John Doe or Lehn Farms LLC"
 					aria-describedby="inputNameFeedback">
@@ -15,6 +17,10 @@
 					<div id="inputNameFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+		        @else
+                    <div id="inputNameFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 
 			</div>
@@ -23,7 +29,9 @@
 				<label for="inputPhone" class="form-label font-weight-normal">Phone *</label>
 				<input wire:model.lazy="phone"
 					type="text"
-					class="form-control form-control-sm {{ $errors->has('phone') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('phone') ? 'is-invalid':'' }}
+					{{ $errors->has('phone') == false && $this->phone != null ? 'is-valid border-success':'' }}"
 					id="inputPhone"
 					placeholder="e.g. 3314242817"
 					aria-describedby="inputPhoneFeedback">
@@ -32,6 +40,10 @@
 					<div id="inputPhoneFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+		        @else
+                    <div id="inputPhoneFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 
 			</div>
@@ -43,7 +55,9 @@
 				<label for="inputEmail" class="form-label font-weight-normal">Email *</label>
 				<input wire:model.lazy="email"
 					type="text"
-					class="form-control form-control-sm {{ $errors->has('email') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('email') ? 'is-invalid':'' }}
+					{{ $errors->has('email') == false && $this->email != null ? 'is-valid border-success':'' }}"
 					id="inputEmail"
 					placeholder="e.g. john_doe@gmail.com"
 					aria-describedby="inputEmailFeedback">
@@ -52,6 +66,10 @@
 					<div id="inputEmailFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+		        @else
+                    <div id="inputEmailFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 
 			</div>
@@ -60,7 +78,9 @@
 				<label for="inputPassword" class="form-label font-weight-normal">Password *</label>
 				<input wire:model.lazy="password"
 					type="text"
-					class="form-control form-control-sm {{ $errors->has('password') ? 'is-invalid':'' }}"
+					class="form-control form-control-sm
+					{{ $errors->has('password') ? 'is-invalid':'' }}
+					{{ $errors->has('password') == false && $this->password != null ? 'is-valid border-success':'' }}"
 					id="inputPassword"
 					placeholder=""
 					aria-describedby="inputPasswordFeedback">
@@ -69,6 +89,10 @@
 					<div id="inputPasswordFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+		        @else
+                    <div id="inputPasswordFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 
 			</div>
@@ -79,7 +103,9 @@
 			<div class="form-group col-md-6">
 				<label for="selectUserType" class="form-label font-weight-normal">User type *</label>
 				<select wire:model.lazy="user_type"
-					class="custom-select custom-select-sm {{ $errors->has('user_type') ? 'is-invalid':'' }}"
+					class="custom-select custom-select-sm
+					{{ $errors->has('user_type') ? 'is-invalid':'' }}
+					{{ $errors->has('user_type') == false && $this->user_type != 'choose' ? 'is-valid border-success':'' }}"
 					id="selectUserType"
 					aria-describedby="selectUserTypeFeedback">
 					<option value="choose" selected>Choose...</option>
@@ -92,13 +118,19 @@
 					<div id="selectUserTypeFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+		        @else
+                    <div id="selectUserTypeFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
 			</div>
 
 			<div class="form-group col-md-6">
 				<label for="selectStatus" class="form-label font-weight-normal">Status *</label>
 				<select wire:model.lazy="status"
-					class="custom-select custom-select-sm {{ $errors->has('status') ? 'is-invalid':'' }}"
+					class="custom-select custom-select-sm
+					{{ $errors->has('status') ? 'is-invalid':'' }}
+					{{ $errors->has('status') == false && $this->status != 'choose' ? 'is-valid border-success':'' }}"
 					id="selectStatus"
 					aria-describedby="selectStatusFeedback">
 	        		<option value="choose" selected>Choose...</option>
@@ -110,7 +142,12 @@
 					<div id="selectStatusFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
+		        @else
+                    <div id="selectStatusFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
 				@enderror
+
 			</div>
 		</div>
 		<!-- /. row -->

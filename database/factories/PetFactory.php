@@ -23,18 +23,29 @@ class PetFactory extends Factory
      */
     public function definition()
     {
+
+        $desexed = $this->faker->randomElement(['Desexed', 'Not desexed', 'Unknown']);
+
+        if ($desexed = 'Desexed') {
+            $desexing_candidate = 1;
+        } else {
+            $desexing_candidate = $this->faker->boolean();
+        }
+
         return [
             'user_id'               => User::all()->random()->id,
             'species_id'            => Species::all()->random()->id,
             'code'                  => $this->faker->unique()->numerify('##########'),
-            'name'                  => $this->faker->firstName('male'|'female'),
-            'breed'                 => $this->faker->randomElement(['Weimaraner', 'Sardo Negro', 'Angus', 'Angora', null]),
-            'zootechnical_function' => $this->faker->randomElement(['Beef Cattle', 'Dairy Cattle', 'Companion', 'Assistance', 'Farm']),
+            'name'                  => $this->faker->randomElement([$this->faker->firstName('male'|'female'), null]),
+            'breed'                 => $this->faker->randomElement(['Weimaraner', 'Black angus', 'Yorkshire', null]),
+            'zootechnical_function' => $this->faker->randomElement(['Beef Cattle', 'Dairy Cattle', 'Companion', null]),
             'sex'                   => $this->faker->randomElement(['Male', 'Female', 'Unknown']),
             'dob'                   => $this->faker->dateTimeBetween('2010-01-01', '2021-01-01'),
-            'neuteredOrSpayed'      => $this->faker->randomElement(['Neutered or spayed', 'Not neutered or spayed', 'Unknown neutered or spayed status']),
-            'diseases'              => $this->faker->sentence(),
-            'allergies'             => $this->faker->text(50),
+            'desexed'               => $desexed,
+            'desexing_candidate'    => $desexing_candidate,
+            'alerts'                => $this->faker->randomElement([$this->faker->text(50), null]),
+            'diseases'              => $this->faker->randomElement([$this->faker->text(50), null, null]),
+            'allergies'             => $this->faker->randomElement([$this->faker->text(50), null, null, null]),
             'status'                => $this->faker->randomElement(['Alive', 'Dead']),
         ];
     }

@@ -25,16 +25,17 @@ class VaccineController extends Component
 
     // CRUD attributes
     public  $selected_species = [],
-            $target_species,
+            //$target_species,
             $name,
             $type,
             $manufacturer,
             $description,
-            $dose,
+            $status = 'choose',
+            $dosage,
             $administration,
-            $primary_vaccination,
+            $vaccination_schedule,
             $primary_doses,
-            $revaccination_interval,
+            $revaccination_schedule,
             $revaccination_doses,
             $selected_id;
 
@@ -60,16 +61,17 @@ class VaccineController extends Component
     **/
     protected function rules() {
         return [
-            'target_species'         => 'required|string|min:3|max:140',
+            //'target_species'         => 'required|string|min:3|max:140',
             'name'                   => 'required|string|min:3|max:140',
             'type'                   => 'required|string|min:3|max:140',
             'manufacturer'           => 'required|string|min:3|max:140',
             'description'            => 'required|string|min:3|max:3000',
-            'dose'                   => 'required|string|min:3|max:255',
+            'status'                 => 'required|in:"Recommended", "Optional"',
+            'dosage'                 => 'required|string|min:3|max:255',
             'administration'         => 'required|string|min:3|max:255',
-            'primary_vaccination'    => 'required|string|min:3|max:255',
+            'vaccination_schedule'   => 'required|string|min:3|max:255',
             'primary_doses'          => 'required|integer|between:1,10',
-            'revaccination_interval' => 'required|string|min:3|max:255',
+            'revaccination_schedule' => 'required|string|min:3|max:255',
             'revaccination_doses'    => 'required|integer|between:0,10'
         ];
     }
@@ -144,8 +146,7 @@ class VaccineController extends Component
 
         if ($this->readyToLoad) {
             if (strlen($this->search) > 0 ) {
-                $vaccines = Vaccine::where('target_species', 'like', '%' . $this->search . '%')
-                    ->orWhere('name', 'like', '%' . $this->search . '%')
+                $vaccines = Vaccine::where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('manufacturer', 'like', '%' . $this->search . '%')
                     ->orWhere('description', 'like', '%' . $this->search . '%')
                     ->orderBy($this->sort, $this->direction)
@@ -197,16 +198,16 @@ class VaccineController extends Component
         $this->selected_id = $vaccine->id;
         //$this->selected_species = $vaccine->species->pluck('id');
         $this->selected_species = [];
-        $this->target_species = $vaccine->target_species;
         $this->name = $vaccine->name;
         $this->type = $vaccine->type;
         $this->manufacturer = $vaccine->manufacturer;
         $this->description = $vaccine->description;
-        $this->dose = $vaccine->dose;
+        $this->status = $vaccine->status;
+        $this->dosage = $vaccine->dosage;
         $this->administration = $vaccine->administration;
-        $this->primary_vaccination = $vaccine->primary_vaccination;
+        $this->vaccination_schedule = $vaccine->vaccination_schedule;
         $this->primary_doses = $vaccine->primary_doses;
-        $this->revaccination_interval = $vaccine->revaccination_interval;
+        $this->revaccination_schedule = $vaccine->revaccination_schedule;
         $this->revaccination_doses = $vaccine->revaccination_doses;
 
         $this->emit('show-modal', 'show-modal');
@@ -278,11 +279,11 @@ class VaccineController extends Component
         $this->type = '';
         $this->manufacturer = '';
         $this->description = '';
-        $this->dose = '';
+        $this->dosage = '';
         $this->administration = '';
-        $this->primary_vaccination = '';
+        $this->vaccination_schedule = '';
         $this->primary_doses = '';
-        $this->revaccination_interval = '';
+        $this->revaccination_schedule = '';
         $this->revaccination_doses = '';
 
         $this->resetValidation();

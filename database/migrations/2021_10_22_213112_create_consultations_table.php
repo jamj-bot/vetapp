@@ -38,11 +38,12 @@ class CreateConsultationsTable extends Migration
             // Plan diagnóstico: qué analisis se deben hacer https://www.slideshare.net/faustopantoja9/ecop-labrador
             // https://cvo.org/CVO/media/College-of-Veterinarians-of-Ontario/Resources%20and%20Publications/Templates%20and%20Protocols/SampleCompanionAnimal.pdf
 
-            $table->string('diagnosis')->default('Pending');
+            $table->string('diagnosis')->nullable();
             $table->enum('prognosis', ['Good', 'Fair', 'Guarded', 'Grave', 'Poor', 'Pending'])->default('Pending');
             $table->text('treatment_plan')->nullable();  // treatment plan, instructions to owner
-            $table->enum('consult_status', ['Lab pending tests', 'Radiology pending tests', 'Closed'])->default('Closed');
+            $table->enum('consult_status', ['Lab tests pending', 'Radiology tests pending', 'Closed'])->default('Closed');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('user_id')
                 ->references('id')
@@ -64,5 +65,6 @@ class CreateConsultationsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('consultations');
+        $table->dropSoftDeletes();
     }
 }

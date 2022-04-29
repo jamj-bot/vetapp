@@ -39,3 +39,7 @@
         });
     }
 </script>
+
+{{-- <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script> --}}
+<script src="//unpkg.com/alpinejs" defer></script>
+<!-- The "defer" attribute is important to make sure Alpine waits for Livewire to load first. -->

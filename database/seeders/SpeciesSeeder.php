@@ -29,7 +29,7 @@ class SpeciesSeeder extends Seeder
 
         Species::create([
             'name' => 'Ganado Bovino',
-            'scientific_name' => 'Bos taurus',
+            'scientific_name' => 'B. Taurus - B. P. Indicus',
             'deleted_at' => null
         ]);
 
@@ -49,6 +49,42 @@ class SpeciesSeeder extends Seeder
             'name' => 'Conejo',
             'scientific_name' => 'Oryctolagus cuniculus',
             'deleted_at' => now()
+        ]);
+
+        Species::create([
+            'name' => 'Caballo',
+            'scientific_name' => 'Equus caballus',
+            'deleted_at' => null
+        ]);
+
+        Species::create([
+            'name' => 'Ganado porcino',
+            'scientific_name' => 'Sus scrofa domesticus',
+            'deleted_at' => null
+        ]);
+
+        Species::create([
+            'name' => 'Ganado bufalino',
+            'scientific_name' => 'Bubalus bubalis',
+            'deleted_at' => null
+        ]);
+
+        Species::create([
+            'name' => 'Ganado asnal',
+            'scientific_name' => 'Equus asinus',
+            'deleted_at' => now()
+        ]);
+
+        Species::create([
+            'name' => 'Alpaca',
+            'scientific_name' => 'Vicugna pacos',
+            'deleted_at' => null
+        ]);
+
+        Species::create([
+            'name' => 'Avestruz',
+            'scientific_name' => 'Struthio camelus',
+            'deleted_at' => null
         ]);
     }
 }

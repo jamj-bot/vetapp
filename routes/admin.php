@@ -1,12 +1,14 @@
 <?php
 
 // use App\Http\Controllers\Admin\ConsultationController;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\PetProfileController;
 use App\Http\Controllers\Admin\UserProfileController;
 use App\Http\Livewire\AssignPermissionsController;
 use App\Http\Livewire\ConsultationController;
 use App\Http\Livewire\ConsultationDetailsController;
+use App\Http\Livewire\ParasiticideController;
 use App\Http\Livewire\PermissionController;
 use App\Http\Livewire\RoleController;
 use App\Http\Livewire\SpeciesController;
@@ -31,7 +33,15 @@ Route::get('pets/{pet}', [PetProfileController::class, 'show'])->name('admin.pet
 
 // Consultations
 Route::get('pets/{pet}/consultations', ConsultationController::class)->name('admin.pets.consultations');
-Route::get('pets/{pet}/consultations/{consultation}', ConsultationDetailsController::class)->name('admin.pets.consultations.show');
+Route::get('pets/{pet}/consultations/{consultation}', ConsultationDetailsController::class)
+	->name('admin.pets.consultations.show');
+
+// Consultation to PDP
+Route::get('pets/{pet}/consultations/{consultation}/PDF', [ExportController::class, 'consultationPDF'])
+	->name('admin.pets.consultations.export');
+// Vaccinations to PDP
+Route::get('pets/{pet}/vaccinations/PDF', [ExportController::class, 'vaccinationsPDF'])
+	->name('admin.pets.vaccinations.export');
 
 //Roles
 Route::get('roles', RoleController::class)->name('admin.roles');
@@ -47,6 +57,9 @@ Route::get('species', SpeciesController::class)->name('admin.species');
 
 // Species
 Route::get('vaccines', VaccineController::class)->name('admin.vaccines');
+
+// Paraciticides
+Route::get('parasiticides', ParasiticideController::class)->name('admin.parasiticides');
 
 // Credits route
 Route::get('credits', function(){

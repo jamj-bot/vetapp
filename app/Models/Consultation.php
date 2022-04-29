@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // Soft Delete
+use Spatie\Permission\Traits\HasRoles; // Laravel Permission
 
 class Consultation extends Model
 {
     use HasFactory;
+    use softDeletes;
+    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -49,5 +53,21 @@ class Consultation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get all of the consultation's images.
+     */
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
+
+    /**
+     * Get all of the consultation's images.
+     */
+    public function tests()
+    {
+        return $this->morphMany(Test::class, 'testable');
     }
 }
