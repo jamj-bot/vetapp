@@ -1,4 +1,4 @@
-<div>
+<div wire:init="loadItems()">
     <!--Content header (Page header)-->
     <section class="content-header">
         <div class="container-fluid">
@@ -7,9 +7,13 @@
                     <h1 class="display-4">{{ $pageTitle }}</h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                      <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-                      <li class="breadcrumb-item active">{{ $pageTitle }}</li>
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $pageTitle }}
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -24,36 +28,51 @@
             <div class="form-row  d-flex justify-content-end">
                 <div class="form-group col-md-3">
                     <label class="sr-only" for="selectRole">Role</label>
-                    <select wire:model="role_id" class="form-control" id="selectRole">
-                        <option selected value="choose">Choose a Role</option>
+                    <select wire:model="role_id" class="custom-select custom-select-md" id="selectRole">
+                        <option selected value="choose">Choose...</option>
                         @foreach($roles as $role)
                             <option value="{{ $role->id }}">{{ $role->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-md-3">
-                    @can('assign_permissions_revoke_all')
-                        <button type="button"
-                            class="btn bg-gradient-primary btn-block shadow"
+                @can('assign_permissions_revoke_all')
+                    <div class="form-group col-md-3">
+                        <a href="javascript:void(0)"
+                            class="btn bg-gradient-primary btn-block shadow
+                            {{ $this->role_id == 0 || strlen($this->search) > 0 ? 'disabled':'' }}"
                             wire:click.prevent="revokeAll()"
-                            title="Revoke all permissions">
-                            <i class="fas fa-door-closed"></i>
-                            Revoke all
-                            <i wire:loading wire:target="revokeAll" class="fas fa-spinner fa-spin"></i>
-                        </button>
-                    @endcan
-                </div>
-                <div class="form-group col-md-3">
-                    @can('assign_permissions_sync')
-                        <button type="button"
-                            class="btn bg-gradient-danger btn-block shadow"
-                            wire:click.prevent="syncAll()">
-                            <i class="fas fa-door-open"></i>
-                                Sync all
-                            <i wire:loading wire:target="syncAll" class="fas fa-spinner fa-spin"></i>
-                        </button>
-                    @endcan
-                </div>
+                            title="Revoke all permissions"
+                            wire:loading.class="disabled">
+                                <span wire:loading.remove wire:target="revokeAll">
+                                   <i class="fas fa-fw fa-door-closed"></i>
+                                   Revoke all
+                                </span>
+                                <span wire:loading wire:target="revokeAll">
+                                    <i class="fas fa-fw fa-spinner fa-spin"></i>
+                                     Please, wait...
+                                </span>
+                        </a>
+                    </div>
+                @endcan
+                @can('assign_permissions_sync_all')
+                    <div class="form-group col-md-3">
+                        <a href="javascript:void(0)"
+                            class="btn bg-gradient-danger btn-block shadow
+                            {{ $this->role_id == 0 || strlen($this->search) > 0 ? 'disabled':'' }}"
+                            wire:click.prevent="syncAll()"
+                            title="Sync all permissions"
+                            wire:loading.class="disabled">
+                                <span wire:loading.remove wire:target="syncAll">
+                                   <i class="fas fa-fw fa-door-open"></i>
+                                   Sync all
+                                </span>
+                                <span wire:loading wire:target="syncAll">
+                                    <i class="fas fa-fw fa-spinner fa-spin"></i>
+                                     Please, wait...
+                                </span>
+                        </a>
+                    </div>
+                @endcan
             </div>
 
 
@@ -64,28 +83,18 @@
                         <div class="card-header bg-gradient-primary">
                             <h3 class="card-title">Assigned permissions</h3>
                             <div class="card-tools">
-
                                 <!-- Datatable's filters -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-sm m-1">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Show</label>
-                                            </div>
-                                            <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                                                <option disabled>Choose...</option>
-                                                <option value="10">10 items</option>
-                                                <option selected value="25">25 items</option>
-                                                <option selected value="50">50 items</option>
-                                            </select>
-                                        </div>
+                                <div class="form-row my-2">
+
+                                    <div class="col-sm-6">
+                                        @include('common.select')
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <div class="col-sm-6">
                                         @include('common.search')
                                     </div>
                                 </div>
                                 <!-- /.Datatable filters -->
-
                             </div>
                         </div>
                         <!-- /.card-header -->
@@ -118,24 +127,28 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <p class="font-weight-light mb-0">
-                                                        {{ $permission->name }}
+                                                    <p class="mb-0">
+                                                        <span>{{ Str::of(str_replace('_', ' ', $permission->name))->title() }}</span>
+
                                                     </p>
-                                                    <p class="d-flex flex-row  text-right text-nowrap mb-0">
-                                                        <span>
-                                                            <label>
-                                                                <input  @cannot('assign_permissions_sync') disabled @endcannot
-                                                                    @if($this->role_id == 'choose') disabled @endif
-                                                                    type="checkbox"
-                                                                    id="p{{ $permission->id }}"
-                                                                    wire:change="syncPermission($('#p' + {{ $permission->id }}).is(':checked'), '{{$permission->name}}' )"
-                                                                    value="{{ $permission->id }}"
-                                                                    class="new-control-input"
-                                                                    {{ $permission->checked == 1 ? 'checked' : '' }}
-                                                                >
-                                                            </label>
-                                                        </span>
-                                                    </p>
+                                                    @can('assign_permissions_sync')
+                                                        <p class="d-flex flex-row  text-right text-nowrap mb-0">
+                                                            <span>
+                                                                <label>
+                                                                    <code>[{{ $permission->name }}]</code>
+                                                                    <input
+                                                                        @if($this->role_id == 'choose') disabled @endif
+                                                                        type="checkbox"
+                                                                        id="p{{ $permission->id }}"
+                                                                        wire:change="syncPermission($('#p' + {{ $permission->id }}).is(':checked'), '{{$permission->name}}' )"
+                                                                        value="{{ $permission->id }}"
+                                                                        class="new-control-input"
+                                                                        {{ $permission->checked == 1 ? 'checked' : '' }}
+                                                                    >
+                                                                </label>
+                                                            </span>
+                                                        </p>
+                                                    @endcan
                                                 </div>
                                             </td>
                                         </tr>
@@ -179,20 +192,27 @@
 
                             <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                             <div class="d-flex justify-content-center">
-                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                                    <span class="loader"></span>
+                                </p>
                             </div>
                         </div>
                           <!-- /.card-body -->
 
-                        <div class="card-footer clearfix" style="display: block;">
-                            @if(count($permissions))
-                                <div class="ml-4">
-                                    @if($permissions->hasPages())
-                                        {{ $permissions->links() }}
-                                    @endif
+                        <!-- card-footer -->
+                        @if(count($permissions))
+                            @if($permissions->hasPages())
+                                <div class="card-footer clearfix" style="display: block;">
+                                    <div class="mailbox-controls">
+                                        <div class="float-right pagination pagination-sm">
+                                            <div class="ml-4">
+                                                {{ $permissions->links() }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
-                        </div>
+                        @endif
                         <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->

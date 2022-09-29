@@ -17,7 +17,7 @@ class SpeciesSeeder extends Seeder
     {
         Species::create([
             'name' => 'Perro',
-            'scientific_name' => 'Cannis Familiaris',
+            'scientific_name' => 'Cannis familiaris',
             'deleted_at' => null
         ]);
 
@@ -29,7 +29,7 @@ class SpeciesSeeder extends Seeder
 
         Species::create([
             'name' => 'Ganado Bovino',
-            'scientific_name' => 'B. Taurus - B. P. Indicus',
+            'scientific_name' => 'B. taurus - B. p. indicus',
             'deleted_at' => null
         ]);
 
@@ -66,18 +66,6 @@ class SpeciesSeeder extends Seeder
         Species::create([
             'name' => 'Ganado bufalino',
             'scientific_name' => 'Bubalus bubalis',
-            'deleted_at' => null
-        ]);
-
-        Species::create([
-            'name' => 'Ganado asnal',
-            'scientific_name' => 'Equus asinus',
-            'deleted_at' => now()
-        ]);
-
-        Species::create([
-            'name' => 'Alpaca',
-            'scientific_name' => 'Vicugna pacos',
             'deleted_at' => null
         ]);
 

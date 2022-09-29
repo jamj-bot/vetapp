@@ -120,8 +120,7 @@
 							{{ $errors->has('dose_number') == false && $this->dose_number != null ? 'is-valid border-success':'' }}"
 							id="inputDoseNumber"
 							placeholder="1"
-							aria-describedby="inputDoseNumberFeedback"
-							readonly disabled>
+							aria-describedby="inputDoseNumberFeedback">
 
 						@error('dose_number')
 							<div id="inputDoseNumberFeedback" class="invalid-feedback">
@@ -135,7 +134,7 @@
 					</div>
 
 					<div class="form-group col-md-4">
-						<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required *</label>
+						<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required {{$this->suggested_dosage ? $this->suggested_dosage:'' }} *</label>
 						<input wire:model.lazy="doses_required"
 							type="number"
 							class="form-control form-control-sm
@@ -143,8 +142,7 @@
 							{{ $errors->has('doses_required') == false && $this->doses_required != null ? 'is-valid border-success':'' }}"
 							id="inputDosesRequired"
 							placeholder="3"
-							aria-describedby="inputDosesRequiredFeedback"
-							readonly disabled>
+							aria-describedby="inputDosesRequiredFeedback">
 
 						@error('doses_required')
 							<div id="inputDosesRequiredFeedback" class="invalid-feedback">

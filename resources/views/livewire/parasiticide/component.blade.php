@@ -7,9 +7,13 @@
                     <h1 class="display-4">{{ $pageTitle }}</h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                      <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-                      <li class="breadcrumb-item active">{{ $pageTitle }}</li>
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $pageTitle }}
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -40,23 +44,14 @@
                         <div class="card-header bg-gradient-primary">
                             <h3 class="card-title">Index</h3>
                             <div class="card-tools">
-
                                 <!-- Datatable's filters -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-sm m-1">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Show</label>
-                                            </div>
-                                            <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                                                <option disabled>Choose...</option>
-                                                <option value="10">10 items</option>
-                                                <option value="25">25 items</option>
-                                                <option selected value="50">50 items</option>
-                                            </select>
-                                        </div>
+                                <div class="form-row my-2">
+
+                                    <div class="col-sm-6">
+                                        @include('common.select')
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <div class="col-sm-6">
                                         @include('common.search')
                                     </div>
                                 </div>
@@ -130,17 +125,17 @@
                                     @forelse($parasiticides as $parasiticide)
                                         <tr data-widget="expandable-table" aria-expanded="false">
                                             <td>
-                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                <p class="d-flex flex-column mb-0">
                                                     {{ $parasiticide->name }}
                                                 </p>
                                             </td>
                                             <td>
-                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                <p class="d-flex flex-column mb-0">
                                                     {{ $parasiticide->manufacturer }}
                                                 </p>
                                             </td>
                                             <td>
-                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                <p class="d-flex flex-column mb-0">
                                                     {{-- <ul class="list-inline font-weight-light text-sm"> --}}
                                                         @foreach($parasiticide->species as $item )
                                                             {{-- <li class="list-inline-item"> --}}{{ $item->name }}.{{-- </li> --}}
@@ -149,7 +144,7 @@
                                                 </p>
                                             </td>
                                             <td>
-                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                <p class="d-flex flex-column mb-0">
                                                     {{ $parasiticide->type }}
                                                 </p>
                                             </td>
@@ -160,7 +155,7 @@
                                         <tr class="expandable-body d-none">
                                             <td colspan="5">
                                                 <div style="display: none;">
-                                                    <dl class="row pl-3 pr-3 font-weight-light">
+                                                    <dl class="row pl-3 pr-3">
                                                         <dt class="col-sm-3 text-uppercase">Description</dt>
                                                         <dd class="col-sm-9">{{ $parasiticide->description }}</dd>
                                                         <dt class="col-sm-3 text-uppercase">Dose</dt>
@@ -236,24 +231,26 @@
                             <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                             <div class="d-flex justify-content-center">
                                 <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
-                                    <i class="fas fa-fw fa-spinner fa-spin"></i>
+                                    <span class="loader"></span>
                                 </p>
                             </div>
-
-                            {{-- aquí va el paginador --}}
                         </div>
                         <!-- /.card-body -->
 
-
-                        <div class="card-footer clearfix" style="display: block;">
-                            @if(count($parasiticides))
-                                <div class="ml-4">
-                                    @if($parasiticides->hasPages())
-                                        {{ $parasiticides->links() }}
-                                    @endif
+                        <!-- card-footer -->
+                        @if(count($parasiticides))
+                            @if($parasiticides->hasPages())
+                                <div class="card-footer clearfix" style="display: block;">
+                                    <div class="mailbox-controls">
+                                        <div class="float-right pagination pagination-sm">
+                                            <div class="ml-4">
+                                                {{ $parasiticides->links() }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
-                        </div>
+                        @endif
                         <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
@@ -267,7 +264,11 @@
     </section>
 
     @include('livewire.parasiticide.form')
+
 </div>
+
+<!-- Css styles for checkboxes and radio buttons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" integrity="sha512-8vq2g5nHE062j3xor4XxPeZiPjmRDh6wlufQlfC6pdQ/9urJkU07NM0tEREeymP++NczacJ/Q59ul+/K2eYvcg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <script type="text/javascript">
     window.addEventListener('stored', event => {

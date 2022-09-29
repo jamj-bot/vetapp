@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Models\Deworming;
 use App\Models\Parasiticide;
+use App\Models\Species;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
@@ -20,14 +21,14 @@ class Dewormings extends Component
     public $pet;
 
     // Datatable attributes
-    public $paginate = '50',
+    public $paginate = '25',
         $sort = 'parasiticide_id',
         $direction = 'asc',
         $readyToLoad = false,
         $search = '';
 
     // General attrbibutes to component
-    public $modalTitle, $modalApplyTitle = 'Deworming';
+    public $addButton, $modalTitle, $modalApplyTitle;
 
     // CRUD attributes
     public $selected_id,
@@ -35,15 +36,17 @@ class Dewormings extends Component
         $type = 'choose',
         $duration,
         $withdrawal_period,
-        $dose_number = 1,
+        $dose_number,
         $doses_required;
 
-    // Other Attributes
-    public $parasiticide_name,
-        $parasiticide_type,
-        $parasiticide_manufacturer,
-        $parasiticide_dose,
-        $parasiticide_administration;
+    // public $parasiticide_name,
+    //     $parasiticide_type,
+    //     $parasiticide_manufacturer,
+    //     $parasiticide_dose,
+    //     $parasiticide_administration;
+
+    // Attributes for modal
+    public $suggested_dosage;
 
     // Listeners
     protected $listeners = [
@@ -58,10 +61,10 @@ class Dewormings extends Component
     {
         return [
             'parasiticide_id'   => 'required|exists:parasiticides,id',
-            'type'              => 'required|in:"First application", "Reapplication"',
+            'type'              => 'required||not_in:choose',
             'duration'          => 'required|min:3|max:140',
             'withdrawal_period' => 'nullable|min:3|max:140',
-            'dose_number'       => 'required|integer|between:1,10',
+            'dose_number'       => 'required|integer|between:0,10',
             'doses_required'    => 'required|integer|between:1,10',
         ];
     }
@@ -123,6 +126,8 @@ class Dewormings extends Component
     public function mount()
     {
         $this->modalTitle = 'Dewormings';
+        $this->modalApplyTitle = 'Deworming';
+        $this->addButton = 'Register deworming';
     }
 
     public function render()
@@ -142,7 +147,11 @@ class Dewormings extends Component
                         'dewormings.created_at',
                         'dewormings.updated_at',
                         'p.name as name',
+                        'p.manufacturer as manufacturer',
+                        'p.type as type_1',
                         'p.description as description',
+                        'p.dose as dose',
+                        'p.administration as administration',
                         'p.primary_application',
                         'p.primary_doses',
                         'p.reapplication_doses',
@@ -150,8 +159,8 @@ class Dewormings extends Component
                     ->where('name', 'like', '%' . $this->search .'%')
                     ->orderBy($this->sort, $this->direction)
                     ->paginate($this->paginate);
-            } else {
 
+            } else {
                 $dewormings = $this->pet->dewormings()
                     ->join('parasiticides as p', 'p.id', 'dewormings.parasiticide_id')
                     ->select('dewormings.id',
@@ -163,27 +172,33 @@ class Dewormings extends Component
                         'dewormings.created_at',
                         'dewormings.updated_at',
                         'p.name as name',
+                        'p.manufacturer as manufacturer',
+                        'p.type as type_1',
                         'p.description as description',
+                        'p.dose as dose',
+                        'p.administration as administration',
                         'p.primary_application',
                         'p.primary_doses',
                         'p.reapplication_doses',
                         'p.reapplication_interval')
                     ->orderBy($this->sort, $this->direction)
                     ->paginate($this->paginate);
+
             }
         } else {
             $dewormings = [];
         }
 
-        $parasiticides = Parasiticide::orderBy('description', 'asc')->get();
+        // $parasiticides = Parasiticide::orderBy('description', 'asc')->get();
+        $parasiticides = Species::findOrFail($this->pet->species->id)->parasiticides->sortByDesc('status');
 
         // FOR FORM
         if ($this->parasiticide_id) {
             if ($this->type != 'choose') {
                 if ($this->type == 'First application') {
-                    $this->doses_required = Parasiticide::find($this->parasiticide_id)->primary_doses;
+                    $this->suggested_dosage = Parasiticide::find($this->parasiticide_id)->primary_doses;
                 } elseif ($this->type == 'Reapplication') {
-                    $this->doses_required = Parasiticide::find($this->parasiticide_id)->reapplication_doses;
+                    $this->suggested_dosage = Parasiticide::find($this->parasiticide_id)->reapplication_doses;
                 }
             }
         }
@@ -278,7 +293,7 @@ class Dewormings extends Component
         }
 
         if ($action == 'decrement') {
-            if ($deworming->dose_number > 1) {
+            if ($deworming->dose_number >= 0) {
                 $deworming->dose_number--;
                 $deworming->save();
 
@@ -327,7 +342,7 @@ class Dewormings extends Component
         $this->type = 'choose';
         $this->duration = '';
         $this->withdrawal_period = '';
-        $this->dose_number = 1;
+        $this->dose_number = '';
         $this->doses_required = null;
         $this->resetValidation();
 

@@ -26,12 +26,14 @@ class Pet extends Model
         'zootechnical_function',
         'sex',
         'dob',
+        'estimated',
         'desexed',
         'desexing_candidate',
         'alerts',
         'diseases',
         'allergies',
-        'status'
+        'status',
+        'image'
     ];
 
     /**
@@ -88,7 +90,7 @@ class Pet extends Model
     }
 
     /**
-     *  Get all the images for the pet
+     *  Get all the images for the pet throught the consultations
      *
      **/
     public function images()
@@ -111,4 +113,28 @@ class Pet extends Model
         );
     }
 
+    public function prescriptions()
+    {
+        return $this->hasManyThrough(
+            Prescription::class,
+            Consultation::class,
+        );
+    }
+
+
+    /**
+     * Get the Pet's image.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getPetProfilePhotoAttribute()
+    {
+        return (file_exists('storage/pet-profile-photos/' . $this->image) ? $this->image : null);
+        // if ($this->image != null) {
+        //     return (file_exists('storage/pet-profile-photos/' . $this->image) ? $this->image : 'livestock.png');
+        // } else {
+        //     return 'livestock.png';
+        // }
+    }
 }

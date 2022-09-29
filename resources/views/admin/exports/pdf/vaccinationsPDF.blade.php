@@ -71,6 +71,7 @@
             <thead>
                 <tr>
                     <td colspan="3">Vaccine</td>
+                    <td>Status</td>
                     <td>Batch</td>
                     <td>Progress</td>
                     <td>Applied</td>
@@ -79,9 +80,10 @@
             <tbody>
                 @foreach($vaccinationsPDF as $vaccination)
                     <tr>
-                        <td style="width: auto;border-left: 1px solid #ddd; text-align: left;">{{ $vaccination->name }}</td>
+                        <td style="width: auto;border-left: 1px solid #ddd; text-align: left;">{{ $vaccination->type }}</td>
+                        <td style="width: auto;text-align: left;"width="10px">{{ $vaccination->name }}</td>
                         <td style="width: auto;text-align: left;"width="10px">{{ $vaccination->manufacturer }}</td>
-                        <td style="width: auto;text-align: left;"width="10px">{{ $vaccination->type }}</td>
+                        <td style="width: auto;text-align: center;"width="10px">{{ $vaccination->status }}</td>
                         <td>{{ $vaccination->batch_number }}</td>
                         <td style="text-align: center; border-right: 1px solid #ddd;">{{ $vaccination->dose_number }} / {{ $vaccination->doses_required }}</td>
                         @if($vaccination->applied)
@@ -102,7 +104,7 @@
             <tfoot>
                 <tr>
                     <td style="width: 33.33333%" class="success">Applied</td>
-                    <td style="width: 33.33333%" class="warning">Schenduled</td>
+                    <td style="width: 33.33333%" class="warning">Scheduled</td>
                     <td style="width: 33.33333%" class="danger">Delayed</td>
                 </tr>
             </tfoot>

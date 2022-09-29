@@ -1,8 +1,8 @@
-<form wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
+<form wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}" autocomplete="off">
 	@include('common.modal-header')
 
 		<div class="form-row">
-			<div class="form-group col-md-6">
+			<div class="form-group col-md-4">
 				<label for="inputName" class="form-label font-weight-normal">Name *</label>
 				<input wire:model.lazy="name"
 					type="text"
@@ -22,10 +22,9 @@
                         Looks good!
                     </div>
 				@enderror
-
 			</div>
 
-			<div class="form-group col-md-6">
+			<div class="form-group col-md-4">
 				<label for="inputPhone" class="form-label font-weight-normal">Phone *</label>
 				<input wire:model.lazy="phone"
 					type="text"
@@ -47,11 +46,8 @@
 				@enderror
 
 			</div>
-		</div>
-		<!-- /. row -->
 
-		<div class="form-row">
-			<div class="form-group col-md-6">
+			<div class="form-group col-md-4">
 				<label for="inputEmail" class="form-label font-weight-normal">Email *</label>
 				<input wire:model.lazy="email"
 					type="text"
@@ -74,10 +70,14 @@
 
 			</div>
 
+		</div>
+		<!-- /. row -->
+
+		<div class="form-row">
 			<div class="form-group col-md-6">
 				<label for="inputPassword" class="form-label font-weight-normal">Password *</label>
 				<input wire:model.lazy="password"
-					type="text"
+					type="password"
 					class="form-control form-control-sm
 					{{ $errors->has('password') ? 'is-invalid':'' }}
 					{{ $errors->has('password') == false && $this->password != null ? 'is-valid border-success':'' }}"
@@ -91,6 +91,29 @@
 					</div>
 		        @else
                     <div id="inputPasswordFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
+				@enderror
+
+			</div>
+
+			<div class="form-group col-md-6">
+				<label for="inputConfirmPassword" class="form-label font-weight-normal">Confirm password *</label>
+				<input wire:model.lazy="confirmPassword"
+					type="password"
+					class="form-control form-control-sm
+					{{ $errors->has('confirmPassword') ? 'is-invalid':'' }}
+					{{ $errors->has('confirmPassword') == false && $this->confirmPassword != null ? 'is-valid border-success':'' }}"
+					id="inputConfirmPassword"
+					placeholder=""
+					aria-describedby="inputConfirmPasswordFeedback">
+
+			   @error('confirmPassword')
+					<div id="inputConfirmPasswordFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+		        @else
+                    <div id="inputConfirmPasswordFeedback" class="valid-feedback">
                         Looks good!
                     </div>
 				@enderror

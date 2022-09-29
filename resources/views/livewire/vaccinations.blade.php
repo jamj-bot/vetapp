@@ -1,31 +1,25 @@
 <div wire:init="loadItems">
+
     <!-- Datatable's filters -->
-    <div class="row mb-2 mr-1">
-        <div class="col-md-4">
-            <div class="input-group input-group-sm m-1">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="inputGroupSelect01">Show</label>
-                </div>
-                <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect01">
-                    <option disabled>Choose...</option>
-                    <option value="10">10 items</option>
-                    <option selected value="50">50 items</option>
-                    <option value="100">100 items</option>
-                </select>
-            </div>
+    <div class="form-row my-2">
+        <div class="col-sm-6 col-md-4">
+            @include('common.select')
         </div>
-        <div class="col-md-4">
+
+        <div class="col-sm-6 col-md-4">
             @include('common.search')
         </div>
+
         <div class="col-md-4">
-            <div class="input-group input-group-sm m-1">
-                @can('vaccinations_store')
+            @can('vaccinations_store')
+                <div class="form-group">
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn bg-gradient-primary btn-sm btn-block shadow" data-toggle="modal" data-target="#modalForm">
-                       <i class="fas fa-fw fa-plus"></i> Add Vaccination
+                    <button type="button" class="btn bg-gradient-primary btn-sm btn-block"
+                        data-toggle="modal" data-target="#modalForm">
+                       <i class="fas fa-fw fa-plus"></i> {{ $this->addButton }}
                     </button>
-                @endcan
-            </div>
+                </div>
+            @endcan
         </div>
     </div>
     <!-- /.Datatable filters -->
@@ -33,12 +27,12 @@
     <div class="card">
         <div class="card-header border-transparent">
             <h3 class="card-title">
-                Vaccination Schendule
+                Vaccination Schedule
             </h3>
 
             <div class="card-tools">
                 <!-- Maximize Button -->
-                <button type="button" class="btn btn-tool pt-3" data-card-widget="maximize">
+                <button type="button" class="btn btn-tool" data-card-widget="maximize">
                     <i class="fas fa-expand"></i>
                 </button>
             </div>
@@ -93,9 +87,20 @@
                             <tr>
                                 <td>
                                     <div class="d-flex justify-content-start align-items-center">
-                                        <p class="d-flex flex-column font-weight-light text-left text-sm text-nowrap mb-0">
-                                            <span class="text-uppercase ">
-                                                {{ $vaccination->name}}
+                                        @if($vaccination->dose_number/$vaccination->doses_required*100 >= 100)
+                                            <i class="fas fa-clipboard-check text-success mr-2"></i>
+                                        @else
+                                            <i class="fas fa-clipboard text-muted mr-2"></i>
+                                        @endif
+                                        <p class="d-flex flex-column text-left text-sm text-nowrap mb-0">
+                                            <span class="text-uppercase font-weight-bold">
+                                                <a href="javascript:void(0)"
+                                                    class="text-orange"
+                                                    data-toggle="modal"
+                                                    data-target="#modalDetails"
+                                                    onclick="setValuesModalApply('{{$vaccination->name}}', '{{$vaccination->type}}', '{{$vaccination->manufacturer}}', '{{$vaccination->description}}', '{{$vaccination->status}}', '{{$vaccination->dosage}}', '{{$vaccination->administration}}', '{{$vaccination->vaccination_schedule}}', '{{$vaccination->primary_doses}}', '{{$vaccination->revaccination_doses}}', '{{$vaccination->revaccination_schedule}}')">
+                                                    {{ $vaccination->name}}
+                                                </a>
                                             </span>
                                             <span>
                                                 {{ $vaccination->type }}
@@ -105,18 +110,35 @@
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-start align-items-center">
-                                        <p class="d-flex flex-column font-weight-light text-sm mb-0">
+                                        <p class="d-flex flex-column text-sm mb-0">
                                             <span class="text-sm">{{ $vaccination->batch_number }}</span>
                                         </p>
                                     </div>
                                 </td>
                                 <td class="text-nowrap">
-                                    @if($vaccination->applied)
+                                    @can('vaccinations_apply')
+                                        <!-- Button trigger modal -->
+                                        <a href="javascript:void(0)"
+                                            data-toggle="modalApply"
+                                            wire:click.prevent="editApply({{ $vaccination }})"
+                                            onclick="setValuesModalApply('{{$vaccination->name}}')"
+                                            title="Apply / Undo apply"
+                                            class="btn btn-sm btn-default shadow-sm">
+                                                <i class="fas fa-fw fa-flag
+                                                    {{ $vaccination->applied ? 'text-success':'' }}
+                                                    {{ !$vaccination->applied && $vaccination->done->isPast() ? 'text-danger':'' }}
+                                                    {{ !$vaccination->applied && $vaccination->done->isFuture() ? 'text-warning':'' }}">
+                                                </i>
+                                                {{ $vaccination->done->format('d-M-Y') }}
+                                        </a>
+                                    @endcan
+{{--                                     @if($vaccination->applied)
                                         @can('vaccinations_update')
                                                 <!-- Button trigger modal -->
                                                 <a href="javascript:void(0)"
                                                     data-toggle="modalApply"
                                                     wire:click.prevent="editApply({{ $vaccination }})"
+                                                    onclick="setValuesModalApply('{{$vaccination->name}}')"
                                                     title="Undo Apply Vaccine"
                                                     class="btn btn-sm btn-default shadow-sm">
                                                         <i class="fas fa-fw fa-flag text-success"></i>
@@ -147,7 +169,7 @@
                                                 </a>
                                             @endcan
                                         @endif
-                                    @endif
+                                    @endif --}}
                                 </td>
                                 <td class="text-xs">
                                     <div class="progress-group">
@@ -156,7 +178,12 @@
                                             <b>{{ $vaccination->dose_number }}</b>/{{ $vaccination->doses_required }}
                                         </span>
                                         <div class="progress progress-sm">
-                                            @if($vaccination->applied)
+                                            <div class="progress-bar {{ $vaccination->applied ? 'bg-success':'' }}
+                                                    {{ !$vaccination->applied && $vaccination->done->isPast() ? 'bg-danger':'' }}
+                                                    {{ !$vaccination->applied && $vaccination->done->isFuture() ? 'bg-warning':'' }}"
+                                                style="width: {{ ($vaccination->dose_number/$vaccination->doses_required)*100 }}%">
+                                            </div>
+{{--                                             @if($vaccination->applied)
                                                 <div class="progress-bar bg-success"
                                                     style="width: {{ ($vaccination->dose_number/$vaccination->doses_required)*100 }}%"></div>
                                             @elseif(!$vaccination->applied)
@@ -167,7 +194,7 @@
                                                     <div class="progress-bar bg-warning"
                                                         style="width: {{ ($vaccination->dose_number/$vaccination->doses_required)*100 }}%"></div>
                                                 @endif
-                                            @endif
+                                            @endif --}}
                                         </div>
                                     </div>
                                 </td>
@@ -185,7 +212,8 @@
                                 <td width="10px">
                                     @can('vaccinations_destroy')
                                         <a href="javascript:void(0)"
-                                            onclick="confirm('{{$vaccination->id}}', 'Are you sure you want delete this vaccination?', 'You won\'t be able to revert this!', 'Vaccination', 'destroy')"title="Delete"
+                                            onclick="confirm('{{$vaccination->id}}', 'Are you sure you want delete this vaccination?', 'You won\'t be able to revert this!', 'Vaccination', 'destroy')"
+                                            title="Delete"
                                             class="btn btn-sm btn-link border border-0">
                                                 <i class="fas fa-trash text-muted"></i>
                                         </a>
@@ -232,7 +260,9 @@
 
                 <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                 <div class="d-flex justify-content-center">
-                    <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                    <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                        <span class="loader"></span>
+                    </p>
                 </div>
             </div>
             <!-- /.table-responsive -->
@@ -241,7 +271,7 @@
 
         <div class="card-footer clearfix" style="display: block;">
 
-            <div class="d-flex flex-row justify-content-end text-xs font-weight-light">
+            <div class="d-flex flex-row justify-content-end text-xs">
                 <span class="mr-2">
                     <i class="fas fa-square text-success"></i> Applied
                 </span>
@@ -288,7 +318,60 @@
     <!-- Apply vaccinations -->
     @include('livewire.forms.form-apply-vaccinations')
 
+    <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" role="dialog" aria-labelledby="modalDetailsLabel" data-backdrop="static" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalDetailsLabel">
+                        <span id="vaccineName"></span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <dl class="row">
+                        <dt class="col-sm-4"><span>Manufacturer</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineManufacturer"></span></dd>
+
+                        <dt class="col-sm-4"><span>Type</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineType"></span></dd>
+
+                        <dt class="col-sm-4"><span>Description</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineDescription"></span></dd>
+
+                        <dt class="col-sm-4"><span>Status</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineStatus"></span></dd>
+
+                        <dt class="col-sm-4"><span>Dosage</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineDosage"></span></dd>
+
+                        <dt class="col-sm-4"><span>Administration</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineAdministration"></span></dd>
+
+                        <dt class="col-sm-4"><span>Vaccination schedule</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineVaccinationSchedule"></span></dd>
+                        <dd class="col-sm-8 offset-sm-4"><span id="vaccinePrimaryDoses"></span> doses</dd>
+
+                        <dt class="col-sm-4"><span>Revaccination schedule</span></dt>
+                        <dd class="col-sm-8"><span id="vaccineRevaccinationSchedule"></span></dd>
+                        <dd class="col-sm-8 offset-sm-4"><span id="vaccineRevaccinationDoses"></span> doses</dd>
+                    </dl>
+                </div>
+
+                <div class="modal-footer">
+                   <button type="button" class="btn bg-gradient-danger" data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
 
 <script>
     window.addEventListener('applied', event => {
@@ -307,8 +390,6 @@
         notify(event)
     });
 
-
-
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {
             $('#modalForm').modal('show')
@@ -323,4 +404,19 @@
             $('#modalFormApply').modal('hide')
         });
     });
+
+    function setValuesModalApply(name, type, manufacturer, description, status, dosage, administration, vaccination_schedule, primary_doses, revaccination_doses, revaccination_schedule){
+        document.getElementById("vaccineName").textContent = name;
+        document.getElementById("vaccineManufacturer").textContent = manufacturer;
+        document.getElementById("vaccineType").textContent = type;
+        document.getElementById("vaccineDescription").textContent = description;
+        document.getElementById("vaccineStatus").textContent = status;
+        document.getElementById("vaccineDosage").textContent = dosage;
+        document.getElementById("vaccineAdministration").textContent = administration;
+        document.getElementById("vaccineVaccinationSchedule").textContent = vaccination_schedule;
+        document.getElementById("vaccinePrimaryDoses").textContent = primary_doses;
+        document.getElementById("vaccineRevaccinationSchedule").textContent = revaccination_schedule;
+        document.getElementById("vaccineRevaccinationDoses").textContent = revaccination_doses;
+    }
 </script>
+

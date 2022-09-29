@@ -39,14 +39,19 @@ class Vaccine extends Model
     /**
      * The species that belong to the vaccine.
      */
+    // public function species()
+    // {
+    //    //return $this->belongsToMany(RelatedModel, pivot_table_name, foreign_key_of_current_model_in_pivot_table, foreign_key_of_other_model_in_pivot_table);
+    //    return $this->belongsToMany(
+    //         Species::class,
+    //         'vaccines_species',
+    //         'vaccine_id',
+    //         'species_id'
+    //     );
+    // }
+
     public function species()
     {
-       //return $this->belongsToMany(RelatedModel, pivot_table_name, foreign_key_of_current_model_in_pivot_table, foreign_key_of_other_model_in_pivot_table);
-       return $this->belongsToMany(
-            Species::class,
-            'vaccines_species',
-            'vaccine_id',
-            'species_id'
-        );
+        return $this->belongsToMany(Species::class);
     }
 }

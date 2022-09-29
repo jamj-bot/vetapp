@@ -10,7 +10,10 @@ use App\Http\Livewire\ConsultationController;
 use App\Http\Livewire\ConsultationDetailsController;
 use App\Http\Livewire\ParasiticideController;
 use App\Http\Livewire\PermissionController;
+use App\Http\Livewire\PetController;
+use App\Http\Livewire\PrescriptionController;
 use App\Http\Livewire\RoleController;
+use App\Http\Livewire\Select2ChangeOwner;
 use App\Http\Livewire\SpeciesController;
 use App\Http\Livewire\TrashController;
 use App\Http\Livewire\UserController;
@@ -29,6 +32,7 @@ Route::get('users/{user}', [UserProfileController::class, 'show'])->name('admin.
 Route::get('trash', TrashController::class)->name('admin.recycle-bin');
 
 // Pets
+Route::get('pets', PetController::class)->name('admin.pets.index');
 Route::get('pets/{pet}', [PetProfileController::class, 'show'])->name('admin.pets.show');
 
 // Consultations
@@ -36,12 +40,20 @@ Route::get('pets/{pet}/consultations', ConsultationController::class)->name('adm
 Route::get('pets/{pet}/consultations/{consultation}', ConsultationDetailsController::class)
 	->name('admin.pets.consultations.show');
 
+// Prescription
+Route::get('pets/{pet}/consultations/{consultation}/prescriptions', PrescriptionController::class)
+	->name('admin.pets.consultations.prescription');
+
 // Consultation to PDP
 Route::get('pets/{pet}/consultations/{consultation}/PDF', [ExportController::class, 'consultationPDF'])
 	->name('admin.pets.consultations.export');
 // Vaccinations to PDP
 Route::get('pets/{pet}/vaccinations/PDF', [ExportController::class, 'vaccinationsPDF'])
 	->name('admin.pets.vaccinations.export');
+
+Route::get('pets/{pet}/dewormings/PDF', [ExportController::class, 'dewormingsPDF'])
+	->name('admin.pets.dewormings.export');
+
 
 //Roles
 Route::get('roles', RoleController::class)->name('admin.roles');
@@ -65,3 +77,6 @@ Route::get('parasiticides', ParasiticideController::class)->name('admin.parasiti
 Route::get('credits', function(){
 	return view('admin.credits');
 })->name('admin.credits');
+
+// Utils route
+Route::get('select2-change-owner', Select2ChangeOwner::class);

@@ -1,31 +1,26 @@
 <div wire:init="loadItems">
+
     <!-- Datatable's filters -->
-    <div class="row mb-2 mr-1">
-        <div class="col-md-4">
-            <div class="input-group input-group-sm m-1">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="inputGroupSelect01">Show</label>
-                </div>
-                <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect01">
-                    <option disabled>Choose...</option>
-                    <option value="10">10 items</option>
-                    <option selected value="50">50 items</option>
-                    <option value="100">100 items</option>
-                </select>
-            </div>
+    <div class="form-row my-2">
+
+        <div class="col-sm-6 col-md-4">
+            @include('common.select')
         </div>
-        <div class="col-md-4">
+
+        <div class="col-sm-6 col-md-4">
             @include('common.search')
         </div>
+
         <div class="col-md-4">
-            <div class="input-group input-group-sm m-1">
-                @can('dewormings_store')
+            @can('dewormings_store')
+                <div class="form-group">
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn bg-gradient-primary btn-sm btn-block shadow" data-toggle="modal" data-target="#modalFormDewormings">
-                       <i class="fas fa-fw fa-plus"></i> Add deworming
+                    <button type="button" class="btn bg-gradient-primary btn-sm btn-block"
+                        data-toggle="modal" data-target="#modalFormDewormings">
+                       <i class="fas fa-fw fa-plus"></i> {{ $this->addButton }}
                     </button>
-                @endcan
-            </div>
+                </div>
+            @endcan
         </div>
     </div>
     <!-- /.Datatable filters -->
@@ -38,7 +33,7 @@
 
             <div class="card-tools">
                 <!-- Maximize Button -->
-                <button type="button" class="btn btn-tool pt-3" data-card-widget="maximize">
+                <button type="button" class="btn btn-tool" data-card-widget="maximize">
                     <i class="fas fa-expand"></i>
                 </button>
             </div>
@@ -63,7 +58,7 @@
                                 @endif
                             </th>
                             <th>
-                                Duration <br> <span class="text-xs text-muted">Withdrawal period </span>
+                                Duration <span class="text-muted">& Withdrawal period </span>
                             </th>
                             <th wire:click="order('updated_at')">
                                 Last update
@@ -99,8 +94,14 @@
                                             <i class="fas fa-clipboard text-muted mr-2"></i>
                                         @endif
                                         <p class="d-flex flex-column font-weight-light text-left text-sm text-nowrap mb-0">
-                                            <span class="text-uppercase">
-                                                {{ $deworming->name}}
+                                            <span class="text-uppercase font-weight-bold">
+                                                <a href="javascript:void(0)"
+                                                    class="text-orange"
+                                                    data-toggle="modal"
+                                                    data-target="#modalDewormingsDetails"
+                                                    onclick="setValuesModalDewormingApply('{{$deworming->name}}', '{{$deworming->type_1}}', '{{$deworming->manufacturer}}', '{{$deworming->dose}}', '{{$deworming->administration}}', '{{$deworming->description}}', '{{$deworming->primary_application}}', '{{$deworming->primary_doses}}', '{{$deworming->reapplication_interval}}', '{{$deworming->reapplication_doses}}')">
+                                                    {{ $deworming->name}}
+                                                </a>
                                             </span>
                                             <span>
                                                 {{ $deworming->type }}
@@ -120,8 +121,18 @@
                                         </p>
                                     </div>
                                 </td>
-                                <td class="text-nowrap font-weight-light">
-                                    {{ $deworming->updated_at->format('d-M-y h:i:s') }}
+                                <td>
+                                    {{-- {{ $deworming->updated_at->format('d-M-y h:i:s') }} --}}
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <p class="d-flex flex-column font-weight-light text-left text-sm text-nowrap mb-0">
+                                            <span class="text-uppercase ">
+                                                {{ $deworming->updated_at->format('d-M-y') }}
+                                            </span>
+                                            <span>
+                                                {{ $deworming->updated_at->format('h:i') }} hours
+                                            </span>
+                                        </p>
+                                    </div>
                                 </td>
 {{--                                 <td class="text-nowrap font-weight-light">
                                     @if($deworming->done)
@@ -131,10 +142,10 @@
                                 <td width="10px">
                                     @can('dewormings_update')
                                         <div class="btn-group-vertical">
-                                            <button class="btn btn-xs btn-default"wire:click="administerParasiticide({{$deworming}}, 'increment')" wire:loading.attr="disabled" wire:target="administerParasiticide" {{ $deworming->dose_number >= $deworming->doses_required ? 'disabled' : '' }}>
+                                            <button class="btn btn-xs btn-default" wire:click="administerParasiticide({{$deworming}}, 'increment')" wire:loading.attr="disabled" wire:target="administerParasiticide" {{ $deworming->dose_number >= $deworming->doses_required ? 'disabled' : '' }}>
                                                 <i class="fas fa-fw fa-caret-up"></i>
                                             </button>
-                                            <button class="btn btn-xs btn-default"wire:click="administerParasiticide({{$deworming}}, 'decrement')" wire:loading.attr="disabled" wire:target="administerParasiticide" {{ $deworming->dose_number <= 1 ? 'disabled' : '' }}>
+                                            <button class="btn btn-xs btn-default" wire:click="administerParasiticide({{$deworming}}, 'decrement')" wire:loading.attr="disabled" wire:target="administerParasiticide" {{ $deworming->dose_number <= 0 ? 'disabled' : '' }}>
                                                 <i class="fas fa-fw fa-caret-down"></i>
                                             </button>
                                         </div>
@@ -214,7 +225,9 @@
 
                 <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                 <div class="d-flex justify-content-center">
-                    <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                    <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                        <span class="loader"></span>
+                    </p>
                 </div>
             </div>
             <!-- /.table-responsive -->
@@ -245,15 +258,15 @@
                 </div>
             @endif
 
-{{--             <div class="mailbox-controls with-border text-center">
-                <a href="{{ route('admin.pets.vaccinations.export', ['pet' => $pet]) }}"
+            <div class="mailbox-controls with-border text-center">
+                <a href="{{--route('admin.pets.dewormings.export', ['pet' => $pet]) --}}"
                     class="btn btn-default btn-sm"
                     target="_blank"
                     rel="noopener"
                     title="Print">
                     <i class="far fa-fw fa-file-pdf"></i> Export
                 </a>
-            </div> --}}
+            </div>
             <!-- /.mailbox-controls -->
         </div>
         <!-- /.card-footer -->
@@ -264,22 +277,64 @@
 
     </div>
 
-
     <!-- Add and edit vaccinations -->
     @include('livewire.forms.form-dewormings')
 
     <!-- Apply vaccinations -->
     {{-- @include('livewire.forms.form-apply-vaccinations') --}}
 
+    <div wire:ignore.self class="modal fade" id="modalDewormingsDetails" tabindex="-1" role="dialog" aria-labelledby="modalDewormingsDetailsLabel" data-backdrop="static" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalDewormingsDetailsLabel">
+                        <span id="dewormingName"></span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <dl class="row">
+                        <dt class="col-sm-4"><span>Manufacturer</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingManufacturer"></span></dd>
+
+                        <dt class="col-sm-4"><span>Type</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingType_1"></span></dd>
+
+                        <dt class="col-sm-4"><span>Description</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingDescription"></span></dd>
+
+                        <dt class="col-sm-4"><span>Dosage</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingDose"></span></dd>
+
+                        <dt class="col-sm-4"><span>Administration</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingAdministration"></span></dd>
+
+                        <dt class="col-sm-4"><span>Primary application</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingPrimaryApplication"></span></dd>
+                        <dd class="col-sm-8 offset-sm-4"><span id="dewormingPrimaryDoses"></span> doses</dd>
+
+                        <dt class="col-sm-4"><span>Reapplication interval</span></dt>
+                        <dd class="col-sm-8"><span id="dewormingReapplicationInterval"></span></dd>
+                        <dd class="col-sm-8 offset-sm-4"><span id="dewormingReapplicationDoses"></span> doses</dd>
+                    </dl>
+                </div>
+
+                <div class="modal-footer">
+                   <button type="button" class="btn bg-gradient-danger" data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // window.addEventListener('applied', event => {
-    //     notify(event)
-    // });
-    // window.addEventListener('undo-applied', event => {
-    //     notify(event)
-    // });
+
     window.addEventListener('deworming-updated', event => {
         notify(event)
     });
@@ -314,4 +369,20 @@
         //     $('#modalFormApply').modal('hide')
         // });
     });
+
+
+    function setValuesModalDewormingApply(name, type_1, manufacturer, dose, administration, description, primary_application, primary_doses, reapplication_interval,reapplication_doses){
+
+        document.getElementById("dewormingName").textContent = name;
+        document.getElementById("dewormingType_1").textContent = type_1;
+        document.getElementById("dewormingManufacturer").textContent = manufacturer;
+        document.getElementById("dewormingDose").textContent = dose;
+        document.getElementById("dewormingAdministration").textContent = administration;
+        document.getElementById("dewormingDescription").textContent = description;
+        document.getElementById("dewormingPrimaryApplication").textContent = primary_application;
+        document.getElementById("dewormingPrimaryDoses").textContent = primary_doses;
+        document.getElementById("dewormingReapplicationInterval").textContent = reapplication_interval;
+        document.getElementById("dewormingReapplicationDoses").textContent = reapplication_doses;
+    }
 </script>
+

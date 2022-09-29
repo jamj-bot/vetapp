@@ -22,6 +22,7 @@ class Consultation extends Model
         'age',
         'weight',
         'temperature',
+        'oxygen_saturation_level',
         'capillary_refill_time',
         'heart_rate',
         'pulse',
@@ -32,12 +33,18 @@ class Consultation extends Model
         'pain',
         'body_condition',
         'problem_statement',
-        'diagnosis',
+        'types_of_diagnosis',
         'prognosis',
         'treatment_plan',
         'consult_status',
     ];
 
+    /**
+     * All of the relationships to be touched.
+     *
+     * @var array
+     */
+    protected $touches = ['pet'];
 
     /**
      * Get the pet that owns the consultation.
@@ -69,5 +76,22 @@ class Consultation extends Model
     public function tests()
     {
         return $this->morphMany(Test::class, 'testable');
+    }
+
+
+    /**
+     * Get all of the consultation's diseases.
+     */
+    public function diseases()
+    {
+        return $this->belongsToMany(Disease::class);
+    }
+
+   /**
+     * Get the prescriptions for the consultation.
+     */
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
     }
 }

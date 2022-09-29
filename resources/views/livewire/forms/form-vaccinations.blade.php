@@ -2,7 +2,7 @@
 	@include('common.modal-header')
 
 		<div class="form-row">
-			<div class="form-group col-md-4">
+			<div class="form-group col-md-3">
 				<label for="selectVaccine" class="form-label font-weight-normal">Vaccine *</label>
 				<select wire:model.lazy="vaccine_id"
 					class="custom-select custom-select-sm
@@ -11,9 +11,13 @@
 					id="selectVaccine"
 					aria-describedby="selectVaccineFeedback">
 					<option value="choose" selected>Choose...</option>
-					@foreach($vaccines as $vaccine)
-						<option value="{{ $vaccine->id }}">{{ $vaccine->name }}</option>
-					@endforeach
+					@forelse($vaccines as $vaccine)
+						<option value="{{ $vaccine->id }}">
+							{{ $vaccine->name }} by {{ $vaccine->manufacturer }}
+						</option>
+					@empty
+						<option value="choose" disabled> Empty </option>
+					@endforelse
 				</select>
 
 				@error('vaccine_id')
@@ -28,16 +32,17 @@
 			</div>
 
 
-			<div class="form-group col-md-4">
+			<div class="form-group col-md-3">
 				<label for="selectType" class="form-label font-weight-normal">Type *</label>
 				<select wire:model.lazy="type"
 					class="custom-select custom-select-sm
 					{{ $errors->has('type') ? 'is-invalid':'' }}
 					{{ $errors->has('type') == false && $this->type != 'choose' ? 'is-valid border-success':'' }}"
 					id="selectType"
-					aria-describedby="selectTypeFeedback">
+					aria-describedby="selectTypeFeedback"
+					{{ $vaccine_id == 0 ? 'disabled' : '' }}>
 
-					<option selected value="choose">Choose</option>
+					<option selected value="choose">Choose...</option>
 					<option value="Vaccination">Vaccination</option>
 					<option value="Revaccination">Revaccination</option>
 				</select>
@@ -53,34 +58,7 @@
 				@enderror
 			</div>
 
-			<div class="form-group col-md-4">
-				<label for="inputBatchNumber" class="form-label font-weight-normal">Batch Number</label>
-				<input wire:model.lazy="batch_number"
-					type="text"
-					class="form-control form-control-sm
-					{{ $errors->has('batch_number') ? 'is-invalid':'' }}
-					{{ $errors->has('batch_number') == false && $this->batch_number != null ? 'is-valid border-success':'' }}"
-					id="inputBatchNumber"
-					placeholder="e.g. 123-MP-1L2O"
-					aria-describedby="inputBatchNumberFeedback">
-
-				@error('batch_number')
-					<div id="inputBatchNumberFeedback" class="invalid-feedback">
-						{{ $message }}
-					</div>
-                @else
-                    <div id="inputBatchNumberFeedback" class="valid-feedback">
-                        Looks good!
-                    </div>
-				@enderror
-			</div>
-
-		</div>
-		<!-- /. row -->
-
-		<div class="form-row">
-
-			<div class="form-group col-md-2">
+			<div class="form-group col-md-3">
 				<label for="inputDoseNumber" class="form-label font-weight-normal">Dose *</label>
 				<input wire:model.lazy="dose_number"
 					type="number"
@@ -102,8 +80,8 @@
 				@enderror
 			</div>
 
-			<div class="form-group col-md-2">
-				<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required *</label>
+			<div class="form-group col-md-3">
+				<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required {{$this->suggested_dosage ? $this->suggested_dosage:'' }} *</label>
 				<input wire:model.lazy="doses_required"
 					type="number"
 					class="form-control form-control-sm
@@ -124,6 +102,10 @@
 				@enderror
 			</div>
 
+		</div>
+		<!-- /. row -->
+
+		<div class="form-row">
 			<div class="form-group col-md-6">
 				<label for="inputDone" class="form-label font-weight-normal">Done *</label>
 				<input wire:model.lazy="done"
@@ -154,7 +136,7 @@
 					{{ $errors->has('applied') == false && $this->applied != null ? 'is-valid border-success':'' }}"
 					id="selectApplied"
 					aria-describedby="selectAppliedFeedback">
-
+					<option value="null">Choose...</option>
 					<option value="1">Yes</option>
 					<option selected value="0">No</option>
 
@@ -170,6 +152,30 @@
                     </div>
 				@enderror
 			</div>
+
+			{{-- @if($this->applied == 1) --}}
+				<div class="form-group col-md-4">
+					<label for="inputBatchNumber" class="form-label font-weight-normal">Batch Number {{ $this->applied == 1 ? '*':'' }}</label>
+					<input wire:model.lazy="batch_number"
+						type="text"
+						class="form-control form-control-sm
+						{{ $errors->has('batch_number') ? 'is-invalid':'' }}
+						{{ $errors->has('batch_number') == false && $this->batch_number != null ? 'is-valid border-success':'' }}"
+						id="inputBatchNumber"
+						placeholder="e.g. 123-MP-1L2O"
+						aria-describedby="inputBatchNumberFeedback">
+
+					@error('batch_number')
+						<div id="inputBatchNumberFeedback" class="invalid-feedback">
+							{{ $message }}
+						</div>
+	                @else
+	                    <div id="inputBatchNumberFeedback" class="valid-feedback">
+	                        Looks good!
+	                    </div>
+					@enderror
+				</div>
+			{{-- @endif --}}
 
 		</div>
 		<!-- /. row -->

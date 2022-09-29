@@ -6,6 +6,7 @@ use App\Models\Species;
 use App\Models\Vaccination;
 use App\Models\Vaccine;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -23,21 +24,35 @@ class VaccineController extends Component
     // General attributes
     public $pageTitle, $modalTitle;
 
+    // Stepper
+    public $currentStep = 1;
+
+    public $steps = [
+        1 => [
+            'heading'    => 'General information',
+        ],
+        2 => [
+            'heading'    => 'Target species',
+        ],
+        3 => [
+            'heading'    => 'Instructions',
+        ]
+    ];
+
     // CRUD attributes
-    public  $selected_species = [],
-            //$target_species,
-            $name,
-            $type,
-            $manufacturer,
-            $description,
-            $status = 'choose',
-            $dosage,
-            $administration,
-            $vaccination_schedule,
-            $primary_doses,
-            $revaccination_schedule,
-            $revaccination_doses,
-            $selected_id;
+    public $selected_species = [],
+        $name,
+        $type,
+        $manufacturer,
+        $description,
+        $status = 'choose',
+        $dosage,
+        $administration,
+        $vaccination_schedule,
+        $primary_doses,
+        $revaccination_schedule,
+        $revaccination_doses,
+        $selected_id;
 
     // Listeners
     protected $listeners = [
@@ -56,25 +71,51 @@ class VaccineController extends Component
     ];
 
     /**
+     *  Validation rules by steps (for stepper)
+     *
+     **/
+    private $validationRules = [
+        1 => [
+            'name'         => ['required', 'string', 'min:3', 'max:140'],
+            'type'         => ['required', 'string', 'min:3', 'max:140'],
+            'manufacturer' => ['required', 'string', 'min:3', 'max:140'],
+            'description'  => ['required', 'string', 'min:3', 'max:3000'],
+            'status'       => ['required', 'in:"Required", "Recommended", "Optional"'],
+        ],
+        2 => [
+            'selected_species' => ['required', 'array'],
+        ],
+        3 => [
+            'dosage'                 => ['required', 'string', 'min:3', 'max:255'],
+            'administration'         => ['required', 'string', 'min:3', 'max:255'],
+            'vaccination_schedule'   => ['required', 'string', 'min:3', 'max:255'],
+            'primary_doses'          => ['required', 'integer', 'integer', 'between:1,10'],
+            'revaccination_schedule' => ['required', 'string', 'min:3', 'max:255'],
+            'revaccination_doses'    => ['required', 'integer', 'integer', 'between:0,10'],
+        ]
+    ];
+
+     /**
      *  Function that returns the validation rules
      *
     **/
-    protected function rules() {
-        return [
-            //'target_species'         => 'required|string|min:3|max:140',
-            'name'                   => 'required|string|min:3|max:140',
-            'type'                   => 'required|string|min:3|max:140',
-            'manufacturer'           => 'required|string|min:3|max:140',
-            'description'            => 'required|string|min:3|max:3000',
-            'status'                 => 'required|in:"Recommended", "Optional"',
-            'dosage'                 => 'required|string|min:3|max:255',
-            'administration'         => 'required|string|min:3|max:255',
-            'vaccination_schedule'   => 'required|string|min:3|max:255',
-            'primary_doses'          => 'required|integer|between:1,10',
-            'revaccination_schedule' => 'required|string|min:3|max:255',
-            'revaccination_doses'    => 'required|integer|between:0,10'
-        ];
-    }
+    // protected function rules()
+    // {
+    //     return [
+    //         'selected_species'       => 'required|array',
+    //         'name'                   => 'required|string|min:3|max:140',
+    //         'type'                   => 'required|string|min:3|max:140',
+    //         'manufacturer'           => 'required|string|min:3|max:140',
+    //         'description'            => 'required|string|min:3|max:3000',
+    //         'status'                 => 'required|in:"Required", "Recommended", "Optional"',
+    //         'dosage'                 => 'required|string|min:3|max:255',
+    //         'administration'         => 'required|string|min:3|max:255',
+    //         'vaccination_schedule'   => 'required|string|min:3|max:255',
+    //         'primary_doses'          => 'required|integer|between:1,10',
+    //         'revaccination_schedule' => 'required|string|min:3|max:255',
+    //         'revaccination_doses'    => 'required|integer|between:0,10'
+    //     ];
+    // }
 
     /**
      *  Real time validation
@@ -82,7 +123,7 @@ class VaccineController extends Component
     **/
     public function updated($propertyName)
     {
-        $this->validateOnly($propertyName);
+        $this->validateOnly($propertyName, $this->validationRules[$this->currentStep]);
     }
 
     /**
@@ -101,6 +142,19 @@ class VaccineController extends Component
     public function resetPagination()
     {
         $this->resetPage();
+    }
+
+
+    public function goToNextStep()
+    {
+        $this->validate($this->validationRules[$this->currentStep]);
+        $this->currentStep++;
+
+    }
+
+    public function goToPreviousStep()
+    {
+        $this->currentStep--;
     }
 
     /**
@@ -141,9 +195,6 @@ class VaccineController extends Component
     {
         $this->authorize('vaccines_index');
 
-        // $vaccine = Vaccine::find(1);
-        // $vaccine->species;
-
         if ($this->readyToLoad) {
             if (strlen($this->search) > 0 ) {
                 $vaccines = Vaccine::where('name', 'like', '%' . $this->search . '%')
@@ -159,7 +210,7 @@ class VaccineController extends Component
             $vaccines = [];
         }
 
-        $speciesList = Species::select('id', 'name', DB::raw("0 as checked"))
+        $speciesList = Species::select('id', 'name', 'scientific_name')
             ->orderBy('name')
             ->get();
 
@@ -170,12 +221,14 @@ class VaccineController extends Component
 
     public function store()
     {
-        //dd($this->selected_species);
         $this->authorize('vaccines_store');
-        $validatedData = $this->validate();
+
+        // Usando validation rules by steps
+        $rules = collect($this->validationRules)->collapse()->toArray();
+        $validatedData = $this->validate($rules);
+
         $vaccine = Vaccine::create($validatedData);
 
-        //$this->selected_species = Species::pluck('id')->toArray();
         $vaccine->species()->attach($this->selected_species);
 
         $this->emit('hide-modal', 'hide-modal');
@@ -194,10 +247,16 @@ class VaccineController extends Component
 
     public function edit(Vaccine $vaccine)
     {
-        //$ids = $vaccine->species->pluck('id');
+        // Recupera el array de ids con formato de string
+        $this->selected_species = $vaccine->species->pluck('id')->map(fn ($item) => (string) $item)->toArray();
+
+        // $this->selected = $this->species->pluck('id')->map(fn ($item) => (string) $item)->toArray();
+
+        // foreach ($this->selected_species as $key => $id) {
+        //     $this->selected_species[$key] = strval($id);
+        // }
+
         $this->selected_id = $vaccine->id;
-        //$this->selected_species = $vaccine->species->pluck('id');
-        $this->selected_species = [];
         $this->name = $vaccine->name;
         $this->type = $vaccine->type;
         $this->manufacturer = $vaccine->manufacturer;
@@ -211,21 +270,21 @@ class VaccineController extends Component
         $this->revaccination_doses = $vaccine->revaccination_doses;
 
         $this->emit('show-modal', 'show-modal');
+
     }
 
     public function update()
     {
         $this->authorize('vaccines_update');
-        //dd($this->selected_species);
 
-        $validatedData = $this->validate();
+        $rules = collect($this->validationRules)->collapse()->toArray();
+        $validatedData = $this->validate($rules);
+
         $vaccine = Vaccine::find($this->selected_id);
         $vaccine->update($validatedData);
-
         $vaccine->species()->sync($this->selected_species);
 
         $this->resetUI();
-
         $this->emit('hide-modal', 'hide-modal');
 
         $this->dispatchBrowserEvent('updated', [
@@ -274,17 +333,19 @@ class VaccineController extends Component
     {
         $this->selected_id = '';
         $this->selected_species = [];
-        $this->target_species = '';
         $this->name = '';
         $this->type = '';
         $this->manufacturer = '';
         $this->description = '';
+        $this->status = 'choose';
         $this->dosage = '';
         $this->administration = '';
         $this->vaccination_schedule = '';
         $this->primary_doses = '';
         $this->revaccination_schedule = '';
         $this->revaccination_doses = '';
+
+        $this->currentStep = 1;
 
         $this->resetValidation();
         $this->resetPage();

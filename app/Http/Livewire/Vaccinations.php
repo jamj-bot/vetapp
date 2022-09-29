@@ -2,8 +2,10 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\Vaccine;
+use App\Models\Pet;
+use App\Models\Species;
 use App\Models\Vaccination;
+use App\Models\Vaccine;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -19,20 +21,27 @@ class Vaccinations extends Component
 	public $pet;
 
 	// Datatable attributes
-	public $paginate = '50',
+	public $paginate = '25',
 		$sort = 'done',
 		$direction = 'desc',
 		$readyToLoad = false,
 		$search = '';
 
 	// General attrbibutes to component
-	public $modalTitle, $modalApplyTitle = 'Vaccination';
+	public $addButton, $modalTitle, $modalApplyTitle;
 
 	// CRUD attributes
-	public $selected_id, $vaccine_id, $type = 'choose', $batch_number, $dose_number, $doses_required, $done, $applied = 0;
+	public $selected_id,
+	$vaccine_id,
+	$type = 'choose',
+	$batch_number,
+	$dose_number,
+	$doses_required,
+	$done,
+	$applied = null;
 
 	// Attributes for modal
-	public $vaccine_name, $vaccine_type, $vaccine_manufacturer, $vaccine_dosage, $vaccine_administration;
+	public $suggested_dosage;
 
 	// Listeners
 	protected $listeners = [
@@ -46,13 +55,13 @@ class Vaccinations extends Component
 	protected function rules()
 	{
 		return [
-			'vaccine_id' => 'required|exists:vaccines,id',
-			'type' => 'required|not_in:choose',
-			'dose_number' => 'required|integer|between:1,5',
+			'vaccine_id'     => 'required|exists:vaccines,id',
+			'type'           => 'required|not_in:choose',
+			'dose_number'    => 'required|integer|between:1,5',
 			'doses_required' => 'required|integer|between:1,5',
-			'done' => 'required|date',
-			'applied' => 'required|boolean',
-			'batch_number' => 'required_if:applied,1',
+			'done'           => 'required|date',
+			'applied'        => 'required|boolean',
+			'batch_number'   => 'required_if:applied,1|max:25',
 		];
 	}
 
@@ -113,6 +122,8 @@ class Vaccinations extends Component
 	public function mount()
 	{
 		$this->modalTitle = 'Vaccinations';
+		$this->modalApplyTitle = 'Vaccination';
+		$this->addButton = 'Register vaccination';
 	}
 
 	public function render()
@@ -150,7 +161,12 @@ class Vaccinations extends Component
 						'vaccinations.dose_number',
 						'vaccinations.doses_required',
 						'v.name as name',
+						'v.type as type',
+						'v.manufacturer as manufacturer',
 						'v.description as description',
+						'v.status as status',
+						'v.dosage as dosage',
+						'v.administration as administration',
 						'v.vaccination_schedule',
 						'v.primary_doses',
 						'v.revaccination_doses',
@@ -162,15 +178,16 @@ class Vaccinations extends Component
 			$vaccinations = [];
 		}
 
-		$vaccines = Vaccine::orderBy('description', 'asc')->get();
+		$vaccines = Species::findOrFail($this->pet->species->id)->vaccines->sortByDesc('status');
+
 
 		// FOR FORM
 		if ($this->vaccine_id) {
 			if ($this->type != 'choose') {
 				if ($this->type == 'Vaccination') {
-					$this->doses_required = Vaccine::find($this->vaccine_id)->primary_doses;
+					$this->suggested_dosage = Vaccine::find($this->vaccine_id)->primary_doses;
 				} elseif ($this->type == 'Revaccination') {
-					$this->doses_required = Vaccine::find($this->vaccine_id)->revaccination_doses;
+					$this->suggested_dosage = Vaccine::find($this->vaccine_id)->revaccination_doses;
 				}
 			}
 		}
@@ -212,13 +229,6 @@ class Vaccinations extends Component
 		$this->doses_required = $vaccination->doses_required;
 		$this->done = $vaccination->done->format('Y-m-d');
 		$this->applied = $vaccination->applied;
-
-		$vaccine = Vaccine::findOrFail($this->vaccine_id);
-		$this->vaccine_name = $vaccine->name;
-		$this->vaccine_type = $vaccine->type;
-		$this->vaccine_manufacturer = $vaccine->manufacturer;
-		$this->vaccine_dosage = $vaccine->dosage;
-		$this->vaccine_administration = $vaccine->administration;
 
 		$this->emit('show-modal-apply', 'show-modal-apply');
 	}
@@ -327,15 +337,8 @@ class Vaccinations extends Component
 		$this->dose_number = '';
 		$this->doses_required = '';
 		$this->done = '';
-		$this->applied = 0;
+		$this->applied = null;
 		$this->resetValidation();
-
-		// Other attributes
-		$this->vaccine_name = '';
-		$this->vaccine_type = '';
-		$this->vaccine_manufacturer = '';
-		$this->vaccine_dose = '';
-		$this->vaccine_administration = '';
 	}
 
 }

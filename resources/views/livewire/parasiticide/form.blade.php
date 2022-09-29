@@ -1,23 +1,5 @@
 <form autocomplete="off" wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
 	@include('common.modal-header')
-		<div class="form-row">
-			<div class="form-group col-md-12">
-				<label class="form-label font-weight-normal">Target species *</label><br>
-				@foreach($speciesList as  $speciesItem)
-					<div class="form-check form-check-inline">
-			  			<input class="form-check-input"
-			  				type="checkbox"
-			  				checked
-			  				id="inlineCheckbox{{$speciesItem->id}}"
-			  				{{-- wire:model="selected_species.{{ $speciesItem->id }}" --}}
-			  				wire:model.defer="selected_species"
-			  				value="{{$speciesItem->id}}"
-			  				{{-- $speciesItem->checked == 1 ? 'checked' : ''--}}>
-			  			<label class="form-check-label" for="inlineCheckbox{{$speciesItem->id}}">{{ $speciesItem->name }}</label>
-					</div>
-				@endforeach
-			</div>
-		</div>
 
 		<div class="form-row">
 			<div class="form-group col-md-4">
@@ -315,5 +297,31 @@
 			</div>
 		</div>
 
+		<div class="form-row">
+			<div class="form-group col-md-12">
+				<label class="form-label font-weight-normal">Target species *</label><br>
+				@foreach($speciesList as  $speciesItem)
+					<div class="{{-- form-check form-check-inline  --}}icheck-greensea {{-- icheck-inline --}}">
+			  			<input class="form-check-input"
+			  				type="checkbox"
+			  				checked
+			  				id="inlineCheckbox{{$speciesItem->id}}"
+			  				{{-- wire:model="selected_species.{{ $speciesItem->id }}" --}}
+			  				wire:model.defer="selected_species"
+			  				value="{{$speciesItem->id}}"
+			  				{{-- $speciesItem->checked == 1 ? 'checked' : ''--}}>
+			  			<label class="form-check-label" for="inlineCheckbox{{$speciesItem->id}}">
+			  				{{ $speciesItem->name }} / <span class="text-muted font-italic">{{ $speciesItem->scientific_name}}</span>
+			  			</label>
+					</div>
+				@endforeach
+
+				@error('selected_species')
+					<div class="text-xs text-danger">
+						{{ $message }}
+					</div>
+				@enderror
+			</div>
+		</div>
 	@include('common.modal-footer')
 </form>

@@ -26,7 +26,7 @@ class VaccineFactory extends Factory
             'type'                   => $this->faker->word,
             'manufacturer'           => $this->faker->word,
             'description'            => $this->faker->sentence,
-            'status'                 => $this->faker->randomElement(['Recommended', 'Optional']),
+            'status'                 => $this->faker->randomElement(['Required', 'Recommended', 'Optional']),
             'dosage'                 => $this->faker->word,
             'administration'         => $this->faker->sentence,
             'vaccination_schedule'   => $this->faker->sentence,

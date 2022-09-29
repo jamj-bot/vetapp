@@ -19,7 +19,7 @@ class CreateVaccinesTable extends Migration
             $table->string('type'); // tipo de vacuna: virus inactuvado, adn mensajero
             $table->string('manufacturer'); // fabricante de la vacuna
             $table->text('description'); // para qupe esta indicada
-            $table->enum('status', ['Recommended', 'Optional']); // es recomendada u obligatoria
+            $table->enum('status', ['Required', 'Recommended', 'Optional']); // es recomendada u obligatoria
             $table->string('dosage'); // cuántos ml darle
             $table->string('administration'); // como dárselos
             $table->string('vaccination_schedule'); // Cuándo vacunar por primera vez

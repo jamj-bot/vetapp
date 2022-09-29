@@ -9,13 +9,19 @@
 				<div class="col-sm-6">
 					<h1 class="display-4">{{ $user->name }}</h1>
 				</div>
-				<div class="col-sm-6">
-					<ol class="breadcrumb float-sm-right">
-					  <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-					   <li class="breadcrumb-item"><a href="{{ route('admin.users')}}">Users</a></li>
-					  <li class="breadcrumb-item active">{{ $user->name }}</li>
-					</ol>
-				</div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.users') }}">Users</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $user->name }}
+                        </li>
+                    </ol>
+                </div>
 			</div>
 		</div>
 	</section>
@@ -28,44 +34,34 @@
 				<div class="col-md-3">
 
 					<!-- Profile Image -->
-					<div class="card card-primary card-outline font-weight-light">
-						<div class="card-body box-profile">
-							<div class="text-center">
-								<img class="profile-user-img img-fluid img-circle shadow"
-									loading="lazy"
-									src="{{ $user->profile_photo_url }}"
-									style="width: 100px; height: 100px; object-fit: cover;"
-									alt="User profile picture">
-							</div>
-
-							<h3 class="profile-username text-center">{{ $user->name }}</h3>
-
-							<p class="text-muted text-center">{{ $user->user_type }}</p>
-
-							<ul class="list-group list-group-unbordered mb-3">
-								<li class="list-group-item">
-									<b>Live pets</b>
-									<a class="float-right text-success">
-										{{ $user->pets->where('status', 'Alive')->count() }}
-									</a>
+					<div class="card card-widget widget-user">
+						<div class="widget-user-header text-white" style="background: url('https://cdn.pixabay.com/photo/2016/06/02/02/25/background-1430099_960_720.png') center center;">
+							{{--<h3 class="widget-user-username text-right">Elizabeth Pierce</h3>--}}
+							<h5 class="widget-user-desc text-right text-uppercase">{{ $user->user_type }}</h5>
+						</div>
+						<div class="widget-user-image">
+							<img class="img-fluid img-circle elevation-2 shadow"
+								loading="lazy"
+								src="{{ $user->profile_photo_url }}"
+								style="width: 100px; height: 100px; object-fit: cover;"
+								alt="User profile picture">
+						</div>
+						<div class="card-footer p-0">
+							<ul class="nav flex-column pt-5">
+								<li class="nav-item">
+									<span class="nav-link text-black">
+										Active pets
+										<span class="float-right badge bg-primary">{{ $user->pets->where('status', 'Alive')->count() }}</span>
+									</span>
 								</li>
-								<li class="list-group-item">
-									<b>Dead pets</b>
-									<a class="float-right text-danger">
-										{{ $user->pets->where('status', 'Dead')->count() }}
-									</a>
-								</li>
-								<li class="list-group-item">
-									<b>Total pets</b>
-									<a class="float-right">
-										{{ $user->pets->count() }}
-									</a>
+								<li class="nav-item">
+									<span class="nav-link text-black">
+										Dead pets
+										<span class="float-right badge bg-dark">{{ $user->pets->where('status', 'Dead')->count() }}</span>
+									</span>
 								</li>
 							</ul>
-
-							<a href="#" class="btn btn-primary btn-block"><b>Create</b></a>
 						</div>
-						<!-- /.card-body -->
 					</div>
 					<!-- /.card -->
 
@@ -101,8 +97,11 @@
 							<hr>
 
 							<strong><i class="fas fa-fw fa-calendar mr-1"></i> Updated</strong>
-
 							<p class="text-muted">
+								{{ $user->updated_at->diffForHumans() }}
+							</p>
+
+{{-- 							<p class="text-muted">
 								{{ $user->updated_at->diffForHumans() }}
 							</p>
 
@@ -122,7 +121,7 @@
 
 							<strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
 
-							<p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p>
+							<p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p> --}}
 						</div>
 						<!-- /.card-body -->
 					</div>
@@ -134,9 +133,21 @@
 					<div class="card">
 						<div class="card-header p-2">
 							<ul class="nav nav-pills">
-								<li class="nav-item"><a class="nav-link active" href="#pets" data-toggle="tab">Pets</a></li>
-								<li class="nav-item"><a class="nav-link" href="#timeline" data-toggle="tab">Timeline</a></li>
-								<li class="nav-item"><a class="nav-link" href="#add_pet" data-toggle="tab">Add Pet</a></li>
+								<li class="nav-item">
+									<a class="nav-link active" href="#pets" data-toggle="tab">
+										<i class="fas fa-dog"></i>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="#timeline" data-toggle="tab">
+										<i class="fas fa-clock"></i>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="#add_pet" data-toggle="tab">
+										<i class="fas fa-user-cog"></i>
+									</a>
+								</li>
 							</ul>
 						</div><!-- /.card-header -->
 						<div class="card-body">
@@ -144,7 +155,8 @@
 
 								<div class="active tab-pane" id="pets">
 									{{-- @livewire('index-pets', ['user' => $user]) --}}
-									@livewire('pets', ['user' => $user])
+									{{-- @livewire('pets', ['user' => $user]) --}}
+									<livewire:pets :user="$user">
 								</div>
 								<!-- /.tab-pane -->
 

@@ -15,7 +15,13 @@ class SpeciesController extends Component
     protected $paginationTheme = 'bootstrap';
 
     // Attributes to datatable
-    public $paginate = '10', $sort = 'name', $direction = 'asc', $search = '';
+    public $paginate = '50',
+        $sort = 'name',
+        $direction = 'asc',
+        $search = '',
+        $readyToLoad = false,
+        $selected = [],
+        $select_page = false;
 
     // Attributes to datatable
     public $pageTitle, $modalTitle;
@@ -25,7 +31,8 @@ class SpeciesController extends Component
 
     // Listener
     protected $listeners = [
-        'destroy'
+        'destroy',
+        'updatedSelected'
     ];
 
     // Query string to  urls with datatable filters
@@ -58,12 +65,38 @@ class SpeciesController extends Component
     }
 
     /**
+     *  Check or all function
+     *
+    **/
+    public function updatedSelectPage($value)
+    {
+        if ($value) {
+            $this->selected = $this->species->pluck('id')->map(fn ($item) => (string) $item)->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    /**
+     *  uncheck Select All
+     *
+    **/
+    public function updatedSelected()
+    {
+        $this->select_page = false;
+    }
+
+    /**
      *  Funtion to reset pagination when a user writtes in search field
      *
     **/
     public function updatingSearch()
     {
         $this->resetPage();
+
+        // Al escribir en el buscador, se limpian los items seleccionados
+        $this->select_page = false;
+        $this->selected = [];
     }
 
     /**
@@ -94,27 +127,43 @@ class SpeciesController extends Component
         }
     }
 
+    /**
+     *  function para verificar si la página ya se cargó.
+     *
+    **/
+    public function loadItems()
+    {
+        $this->readyToLoad = true;
+    }
+
     public function mount()
     {
         $this->pageTitle = 'Species';
         $this->modalTitle = 'Species';
     }
 
+    public function getSpeciesProperty()
+    {
+        if ($this->readyToLoad) {
+            if (strlen($this->search) > 0) {
+                return Species::where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('scientific_name', 'like', '%' . $this->search . '%')
+                    ->orderBy($this->sort, $this->direction)
+                    ->paginate($this->paginate);
+            } else {
+                return Species::orderBy($this->sort, $this->direction)
+                    ->paginate($this->paginate);
+            }
+        } else {
+            return [];
+        }
+    }
+
     public function render()
     {
         $this->authorize('species_index');
 
-        if (strlen($this->search) > 0) {
-            $species = Species::where('name', 'like', '%' . $this->search . '%')
-                ->orWhere('scientific_name', 'like', '%' . $this->search . '%')
-                ->orderBy($this->sort, $this->direction)
-                ->paginate($this->paginate);
-        } else {
-            $species = Species::orderBy($this->sort, $this->direction)
-                ->paginate($this->paginate);
-        }
-
-        return view('livewire.species.component', compact('species'))
+        return view('livewire.species.component', ['species' => $this->species])
             ->extends('admin.layout.app')
             ->section('content');
     }
@@ -167,7 +216,7 @@ class SpeciesController extends Component
             'class' => 'bg-success',
             'icon' => 'fas fa-check-circle fa-lg',
             'image' => auth()->user()->profile_photo_url,
-            'body' => 'Species has been updated correctly.'
+            'body' => 'Item moved to Recycle bin.'
         ]);
     }
 
@@ -175,27 +224,106 @@ class SpeciesController extends Component
     {
         $this->authorize('species_destroy');
 
-        $petsCount = Pet::where('species_id', $id)->count();
-
-        if ($petsCount > 0) {
+        if (Pet::withTrashed()->where('species_id', $id)->count()) {
             $this->dispatchBrowserEvent('destroy-error', [
                 'title' => 'Not deleted',
                 'subtitle' => 'Warning!',
                 'class' => 'bg-warning',
                 'icon' => 'fas fa-exclamation-triangle fa-lg',
                 'image' => auth()->user()->profile_photo_url,
-                'body' => 'This Species cannot be removed because has associated Pets.'
+                'body' => 'Item can’t be moved to Recycle bin because cannot be deleted.'
             ]);
             return;
         }
 
         Species::find($id)->delete();
+
+        $this->dispatchBrowserEvent('deleted', [
+            'title' => 'Deleted',
+            'subtitle' => 'Succesfully!',
+            'class' => 'bg-danger',
+            'icon' => 'fas fa-check-circle fa-lg',
+            'image' => auth()->user()->profile_photo_url,
+            'body' => 'Item moved to Recycle bin.'
+        ]);
+    }
+
+    public function destroyMultiple()
+    {
+        $this->authorize('species_destroy');
+
+        //Si no hay ningun item seleccionado
+        if (!$this->selected) {
+            $this->dispatchBrowserEvent('destroy-error', [
+                'title' => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class' => 'bg-light',
+                'icon' => 'fas fa-exclamation-triangle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => '0 items selected'
+            ]);
+            return;
+        }
+
+        // Seleccionado items que no se pueden borrar
+        $not_deleted = [];
+        foreach ($this->selected as $key => $id) {
+            if (Pet::withTrashed()->where('species_id', $id)->count()) {
+                array_push($not_deleted, $id);
+                unset($this->selected[$key]);
+            }
+        }
+
+        // si hay items que no se pueden borrar, mando la alerta
+        if ($not_deleted) {
+
+            // Obteniendo los nombre de los items que no se pueden borrar
+            $speciesNotDeleted = Species::whereIn('id', $not_deleted)
+                ->select('name')
+                ->pluck('name')
+                ->toArray();
+
+            $this->dispatchBrowserEvent('destroy-error', [
+                'title' => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class' => 'bg-warning',
+                'icon' => 'fas fa-exclamation-triangle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => count($speciesNotDeleted) . ' items can’t be moved to Recycle bin because cannot be deleted: ' . implode(", ", $speciesNotDeleted)
+            ]);
+        }
+
+        if ($this->selected) {
+            // Seleccionando los nombres de las especies que sí se pueden borrar
+            $speciesDeleted = Species::whereIn('id', $this->selected)
+                ->select('name')
+                ->pluck('name')
+                ->toArray();
+
+            Species::destroy($this->selected);
+
+            $this->dispatchBrowserEvent('deleted', [
+                'title' => 'Deleted',
+                'subtitle' => 'Succesfully!',
+                'class' => 'bg-danger',
+                'icon' => 'fas fa-check-circle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => count($speciesDeleted). ' items moved to Recycle bin: ' . implode(", ", $speciesDeleted)
+            ]);
+        }
+
+        $this->resetUI();
     }
 
     function resetUI() {
         $this->selected_id = '';
         $this->name = '';
         $this->scientific_name = '';
+
+        $this->selected = [];
+        $this->select_page = false;
+        $this->search = '';
+
         $this->resetValidation();
         $this->resetPage();
     }

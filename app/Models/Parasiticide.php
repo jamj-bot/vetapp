@@ -39,13 +39,22 @@ class Parasiticide extends Model
      * The species that belong to the parasiticide.
      *
      **/
+    // public function species()
+    // {
+    //     return $this->belongsToMany(
+    //         Species::class,
+    //         'parasiticides_species',
+    //         'parasiticide_id',
+    //         'species_id'
+    //     );
+    // }
+
+    /**
+     * The species that belong to the parasiticide.
+     *
+     **/
     public function species()
     {
-        return $this->belongsToMany(
-            Species::class,
-            'parasiticides_species',
-            'parasiticide_id',
-            'species_id'
-        );
+        return $this->belongsToMany(Species::class);
     }
 }

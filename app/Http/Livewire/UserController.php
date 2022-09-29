@@ -18,19 +18,25 @@ class UserController extends Component
     protected $paginationTheme = 'bootstrap';
 
     // Datatable attributes
-    public $paginate = '10', $sort = 'name', $direction = 'asc', $readyToLoad = false, $search = '';
+    public $paginate = '50', $sort = 'name', $direction = 'asc', $readyToLoad = false, $search = '';
 
     // General attributes
     public $pageTitle, $modalTitle;
 
     // CRUD attributes
-    public $name, $phone, $email, $password, $status = 'choose', $user_type = 'choose', $selected_id;
+    public $name,
+        $phone,
+        $email,
+        $password,
+        $confirmPassword,
+        $status = 'choose',
+        $user_type = 'choose',
+        $selected_id;
 
     // Listeners
     protected $listeners = [
         'destroy' => 'destroy',
     ];
-
 
     /**
      *  Query string than  urls with datatable filters
@@ -38,7 +44,7 @@ class UserController extends Component
      **/
     protected $queryString = [
         'search' => ['except' => ''],
-        'paginate' => ['except' => '10'],
+        'paginate' => ['except' => '50'],
         'sort' => ['except' => 'name'],
         'direction' => ['except' => 'asc']
     ];
@@ -50,12 +56,13 @@ class UserController extends Component
     protected function rules()
     {
         return [
-            'name' => 'required|string|min:3|max:255',
-            'phone' => 'required|regex:/[0-9]{10}/',
-            'email' => "required|email|unique:users,email,{$this->selected_id}",
-            'password' => 'required|min:8',
-            'user_type' => 'required|not_in:choose',
-            'status' => 'required|not_in:choose'
+            'name'            => 'required|string|min:3|max:255',
+            'phone'           => 'required|regex:/[0-9]{10}/',
+            'email'           => "required|email|unique:users,email,{$this->selected_id}",
+            'password'        => 'required|string|min:8',
+            'confirmPassword' => 'required|string|same:password',
+            'user_type'       => 'required|not_in:choose',
+            'status'          => 'required|not_in:choose'
         ];
     }
 
@@ -180,7 +187,8 @@ class UserController extends Component
         $this->name = $user->name;
         $this->phone = $user->phone;
         $this->email = $user->email;
-        $this->password = "";
+        $this->password = '';
+        $this->confirmPassword = '';
         $this->status = $user->status;
         $this->user_type = $user->user_type; #user->role->name
 
@@ -232,14 +240,13 @@ class UserController extends Component
         $user->delete();
     }
 
-
-
     function resetUI() {
         $this->selected_id = '';
         $this->name = '';
         $this->phone = '';
         $this->email = '';
-        $this->password = "";
+        $this->password = '';
+        $this->confirmPassword = '';
         $this->status = 'choose';
         $this->user_type = 'choose';
         $this->resetValidation();

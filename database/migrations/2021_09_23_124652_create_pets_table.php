@@ -24,12 +24,14 @@ class CreatePetsTable extends Migration
             $table->string('zootechnical_function', 140)->nullable();
             $table->enum('sex', ['Male', 'Female', 'Unknown']);
             $table->date('dob');
+            $table->boolean('estimated');
             $table->enum('desexed', ['Desexed', 'Not desexed', 'Unknown']);
             $table->boolean('desexing_candidate')->default(1);
             $table->string('alerts', 255)->nullable();
             $table->string('diseases', 255)->nullable();
             $table->string('allergies', 255)->nullable();
             $table->enum('status', ['Alive', 'Dead'])->default('Alive');
+            $table->string('image', 100)->nullable();
             $table->timestamps();
             $table->softDeletes();
 

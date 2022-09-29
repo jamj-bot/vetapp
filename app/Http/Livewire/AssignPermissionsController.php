@@ -16,13 +16,13 @@ class AssignPermissionsController extends Component
     protected $paginationTheme = 'bootstrap';
 
     // Datatable attributes
-    public $paginate = '25', $sort = 'name', $direction = 'asc', $search = '';
+    public $paginate = '50', $sort = 'name', $direction = 'asc', $search = '';
 
     // Component attributes
     public $pageTitle;
 
     // Model attributes
-    public $role_id, $permissionSelected = [], $oldPermissions = [];
+    public $role_id = 0, $permissionSelected = [], $oldPermissions = [], $readyToLoad = false;
 
     // Listener
     public $listeners = [
@@ -32,7 +32,7 @@ class AssignPermissionsController extends Component
     // Query string to  urls with datatable filters
     protected $queryString = [
         'search' => ['except' => ''],
-        'paginate' => ['except' => '25'],
+        'paginate' => ['except' => '50'],
         'sort' => ['except' => 'name'],
         'direction' => ['except' => 'asc']
     ];
@@ -73,6 +73,15 @@ class AssignPermissionsController extends Component
         }
     }
 
+    /**
+     *  function para verificar si la página ya se cargó.
+     *
+    **/
+    public function loadItems()
+    {
+        $this->readyToLoad = true;
+    }
+
     public function mount()
     {
         $this->pageTitle = 'Assign Permissions';
@@ -83,11 +92,22 @@ class AssignPermissionsController extends Component
     {
         $this->authorize('assign_permissions_index');
 
-        // recupero todos los permisos seleccionando nombre, id y agregando un nuevo campo llamado checked con valor de 0
-        $permissions = Permission::select('name', 'id', DB::raw("0 as checked"))
-            ->orderBy($this->sort, $this->direction)
-            ->simplePaginate($this->paginate);
-
+        if ($this->readyToLoad) {
+            if (strlen($this->search) > 0) {
+                // Recupero los permisos buscados por le campo search
+                $permissions = Permission::select('name', 'id', DB::raw("0 as checked"))
+                    ->where('name', 'like', '%' . $this->search . '%')
+                    ->orderBy($this->sort, $this->direction)
+                    ->paginate($this->paginate);
+            } else {
+                // recupero todos los permisos seleccionando nombre, id y agregando un nuevo campo llamado checked con valor de 0
+                $permissions = Permission::select('name', 'id', DB::raw("0 as checked"))
+                    ->orderBy($this->sort, $this->direction)
+                    ->paginate($this->paginate);
+            }
+        } else {
+            $permissions = [];
+        }
 
         // Si el usuario tiene seleccionado un rol:
             // Uno las tablas role_has_permisions através del id del permiso, cuando el role id y los guardo en un array.

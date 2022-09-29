@@ -13,6 +13,7 @@ class Species extends Model
     use softDeletes;
     use HasRoles;
 
+
     /**
      * The attributes that are mass assignable.
      *
@@ -32,16 +33,32 @@ class Species extends Model
         return $this->hasMany(Pet::class);
     }
 
-    /**
-     * The vaccines that belong to the species.
-     */
-    // public function species()
+
+    // public function vaccines()
     // {
-    //    //return $this->belongsToMany(RelatedModel, pivot_table_name, foreign_key_of_current_model_in_pivot_table, foreign_key_of_other_model_in_pivot_table);
-    // return $this->belongsToMany(
-    //         Species::class,
+    //    return $this->belongsToMany(
+    //         Vaccine::class,
     //         'vaccines_species',
-    //         'species_id',
-    //         'vaccine_id');
+    //         'vaccine_id',
+    //         'species_id'
+    //     );
     // }
+
+    /**
+     * Get the vaccines for the species
+     *
+     */
+    public function vaccines()
+    {
+        return $this->belongsToMany(Vaccine::class);
+    }
+
+    /**
+     * Get the parasiticides for the species
+     *
+     */
+    public function parasiticides()
+    {
+        return $this->belongsToMany(Parasiticide::class);
+    }
 }

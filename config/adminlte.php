@@ -309,8 +309,16 @@ return [
         [
             'text'  => 'Users',
             'route' => 'admin.users',
+            'active'      => ['admin/users*'],
             'icon'  => 'fas fa-fw fa-address-book',
             'can'   => 'users_index',
+        ],
+        [
+            'text'  => 'Pets',
+            'route' => 'admin.pets.index',
+            'active'      => ['admin/pets*'],
+            'icon'  => 'fas fa-fw fa-dog',
+            'can'   => 'pets_index',
         ],
         // [
         //     'text'        => 'Users',
@@ -404,11 +412,12 @@ return [
                 // ],
             ],
         ],
-        // [
-        //     'text'       => 'Credits',
-        //     'icon_color' => 'red',
-        //     'route'        => 'admin.credits',
-        // ],
+        [
+            'text'       => 'Credits',
+            // 'icon'       => 'fas fa-fw fa-icons',
+            'icon_color' => 'danger',
+            'route'      => 'admin.credits',
+        ],
         // [
         //     'text'       => 'warning',
         //     'icon_color' => 'yellow',

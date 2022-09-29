@@ -1,4 +1,4 @@
-<div>
+<div wire:init="loadItems()">
     <!--Content header (Page header)-->
     <section class="content-header">
         <div class="container-fluid">
@@ -7,9 +7,13 @@
                     <h1 class="display-4">{{ $pageTitle }}</h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                      <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-                      <li class="breadcrumb-item active">{{ $pageTitle }}</li>
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $pageTitle }}
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -20,8 +24,16 @@
     <section class="content">
         <div class="container-fluid">
 
-            <!-- Buttons -->
+{{--             <!-- Buttons -->
             <div class="form-row d-flex justify-content-end">
+                <div class="form-group col-md-3">
+                    @can('species_destroy')
+                        <button id="destroyMultiple" wire:click="destroyMultiple" type="button" class="btn bg-gradient-danger btn-block shadow {{ $this->select_page ? '' : 'd-none' }}">
+                            <i class="fas fa-fw fa-trash"></i>
+                            Delete <span id="contador" class="font-weight-bold">{{ count($this->selected) }}</span> species
+                        </button>
+                    @endcan
+                </div>
                 <div class="form-group col-md-3">
                     @can('species_store')
                         <!-- Button trigger modal -->
@@ -31,47 +43,50 @@
                     @endcan
                 </div>
             </div>
-
-
+ --}}
             <!--Datatable -->
             <div class="row">
                 <div class="col-12">
+
+                    <!-- Datatable's filters when screen < md-->
+                    @include('common.datatable-filters-smaller-md')
+
+                    <!-- Datatable's filters when screen > md-->
+                    @include('common.datatable-filters-wider-md')
+
                     <div class="card">
                         <div class="card-header bg-gradient-primary">
-                            <h3 class="card-title">Index</h3>
-                            <div class="card-tools">
-
-                                <!-- Datatable's filters -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-sm m-1">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Show</label>
-                                            </div>
-                                            <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                                                <option disabled>Choose...</option>
-                                                <option value="10">10 items</option>
-                                                <option selected value="25">25 items</option>
-                                                <option value="50">50 items</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        @include('common.search')
-                                    </div>
+                            <!-- Datatable's buttons -->
+                            <div class="form-row d-flex justify-content-between">
+                                <div class="col-12 col-sm-5 col-md-auto">
+                                    @include('common.destroy-multiple-button')
                                 </div>
-                                <!-- /.Datatable filters -->
+
+                                <div class="col-12 col-sm-5 col-md-auto">
+                                    <!-- Add Button -->
+                                    @can('species_store')
+                                        @include('common.add-button')
+                                    @endcan
+                                </div>
                             </div>
                         </div>
                         <!-- /.card-header -->
 
-                        <div class="card-body table-responsive p-0">
+                         <!-- Datatable's when screen > md (card-body)-->
+                        <div class="card-body table-responsive p-0 d-none d-md-block">
                             <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
+                                        <th>
+                                            <div class="icheck-pomegranate">
+                                                <input type="checkbox"
+                                                id="checkAll"
+                                                wire:model="select_page">
+                                                <label class="sr-only" for="checkAll">Click to check all items</label>
+                                            </div>
+                                        </th>
                                         <th wire:click="order('name')">
                                             Name
-
                                             @if($sort == 'name')
                                                 @if($direction == 'asc')
                                                     <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
@@ -104,14 +119,25 @@
                                 </thead>
                                 <tbody>
                                     @forelse($species as $specie)
-                                        <tr>
+                                        <tr id="rowcheck{{ $specie->id }}" class="{{ $this->select_page ? 'table-active font-weight-bold' : ''}}">
+                                            <td width="10px">
+                                                <div class="icheck-pomegranate">
+                                                    <input type="checkbox"
+                                                    id="check{{$specie->id}}"
+                                                    wire:model.defer="selected"
+                                                    value="{{$specie->id}}"
+                                                    onchange="updateInterface(this.id)"
+                                                    class="counter">
+                                                    <label class="sr-only" for="check{{$specie->id}}">Click to check</label>
+                                                </div>
+                                            </td>
                                             <td>
-                                                <p class="d-flex flex-column font-weight-light mb-0">
+                                                <p class="d-flex flex-column mb-0">
                                                     {{ $specie->name }}
                                                 </p>
                                             </td>
                                             <td>
-                                                <p class="d-flex flex-column font-weight-light font-italic mb-0">
+                                                <p class="d-flex flex-column font-italic mb-0">
                                                     {{ $specie->scientific_name }}
                                                 </p>
                                             </td>
@@ -119,7 +145,7 @@
                                                 @can('species_update')
                                                     <a href="javascript:void(0)"
                                                         data-toggle="modal"
-                                                        wire:click.prevent="edit({{ $specie }})"
+                                                        wire:click.defer="edit({{ $specie }})"
                                                         title="Edit"
                                                         class="btn btn-sm btn-link border border-0">
                                                             <i class="fas fa-edit text-muted"></i>
@@ -138,8 +164,9 @@
                                             </td>
                                         </tr>
                                     @empty
+                                    @if($readyToLoad == true)
                                         <tr>
-                                            <td colspan="4">
+                                            <td colspan="5">
                                                 @if(strlen($search) <= 0)
                                                 <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
                                                     <div class="col-12 d-flex justify-content-center align-items-center text-muted">
@@ -168,30 +195,38 @@
                                                 @endif
                                             </td>
                                         </tr>
+                                    @endif
                                     @endforelse
                                 </tbody>
                             </table>
 
                             <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                             <div class="d-flex justify-content-center">
-                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                                    <span class="loader"></span>
+                                </p>
                             </div>
                         </div>
-                          <!-- /.card-body -->
+                        <!-- /.Datatable's when screen > md (card-body) -->
 
-                        <div class="card-footer clearfix" style="display: block;">
-                            @if(count($species))
-                                <div class="ml-4">
-                                    @if($species->hasPages())
-                                        {{ $species->links() }}
-                                    @endif
+                        <!-- card-footer -->
+                        @if(count($species))
+                            @if($species->hasPages())
+                                <div class="card-footer clearfix" style="display: block;">
+                                    <div class="mailbox-controls">
+                                        <div class="float-right pagination pagination-sm">
+                                            <div class="ml-4">
+                                                {{ $species->links() }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
-                        </div>
+                        @endif
                         <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
-                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, destroyMultiple">
                         </div>
                     </div>
                     <!-- /.card -->
@@ -203,6 +238,7 @@
     @include('livewire.species.form')
 </div>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" integrity="sha512-8vq2g5nHE062j3xor4XxPeZiPjmRDh6wlufQlfC6pdQ/9urJkU07NM0tEREeymP++NczacJ/Q59ul+/K2eYvcg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <script type="text/javascript">
     window.addEventListener('stored', event => {
@@ -210,6 +246,10 @@
     });
 
     window.addEventListener('updated', event => {
+        notify(event)
+    });
+
+    window.addEventListener('deleted', event => {
         notify(event)
     });
 
@@ -226,4 +266,40 @@
             $('#modalForm').modal('hide')
         });
     });
+</script>
+
+<script type="text/javascript">
+
+    function updateInterface(id) {
+        uncheckAll();
+        trActive(id);
+        count();
+    }
+
+    function uncheckAll() {
+        // Desmarca check all si estaba seleccionado al hacer clic en una row
+        if (document.getElementById('checkAll').checked) {
+            document.getElementById('checkAll').checked = false
+        }
+    }
+
+    function trActive(id) {
+        // marca los TR como activados al hacer clic en una row
+        var row = document.getElementById("rowcheck"+document.getElementById(id).value)
+        row.classList.toggle("table-active")
+        row.classList.toggle("font-weight-bold")
+    }
+
+    function count() {
+        // Selecciona todos los input de tipo chechbox que tengan la clase counter y los cuenta
+        document.getElementById("counter").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
+
+        if (document.querySelectorAll('input[type="checkbox"]:checked.counter').length < 1) {
+            document.getElementById("destroyMultiple").classList.add("d-none");
+        }
+        if (document.querySelectorAll('input[type="checkbox"]:checked.counter').length > 0) {
+            document.getElementById("destroyMultiple").classList.remove("d-none");
+        }
+    }
+
 </script>

@@ -64,7 +64,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="inputTemperatureFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -86,7 +86,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="inputHeartRateFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -95,6 +95,28 @@
                     <!-- /. row -->
 
                     <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="inputOxygenSaturationLevel" class="form-label font-weight-normal">Oxygen saturation level (%)</label>
+                            <input wire:model.lazy="oxygen_saturation_level"
+                                type="number"
+                                class="form-control form-control-sm
+                                {{ $errors->has('oxygen_saturation_level') ? 'is-invalid':'' }}
+                                {{ $errors->has('oxygen_saturation_level') == false && $this->oxygen_saturation_level != null ? 'is-valid border-success':'' }}"
+                                id="inputOxygenSaturationLevel"
+                                placeholder="e.g. 98"
+                                aria-describedby="inputOxygenSaturationLevelFeedback">
+
+                            @error('oxygen_saturation_level')
+                                <div id="inputOxygenSaturationLevelFeedback" class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @else
+                                <div id="inputOxygenSaturationLevelFeedback" class="valid-feedback">
+                                    Looks good!
+                                </div>
+                            @enderror
+                        </div>
+
                         <div class="form-group col-md-3">
                             <label for="inputRespiratoryRate" class="form-label font-weight-normal">Respiratory rate (bpm) *</label>
                             <input wire:model.lazy="respiratory_rate"
@@ -111,13 +133,13 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="inputRespiratoryRateFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
                         </div>
 
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label for="selectCapillaryRefillTime" class="form-label font-weight-normal">Capillary refill time (crt) *</label>
                             <select wire:model.lazy="capillary_refill_time"
                                 class="custom-select custom-select-sm
@@ -136,13 +158,13 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="selectCapillaryRefillTimeFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
                         </div>
 
-                        <div class="form-group col-md-5">
+                        <div class="form-group col-md-3">
                             <label for="selectPulse" class="form-label font-weight-normal">Pulse *</label>
                             <select wire:model.lazy="pulse"
                                 class="custom-select custom-select-sm
@@ -162,7 +184,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="selectPulseFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -216,7 +238,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="selectConsciousnessFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -272,7 +294,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="selectPainFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -287,9 +309,11 @@
                                 id="selectBodyCondition"
                                 aria-describedby="selectBodyConditionFeedback">
                                 <option value="choose" selected>Choose...</option>
-                                <option value="Too thin">Too thin</option>
-                                <option value="Ideal">Ideal</option>
-                                <option value="Too heavy">Too heavy</option>
+                                <option value="Very thin">Very thin</option>
+                                <option value="Thin">Thin</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Fat">Fat</option>
+                                <option value="Very fat">Very fat</option>
                             </select>
 
                             @error('body_condition')
@@ -297,7 +321,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="selectBodyConditionFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -326,7 +350,7 @@
                             TEXTAREA OCULTO: una vez que el texto escrito en el CKEDITOR está sincronizado con este TEXTAREA,
                             esta información se debe enviar al método UPDATE o STORE según corresponda para que en dichas funciones el valor se le asigne al attibuto o propiedad $problem_statement
                             -->
-                            <textarea id="textareaProblemStatement" hidden {{--wire:model="problem_statement--}}">
+                            <textarea id="textareaProblemStatement" hidden {{--wire:model="problem_statement--}}>
                             </textarea>
 
     {{--                             @error('problem_statement')
@@ -338,29 +362,81 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="inputDiagnosis" class="form-label font-weight-normal">Diagnosis</label>
-                            <input wire:model.lazy="diagnosis"
+
+{{--                         <div class="form-group col-md-4">
+                            <label for="inputDisease" class="form-label font-weight-normal">Diagnosis *</label>
+                            <input wire:model.lazy="disease"
                                 type="text"
                                 class="form-control form-control-sm
-                                {{ $errors->has('diagnosis') ? 'is-invalid':'' }}
-                                {{ $errors->has('diagnosis') == false && $this->diagnosis != null ? 'is-valid border-success':'' }}"
-                                id="inputDiagnosis"
-                                placeholder="e.g. Pyometra"
-                                aria-describedby="inputDiagnosisFeedback">
+                                {{ $errors->has('disease') ? 'is-invalid':'' }}
+                                {{ $errors->has('disease') == false && $this->disease != null ? 'is-valid border-success':'' }}"
+                                id="inputDisease"
+                                placeholder="e.g. Pyometra; necrosis and fatty degeneration, difuse, severe, liver."
+                                aria-describedby="inputDiseaseFeedback">
 
-                            @error('diagnosis')
-                                <div id="inputDiagnosisFeedback" class="invalid-feedback">
+                            @error('disease')
+                                <div id="inputDiseaseFeedback" class="invalid-feedback">
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="inputDiagnosisFeedback" class="valid-feedback">
+                                <div id="inputDiseaseFeedback" class="valid-feedback">
+                                    Looks good!
+                                </div>
+                            @enderror
+                        </div> --}}
+
+                        <div class="form-group col-md-4">
+                            <label for="textareaDisease"class="form-label font-weight-normal">Diagnosis *</label>
+                                <textarea wire:model.lazy="disease"
+                                    class="form-control form-control-sm
+                                    {{ $errors->has('disease') ? 'is-invalid':'' }}
+                                    {{ $errors->has('disease') == false && $this->disease != null ? 'is-valid border-success':'' }}"
+                                    id="textareaDisease"
+                                    placeholder="e.g. Pyometra; necrosis and fatty degeneration, difuse, severe, liver."
+                                    aria-describedby="textareaDiseaseFeedback"
+                                    rows="6">
+                                </textarea>
+
+                            @error('disease')
+                                <div id="textareaDiseaseFeedback" class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @else
+                                <div id="textareaDiseaseFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
                         </div>
 
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-4">
+                            <label for="selectTypesOfDiagnosis" class="form-label font-weight-normal">Type(s) of diagnosis *</label>
+                            <select wire:model.lazy="types_of_diagnosis"
+                                class="custom-select custom-select-sm
+                                {{ $errors->has('types_of_diagnosis') ? 'is-invalid':'' }}
+                                {{ $errors->has('types_of_diagnosis') == false && $this->types_of_diagnosis != null ? 'is-valid border-success':'' }}"
+                                id="selectTypesOfDiagnosis"
+                                aria-describedby="selectTypesOfDiagnosisFeedback" multiple size="7">
+                                <option value="Clinical">Clinical diagnosis</option>
+                                <option value="Presumptive">Presumptive diagnosis</option>
+                                <option value="Laboratory">Laboratory diagnosis</option>
+                                <option value="Radiology or tissue">Radiology or tissue diagnosis</option>
+                                <option value="Principal">Principal diagnosis</option>
+                                <option value="Admitting">Admitting diagnosis</option>
+                                <option value="Other">Other diagnosis</option>
+                            </select>
+
+                            @error('types_of_diagnosis')
+                                <div id="selectTypesOfDiagnosisFeedback" class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @else
+                                <div id="selectTypesOfDiagnosisFeedback" class="valid-feedback">
+                                    Looks good!
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group col-md-4">
                             <label for="selectPrognosis" class="form-label font-weight-normal">Prognosis *</label>
                             <select wire:model.lazy="prognosis"
                                 class="custom-select custom-select-sm
@@ -383,7 +459,7 @@
                                     {{ $message }}
                                 </div>
                             @else
-                                <div id="selectParasiticideFeedback" class="valid-feedback">
+                                <div id="selectPrognosisFeedback" class="valid-feedback">
                                     Looks good!
                                 </div>
                             @enderror
@@ -425,8 +501,7 @@
                                 id="selectConsultStatus"
                                 aria-describedby="selectConsultStatusFeedback">
                                 <option value="choose" selected>Choose...</option>
-                                <option value="Lab tests pending">Lab tests pending</option>
-                                <option value="Radiology tests pending">Radiology tests pending</option>
+                                <option value="In process">In process</option>
                                 <option value="Closed">Closed</option>
                             </select>
 
@@ -490,5 +565,4 @@
             </div>
         </div>
     </div>
-
 </form>

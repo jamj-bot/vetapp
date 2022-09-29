@@ -7,9 +7,13 @@
                     <h1 class="display-4">{{ $pageTitle }}</h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                      <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-                      <li class="breadcrumb-item active">{{ $pageTitle }}</li>
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $pageTitle }}
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -26,7 +30,7 @@
                     @can('users_store')
                         <!-- Button trigger modal -->
                         <button type="button" class="btn bg-gradient-primary btn-block shadow" data-toggle="modal" data-target="#modalForm">
-                           <i class="fas fa-fw fa-plus"></i> Add User
+                           <i class="fas fa-fw fa-plus-circle"></i> Add User
                         </button>
                     @endcan
                 </div>
@@ -39,35 +43,25 @@
                         <div class="card-header bg-gradient-primary">
                             <h3 class="card-title">Index</h3>
                             <div class="card-tools">
-
                                 <!-- Datatable's filters -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-sm m-1">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Show</label>
-                                            </div>
-                                            <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                                                <option disabled>Choose...</option>
-                                                <option selected value="10">10 items</option>
-                                                <option value="50">50 items</option>
-                                                <option value="100">100 items</option>
-                                            </select>
-                                        </div>
+                                <div class="form-row my-2">
+
+                                    <div class="col-sm-6">
+                                        @include('common.select')
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <div class="col-sm-6">
                                         @include('common.search')
                                     </div>
                                 </div>
                                 <!-- /.Datatable filters -->
-
                             </div>
                         </div>
                         <!-- /.card-header -->
 
 
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed table-hover">
+                            <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th wire:click="order('name')">
@@ -122,7 +116,7 @@
                                                     <p class="pr-2 mb-0">
                                                         <img class="{{-- profile-user-img --}} img-circle elevation-3"
                                                             loading="lazy"
-                                                        	alt="avatar"
+                                                        	alt="user profile photo"
                       										src="{{ $user->profile_photo_url }}"
                                                             style="width: 40px; height: 40px; object-fit: cover;">
 
@@ -235,24 +229,40 @@
                                             </tr>
                                         @endif
                                     @endforelse
+
                                 </tbody>
                             </table>
 
                             <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                             <div class="d-flex justify-content-center">
-                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                                    {{-- <i class="fas fa-fw fa-spinner fa-spin"></i> --}}
+                                    <span class="loader"></span>
+                                </p>
                             </div>
-
-
-                            @if(count($users))
-                                <div class="ml-4">
-                                    @if($users->hasPages())
-                                        {{ $users->links() }}
-                                    @endif
-                                </div>
-                            @endif
                         </div>
                           <!-- /.card-body -->
+
+
+                        <!-- card-footer -->
+                        @if(count($users))
+                            @if($users->hasPages())
+                                <div class="card-footer clearfix" style="display: block;">
+                                    <div class="mailbox-controls">
+                                        <div class="float-right pagination pagination-sm">
+                                            <div class="ml-4">
+                                                {{ $users->links() }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                        <!-- /.card-footer -->
+
+                        <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        </div>
                     </div>
                     <!-- /.card -->
                 </div>

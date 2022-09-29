@@ -60,7 +60,7 @@ class ParasiticideController extends Component
     protected function rules()
     {
         return [
-            'selected_species'       => 'required',
+            'selected_species'       => 'required|array',
             'name'                   => 'required|string|min:3|max:140',
             'type'                   => 'required|string|in:"Internal","External","Internal and external"',
             'manufacturer'           => 'required|string|min:3|max:140',
@@ -158,8 +158,8 @@ class ParasiticideController extends Component
         //     ->orderBy('name')
         //     ->get();
 
-        $speciesList = Species::select('id', 'name')
-            ->orderBy('id')
+        $speciesList = Species::select('id', 'name', 'scientific_name')
+            ->orderBy('name')
             ->get();
 
         return view('livewire.parasiticide.component', compact('parasiticides', 'speciesList'))
@@ -194,9 +194,13 @@ class ParasiticideController extends Component
     {
         $this->authorize('parasiticides_update');
 
+        $this->selected_species = $parasiticide->species->pluck('id')->toArray();
+
+        foreach ($this->selected_species as $key => $id) {
+            $this->selected_species[$key] = strval($id);
+        }
+
         $this->selected_id = $parasiticide->id;
-        $this->selected_species = [];
-        $this->target_species = $parasiticide->target_species;
         $this->name = $parasiticide->name;
         $this->type = $parasiticide->type;
         $this->manufacturer = $parasiticide->manufacturer;

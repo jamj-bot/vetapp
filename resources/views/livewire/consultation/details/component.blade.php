@@ -5,31 +5,36 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="display-4">
-                        {{ $pageTitle }} #{{ $consultation->id }}: {{ $pet->name != null ? $pet->name : $pet->code }}
+                        {{ $pet->name != null ? $pet->name : $pet->code }} / {{ $pageTitle }}
                         @if($pet->status == 'Dead')
-                            <sup><i class="fas fa-cross"></i></sup>
+                            <sup class="font-weight-light">Inactive</sup>
                         @endif
                     </h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">...</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.users') }}">...</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.users.show', $pet->user) }}">...</a></li>
+                    <ol class="breadcrumb float-sm-right text-sm">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('admin.pets.show', $pet)}}">
-                                @if($pet->name) {{ $pet->name }} @else {{ $pet->code }} @endif
-                            </a>
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.users') }}">Users</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.users.show', $pet->user) }}">{{ $pet->user->name }}</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.pets.show', $pet)}}"> {{ $pet->name ? $pet->name:$pet->code}}</a>
                         </li>
                         <li class="breadcrumb-item">
                             <a href="{{ route('admin.pets.consultations', $pet) }}">Consultations</a>
                         </li>
-                        <li class="breadcrumb-item active">{{ $pageTitle }} #{{ $consultation->id }}</li>
+                        <li class="breadcrumb-item active">#{{ $consultation->id }}</li>
                     </ol>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- Main content -->
     <section class="content">
@@ -67,6 +72,12 @@
                     <!-- about card -->
                     @include('common.about-card')
                     <!-- /.card -->
+
+                    <a href="{{ route('admin.pets.consultations.prescription', ['pet' => $pet, 'consultation' => $consultation]) }}"
+                        class="btn btn-block btn-default mb-3">
+                        <i class="far fa-arrow-alt-circle-left"></i>
+                        Add prescription
+                    </a>
                 </div>
                 <!-- /.col -->
 
@@ -76,30 +87,58 @@
                     @include('common.alerts')
                     <!-- /.Alerts -->
 
+{{--                     @if (session('message'))
+                        <div class="alert alert-success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                            {{ session('message') }}
+                        </div>
+                    @endif --}}
+
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Consultation details</h3>
+                            <h4 class="card-title">
+                                Consultation ID: {{ str_pad($consultation->id, 8, "0", STR_PAD_LEFT)  }}
+                                @if (session('message'))
+                                        <i class="fas fa-exclamation text-warning"></i> {{ session('message') }}
+                                @endif
+                            </h4>
 
                             <div class="card-tools">
                                 <span class="text-muted text-sm" wire:loading >
+                                        Please, wait... <i class="fas fa-fw fa-spinner fa-spin"></i>
+                                    </span>
+                                    <a href="javascript:void(0)"
+                                        wire:click="previusConsultation"
+                                        class="btn btn-default btn-sm"
+                                        title="Previous">
+                                            <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                    <a href="javascript:void(0)"
+                                        wire:click="nextConsultation"
+                                        class="btn btn-default btn-sm" title="Next">
+                                            <i class="fas fa-chevron-right"></i>
+                                    </a>
+                   {{--              <span class="text-muted text-sm" wire:loading >
                                     Please, wait... <i class="fas fa-fw fa-spinner fa-spin"></i>
                                 </span>
                                 <a href="javascript:void(0)"
-                                    wire:click="previusConsultation({{$consultation->id}})"
+                                    wire:click="previusConsultation"
                                     class="btn btn-tool" title="Previous">
                                         <i class="fas fa-chevron-left"></i>
                                 </a>
                                 <a href="javascript:void(0)"
-                                    wire:click="nextConsultation({{$consultation->id}})"
+                                    wire:click="nextConsultation"
                                     class="btn btn-tool" title="Next">
                                     <i class="fas fa-chevron-right"></i>
-                                </a>
+                                </a> --}}
                             </div>
+{{--
+                            <div class="float-right">
+
+                            </div> --}}
                         </div>
                         <!-- /.card-header -->
 
                         <div class="card-body p-0">
-
                             <div class="mailbox-read-info">
                                 <h4>
                                     {{ $consultation->user->name }}, DVM
@@ -109,10 +148,12 @@
                                     </span>
                                 </h4>
                                 <span>
-                                    Consultation ID: #{{ $consultation->id }}
-                                    <span class="mailbox-read-time float-right">
+                                    <i class="fas fa-fw fa-calendar text-muted"></i>
+                                    {{ $consultation->created_at->format('d-M-Y h:i A') }}
+                                    {{-- Consultation ID: {{ str_pad($consultation->id, 8, "0", STR_PAD_LEFT)  }} --}}
+{{--                                     <span class="mailbox-read-time float-right">
                                         {{ $consultation->created_at->format('d-M-Y h:i A') }}
-                                    </span>
+                                    </span> --}}
                                 </span>
                             </div>
                             <!-- /.mailbox-read-info -->
@@ -141,16 +182,15 @@
                             </div> --}}
                             <!-- /.mailbox-controls -->
 
-                            <div class="mailbox-read-message font-weight-light">
+                            <div class="mailbox-read-message">
                                 <h4>Pet information</h4>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        {{-- <i class="fas fa-fw fa-horse-head mr-1" style="color: "> --}}
-                                        <b></i>Pet name: </b>{{ $consultation->pet->name }}
+                                        <b></i>Pet name: </b>{{ $consultation->pet->name ? $consultation->pet->name : $consultation->pet->code }}
                                     </div>
                                     <div class="col-md-6">
-                                        {{-- <i class="far fa-fw fa-calendar-alt mr-1" style="color: "></i> --}}
                                         <b>Age: </b>{{ $consultation->age }}
+                                        <sup class="text-muted">{{ $consultation->pet->estimated ? 'est.' : ''}}</sup>
                                     </div>
                                 </div>
 
@@ -159,31 +199,30 @@
                                 <h4>Vital statistics</h4>
                                 <div class="row">
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-weight mr-1" style="color: "></i> --}}
                                         <b>Weight: </b>{{ $consultation->weight }} kilograms.
                                     </div>
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-thermometer-empty mr-1" style="color: "></i> --}}
                                         <b>Temperature: </b>{{ $consultation->temperature }} °C
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-stopwatch mr-1" style="color: "></i> --}}
-                                        <b>Capillary refill time: </b>{{ $consultation->capillary_refill_time }}
+                                        <b>Oxygen saturation level: </b>{{ $consultation->oxygen_saturation_level }}%
                                     </div>
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-heartbeat mr-1" style="color: red;"></i> --}}
-                                        <b>Heart rate: </b>{{ $consultation->heart_rate }} beats per minute
+                                        <b>Capillary refill time: </b>{{ $consultation->capillary_refill_time }}
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-heart mr-1" style="color: tomato;"></i> --}}
-                                        <b>Pulse: </b>{{ $consultation->pulse }}
+                                        <b>Heart rate: </b>{{ $consultation->heart_rate }} beats per minute
                                     </div>
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-lungs mr-1" style="color: "></i> --}}
+                                        <b>Pulse: </b>{{ $consultation->pulse }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
                                         <b>Respiratory rate: </b>{{ $consultation->respiratory_rate }} breaths per minute
                                     </div>
                                 </div>
@@ -192,7 +231,6 @@
                                 <h4>Ancillary info</h4>
                                 <div class="row">
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-thermometer mr-1" style="color: "></i> --}}
                                         <b>Reproductive status: </b>{{ $consultation->reproductive_status }}
                                     </div>
                                     <div class="col-md">
@@ -201,17 +239,14 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-tint mr-1" style="color: "></i> --}}
                                         <b>Hydration: </b>{{ $consultation->hydration }}
                                     </div>
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-frown-open mr-1" style="color: #ffc51a"></i> --}}
                                         <b>Pain: </b>{{ $consultation->pain }}
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        {{-- <i class="fas fa-fw fa-bone mr-1" style="color: "></i> --}}
                                         <b>Body condition: </b>{{ $consultation->body_condition }}
                                     </div>
                                 </div>
@@ -222,21 +257,24 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h4>Diagnosis</h4>
-
-
-                                        @if($consultation->diagnosis)
-                                            <span class="fa-stack fa-2x fa-pull-left">
-                                                <i class="fas fa-square fa-stack-2x text-info"></i>
-                                                <i class="fas fa-comment-medical fa-stack-1x fa-inverse text-light"></i>
-                                            </span>
-                                            {{ $consultation->diagnosis }}
-                                        @else
+                                        @if(str_contains('Presumptive', $consultation->types_of_diagnosis))
                                             <span class="fa-stack fa-2x fa-pull-left">
                                                 <i class="fas fa-square fa-stack-2x text-info"></i>
                                                 <i class="fas fa-question fa-stack-1x fa-inverse text-light"></i>
                                             </span>
-                                            Undetermined
+                                        @else
+                                            <span class="fa-stack fa-2x fa-pull-left">
+                                                <i class="fas fa-square fa-stack-2x text-info"></i>
+                                                <i class="fas fa-comment-medical fa-stack-1x fa-inverse text-light"></i>
+                                            </span>
                                         @endif
+                                        {{--  Limita el número de palabras a máximo 5; la primera letra la vuelve mayúscula, el array lo convierte en string separado por comas --}}
+                                        <span class="font-weight-bolder">Disease(s):</span><br>
+                                        {{ Str::ucfirst($consultation->diseases->implode('name', '; ')) }}
+                                        <br><br>
+                                        <span class="font-weight-bolder">Type(s) of diagnosis:</span><br>
+                                        {{ Str::ucfirst(Str::lower($consultation->types_of_diagnosis)) }}
+                                        <br><br>
                                     </div>
 
                                     <div class="col-md-6">
@@ -246,9 +284,9 @@
                                             <i class="fas fa-heartbeat fa-stack-1x fa-inverse text-light"></i>
                                         </span>
                                         {{ $consultation->prognosis }}
-
                                     </div>
                                 </div>
+
                                 <hr>
 
                                 <h4>Treatment plan</h4>
@@ -311,8 +349,12 @@
                                                             </div>
 
                                                             <div class="mb-3 border border-1 rounded-bottom overflow-hidden">
-                                                                <p class="text-xs m-1">
-                                                                    {{ $image->name }}
+                                                                <p class="text-xs m-1" title="{{ $image->name }}">
+                                                                    @if( strlen($image->name) > 27)
+                                                                        {{ substr($image->name, 0, 24) }}...
+                                                                    @else
+                                                                        {{ $image->name }}
+                                                                    @endif
                                                                 </p>
                                                                 <div class="btn-group btn-block">
                                                                     @can('consultations_download_files')
@@ -399,57 +441,66 @@
                                         <div class="tab-pane fade" :class="tab == 1 ? 'show active' : ''" id="nav-tests" role="tabpanel" aria-labelledby="nav-tests-tab">
                                             <h4 class="lead mt-2">Lab tests</h4>
 
+
                                             @can('consultations_index')
-                                                <div class="row">
-                                                    @forelse($consultation->tests as $test)
-                                                        <div class="col-sm-12 col-md-4 col-lg-3 text-center">
+                                                <div class="card">
+                                                    <div class="card-body p-0 text-sm">
+                                                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                                                            @forelse($consultation->tests as $test)
+                                                                <li class="item px-2">
+                                                                    <div class="product-img">
+                                                                        <a href="javascript:void(0)" data-toggle="modal" data-target="#modalImages"
+                                                                            onclick="changeSrcHref('{{ asset('/storage/'. $test->url) }}', '{{url('admin/pets/'.$pet->id.'/consultations/'.$test->testable_id)}}', '2048px')"
+                                                                            title="Show">
+                                                                            <img src="{{ url('vendor/adminlte/dist/img/pdf.png') }}"
+                                                                                style="width: 48px; height: 48px; object-fit: cover;">
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="product-info">
+                                                                        {{ $test->name }}
 
-                                                            <div class="border border-1 rounded-top mb-1 p-1 overflow-hidden bg-gradient-dark">
-                                                                <!-- Button trigger modal -->
-                                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#modalImages"
-                                                                    onclick="changeSrcHref('{{ asset('/storage/'. $test->url) }}', '{{url('admin/pets/'.$pet->id.'/consultations/'.$consultation->id)}}', '2048px')"
-                                                                    title="View">
-                                                                    <img src="{{ url('vendor/adminlte/dist/img/pdf.png') }}"
-                                                                        style="width: 64px; height: 64px; object-fit: cover;">
-                                                                </a>
-                                                            </div>
+                                                                        <span class="float-right">
+                                                                            <div class="btn-group">
+                                                                                @can('consultations_download_files')
+                                                                                      <button wire:click.prevent="downloadTest({{ $test }})"
+                                                                                        class="btn btn-info btn-xs border border-0 px-2" title="Download Test">
+                                                                                        <i class="fas fa-fw fa-cloud-download-alt"></i>
+                                                                                    </button>
+                                                                                    @endcan
+                                                                                    @can('consultations_delete_files')
+                                                                                    <button wire:click.prevent="deleteTest({{ $test }})"
+                                                                                        class="btn btn-danger btn-xs border border-0 px-2" title="Delete Test">
+                                                                                        <i class="fas fa-fw fa-trash-alt"></i>
+                                                                                    </button>
+                                                                                @endcan
+                                                                            </div>
+                                                                        </span>
 
-                                                            <div class="mb-3 border border-1 rounded-bottom overflow-hidden">
-                                                                <p class="text-xs m-1">
-                                                                    {{ $test->name }}
-                                                                </p>
-                                                                <div class="btn-group btn-block">
-                                                                    @can('consultations_download_files')
-                                                                          <button wire:click.prevent="downloadTest({{ $test }})"
-                                                                            class="btn btn-default btn-flat btn-xs border border-0" title="Download Test">
-                                                                            <i class="fas fa-fw fa-cloud-download-alt"></i>
-                                                                        </button>
-                                                                        @endcan
-                                                                        @can('consultations_delete_files')
-                                                                        <button wire:click.prevent="deleteTest({{ $test }})"
-                                                                            class="btn btn-default btn-flat btn-xs border border-0" title="Delete Test">
-                                                                            <i class="fas fa-fw fa-trash-alt"></i>
-                                                                        </button>
-                                                                    @endcan
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @empty
-                                                        <div class="container">
-                                                            <div class="row text-center text-muted pt-3">
-                                                                <div class="col-12">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="76" height="76" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
-                                                                        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5ZM1.6 11.85H0v3.999h.791v-1.342h.803c.287 0 .531-.057.732-.173.203-.117.358-.275.463-.474a1.42 1.42 0 0 0 .161-.677c0-.25-.053-.476-.158-.677a1.176 1.176 0 0 0-.46-.477c-.2-.12-.443-.179-.732-.179Zm.545 1.333a.795.795 0 0 1-.085.38.574.574 0 0 1-.238.241.794.794 0 0 1-.375.082H.788V12.48h.66c.218 0 .389.06.512.181.123.122.185.296.185.522Zm1.217-1.333v3.999h1.46c.401 0 .734-.08.998-.237a1.45 1.45 0 0 0 .595-.689c.13-.3.196-.662.196-1.084 0-.42-.065-.778-.196-1.075a1.426 1.426 0 0 0-.589-.68c-.264-.156-.599-.234-1.005-.234H3.362Zm.791.645h.563c.248 0 .45.05.609.152a.89.89 0 0 1 .354.454c.079.201.118.452.118.753a2.3 2.3 0 0 1-.068.592 1.14 1.14 0 0 1-.196.422.8.8 0 0 1-.334.252 1.298 1.298 0 0 1-.483.082h-.563v-2.707Zm3.743 1.763v1.591h-.79V11.85h2.548v.653H7.896v1.117h1.606v.638H7.896Z"/>
-                                                                    </svg>
-                                                                </div>
-                                                                <div class="col-12">
-                                                                    <p class="text-lg lead">
-                                                                         No attached documents
-                                                                    </p>
-                                                                </div>
-                                                             </div>
-                                                        </div>
-                                                    @endforelse
+                                                                        <span class="product-description">
+                                                                            {{ $test->updated_at->diffForHumans() }}
+                                                                        </span>
+                                                                    </div>
+                                                                </li>
+                                                            @empty
+                                                                <li class="item px-2">
+                                                                    <div class="container">
+                                                                        <div class="row text-center text-muted pt-3">
+                                                                            <div class="col-12">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="76" height="76" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
+                                                                                    <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5ZM1.6 11.85H0v3.999h.791v-1.342h.803c.287 0 .531-.057.732-.173.203-.117.358-.275.463-.474a1.42 1.42 0 0 0 .161-.677c0-.25-.053-.476-.158-.677a1.176 1.176 0 0 0-.46-.477c-.2-.12-.443-.179-.732-.179Zm.545 1.333a.795.795 0 0 1-.085.38.574.574 0 0 1-.238.241.794.794 0 0 1-.375.082H.788V12.48h.66c.218 0 .389.06.512.181.123.122.185.296.185.522Zm1.217-1.333v3.999h1.46c.401 0 .734-.08.998-.237a1.45 1.45 0 0 0 .595-.689c.13-.3.196-.662.196-1.084 0-.42-.065-.778-.196-1.075a1.426 1.426 0 0 0-.589-.68c-.264-.156-.599-.234-1.005-.234H3.362Zm.791.645h.563c.248 0 .45.05.609.152a.89.89 0 0 1 .354.454c.079.201.118.452.118.753a2.3 2.3 0 0 1-.068.592 1.14 1.14 0 0 1-.196.422.8.8 0 0 1-.334.252 1.298 1.298 0 0 1-.483.082h-.563v-2.707Zm3.743 1.763v1.591h-.79V11.85h2.548v.653H7.896v1.117h1.606v.638H7.896Z"/>
+                                                                                </svg>
+                                                                            </div>
+                                                                            <div class="col-12">
+                                                                                <p class="text-lg lead">
+                                                                                     No attached documents
+                                                                                </p>
+                                                                            </div>
+                                                                         </div>
+                                                                    </div>
+                                                                </li>
+                                                            @endforelse
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             @endcan
 
@@ -495,32 +546,25 @@
 
                         <!-- /.card-footer -->
                         <div class="card-footer">
-                            <div class="float-right">
-                                <span class="text-muted text-sm" wire:loading >
-                                    Please, wait... <i class="fas fa-fw fa-spinner fa-spin"></i>
-                                </span>
-                                <a href="javascript:void(0)"
-                                    wire:click="previusConsultation({{$consultation->id}})"
-                                    class="btn btn-default"
-                                    title="Previous">
-                                        <i class="fas fa-chevron-left"></i>
-                                </a>
-                                <a href="javascript:void(0)"
-                                    wire:click="nextConsultation({{$consultation->id}})"
-                                    class="btn btn-default" title="Next">
-                                        <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </div>
-
                             @can('consultations_destroy')
-                                <a href="javascript:void(0)"
-                                    wire:click.prevent="destroy({{ $consultation }})"
-                                    title="Delete"
-                                    class="btn btn-default">
-                                        <i class="fas fa-trash-alt"></i> Delete
-                                </a>
+                                <button class="button2" wire:click="delete({{$consultation}})">
+                                    <span class="text">Delete</span>
+                                    <span class="icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path></svg>
+                                    </span>
+                                </button>
                             @endcan
-                            @can('consultations_export')
+
+
+{{-- <button class="my-button">
+    <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M20 17h2v2H2v-2h2v-7a8 8 0 1 1 16 0v7zm-2 0v-7a6 6 0 1 0-12 0v7h12zm-9 4h6v2H9v-2z" fill="currentColor"></path>
+    </svg>
+</button> --}}
+
+
+{{--                             @can('consultations_export')
                                 <a href="{{ route('admin.pets.consultations.export', ['pet' => $pet, 'consultation' => $consultation]) }}"
                                     class="btn btn-default"
                                     target="_blank"
@@ -528,7 +572,7 @@
                                     title="Export to PDF">
                                     <i class="far fa-fw fa-file-pdf"></i> Export
                                 </a>
-                            @endcan
+                            @endcan --}}
                         </div>
                         <!-- /.card-footer -->
                     </div>

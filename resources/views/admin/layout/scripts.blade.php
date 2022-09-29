@@ -28,7 +28,7 @@
         $(document).Toasts('create', {
             title: event.detail.title,
             subtitle: event.detail.subtitle,
-            position: 'topRight',
+            position: 'bottomRight',
             class: event.detail.class,
             icon: event.detail.icon,
             autohide: true,
@@ -40,6 +40,10 @@
     }
 </script>
 
-{{-- <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script> --}}
+<!-- <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script> -->
 <script src="//unpkg.com/alpinejs" defer></script>
 <!-- The "defer" attribute is important to make sure Alpine waits for Livewire to load first. -->
+
+<!-- Select2-->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

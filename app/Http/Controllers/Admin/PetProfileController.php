@@ -36,14 +36,19 @@ class PetProfileController extends Controller
             ->get();
 
 
+        // $images = $pet->images()->orderBy('updated_at', 'desc')->limit(4)->get();
+        // $tests = $pet->tests()->orderBy('updated_at', 'desc')->limit(4)->get();
+
+
         //$this->authorize('pet_profile_show'); 'Lab tests pending','Radiology tests pending','Closed'
+
         return view('admin.pets.show',
             compact('pet',
                 'trashed_consultations',
                 'total_consultations',
                 'closed_consultations',
                 'open_consultations',
-                'weights_chart'
+                'weights_chart',
             )
         );
     }

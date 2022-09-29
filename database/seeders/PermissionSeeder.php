@@ -16,32 +16,47 @@ class PermissionSeeder extends Seeder
     {
 
         /**
-         * toDO:
+         * To do:
          *
-         *  ✓✓ Consultation details:
-         *      a) Crear permisos para subir, eliminar y descargar imágenes y tests de laboratorio en las consultas.
-         *      b) Estilizar el ocntenedor de imagenes / tests en el componente
-         *  ✓✓ Revisar todos los <a> de todos los componentes:
-         *      a) los que utilizan el atributo target para agregar el rel="noopener noreferrer" y
-         *      b) href="javascript:void(0)" cuando aplique.
-         *  ✓✓ Arreglar la validación para los tests en ConsultationDetails.
-         *  ✓✓ Arreglar lo relacionado con el editor WYSIWYG en las consultas.
-         *  ✓✓ Agregar el sppiner al botón del modal de los formularios.
-         *  ✓✓ Agregar el componente/modelo, etc., para desparasitantes.
-         *  ✓✓ Agregar el componente/modelo, etc., para desparacitaciones.
-         *  ✓✓ Completar el feedback positivo a los formularios
-         *  ✓✓ Volver nullable el campo name de las pet
-         *
-         *
-         *  — Agregar el compo presuntive en Consultation model.
-         *  — Agregar al modelo consultations la especialidad
-         *
-         *  — Verificar y corregir si es necesario los permisos de las consultas.
+         *  — Agregar al modelo consultations la especialidad?
+         *  — Revisar el problema con la validación del componente change owner.
          *  — Buscar mejores opciones para mostra/ocultar los botones save/update de los formularios
-         *  — Arreglar el algoritmo de nextConsultation y previousConsultation (se brinca consultas)
-         *  — Agregar el componente/modelo, etc., para prescipciones.
          *  — Implementar la funcionalidad para pactar citas.
-         *  — Agregar la opción de cambiar el dueño de la pet.
+         *  — Que se pueda revisar por cada veterinario: las consultas /rrecetas que ha creado en total y en determinado periodo.
+         *  — Revisar porqué no se esán subiendo las iamgenes con el factory
+         *  — Overdue vaccination reminder, checkup
+         *  — Export dewormings
+         *
+         *  — Perfeccionar la validación del array de arrays de instructions mando al método CreateMany:
+         *      Ejemplo de cómo agregar reglas de validación condicionalmente:
+         *      https://laracasts.com/discuss/channels/laravel/multiple-required-if-within-a-validators-rule
+         *
+         *  — Mejorar la accesibilidad de las tablas con <caption>, rowspan, <scope>, etc.
+
+         *  — Mejorar texto de los toast:
+         *      - Ejemplo de texto escrito correctamente: Record added succesfully.
+         *
+         *  — Optimizar / estandarizar la utilización de Toast / Sweet Alert:
+         *      - Utilizar un Sweet alert en el caso de que vaya a realizar un force delete ("Esta opción no se puede deshacer").
+         *      - Utilizar un toast en caso de que se vaya a realizar un delete ("Se envió a Recycle bin").
+         *
+         *  — Rediseñar la sección de Recycle bin
+         **/
+
+
+        /**
+         *  — https://www.researchgate.net/publication/305679921_Practical_Manual_on_Veterinary_Clinical_Diagnostic_Approach
+         *  — ROUTES OF DRUG ADMINISTRATION: Oral administration OA, intravenous route IV, intramuscular IM, intradernal
+         *       route ID, epidural route, subconjuntival, topical or local application.
+         *  — DIAGNOSIS: clinical diagnosis, laboratory diagnosis, radiology or tissue diagnosis, principal diagnosis, admitting
+         *       diagnosis, other
+         *
+         *  — https://www.slideshare.net/SUNYUlsterInstructs/veterinary-drug-use-prescribing-acquisition-and-pharmacy-management
+         *  — PRESCRIPTION FIELDS:
+         *      -hospital name and address,
+         *      -vet name, cédula profesional,
+         *      -drug name, strength, and quantity (metronidazol, 10 mg, tablets, QTY 14),
+         *      -date of the order, directions for use, any refill information (if warranted)
          *
          **/
 
@@ -49,12 +64,14 @@ class PermissionSeeder extends Seeder
          * — Lista de vistas:
          *      ✓ users component
          *      ✓ user.show
-         *      ✓ pets.show, modal-image
-         *      ✓ vaccinations component
-         *      ✓ consultations component
-         *      ✓ consultation details component
+         *      ✓ pets.show
+         *          ✓ vaccinations component
+         *          ✓ dewormings component
+         *          ✓ consultations component
+         *          ✓ consultation details component
          *      ✓ species component
          *      ✓ vaccine component
+         *      ✓ parasiticide component
          *      ✓ trash component
          *      ✓ permission component
          *      ✓ role component
@@ -67,6 +84,17 @@ class PermissionSeeder extends Seeder
          *  role 3 = client
          *  role 4 = veterinarian
          *  role 5 = guest
+         *
+         * 1 =  perro
+         * 2 =  gato
+         * 3 =  bovino
+         * 4 =  ovino
+         * 5 =  caprino
+         * 6 =  conejo
+         * 7 =  caballo
+         * 8 =  procino
+         * 9 =  bufalino
+         * 10 = avestruz
          **/
 
         //------ Vaccines permissions ------
@@ -118,7 +146,11 @@ class PermissionSeeder extends Seeder
             'name' => 'vaccines_destroy'
         ])->syncRoles(1);
 
+
         //------ Vaccinations permissions ------
+        Permission::create([
+            'name' => 'vaccinations_apply'
+        ])->syncRoles(1);
         Permission::create([
             'name' => 'vaccinations_update'
         ])->syncRoles(1);
@@ -175,6 +207,9 @@ class PermissionSeeder extends Seeder
         ])->syncRoles(1);
         Permission::create([
             'name' => 'pets_destroy'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'pets_change_owner'
         ])->syncRoles(1);
 
         //------ Vaccines permissions ------

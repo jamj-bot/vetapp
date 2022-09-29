@@ -3,8 +3,11 @@
 namespace App\Http\Livewire;
 
 use App\Models\Consultation;
+use App\Models\Disease;
 use App\Models\Image;
+use App\Models\Medicine;
 use App\Models\Pet;
+use App\Models\Prescription;
 use App\Models\Test;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -18,20 +21,18 @@ class ConsultationDetailsController extends Component
     use AuthorizesRequests;
     use WithFileUploads;
 
+    // General attributes
     public $pageTitle, $modalTitle;
-    public $pet, $consultation_id, $current_consultation, $selected_consultation_id = null, $show = null;
 
-    // Upload images
-    public $images = [];
 
-    // Upload tests
-    public $tests = [];
+    public $pet_id, $consultation_id;
 
     // CRUD attributes
     public $selected_id,
         $age,
         $weight,
         $temperature,
+        $oxygen_saturation_level,
         $capillary_refill_time = 'choose',
         $heart_rate,
         $pulse = 'choose',
@@ -42,10 +43,18 @@ class ConsultationDetailsController extends Component
         $pain = 'choose',
         $body_condition = 'choose',
         $problem_statement,
-        $diagnosis,
-        $prognosis = 'Pending',
+        $types_of_diagnosis = [],
+        $prognosis = 'choose',
+        $color = '',
         $treatment_plan,
-        $consult_status = 'choose';
+        $consult_status = 'choose',
+        $disease ='';
+
+    // Upload images
+    public $images = [];
+
+    // Upload tests
+    public $tests = [];
 
     /**
      *  Function that returns the validation rules
@@ -54,23 +63,25 @@ class ConsultationDetailsController extends Component
     protected function rules()
     {
         return [
-            'age'                   => 'required|string|min:3|max:255',
-            'weight'                => 'required|numeric|numeric|between:0,9999.999|regex:/^\d+(\.\d{1,3})?$/',
-            'temperature'           => 'required|numeric|between:0,99.99|regex:/^\d+(\.\d{1,2})?$/',
-            'capillary_refill_time' => 'required|in:"Less than 1 second","1-2 seconds","Longer than 2 seconds"',
-            'heart_rate'            => 'required|integer|between:0,2000',
-            'pulse'                 => 'required|in:"Strong and synchronous with each heart beat","Irregular","Bounding","Weak or absent"',
-            'respiratory_rate'      => 'required|integer|between:0,200',
-            'reproductive_status'   => 'required|in:"Pregnant","Lactating","Neither"',
-            'consciousness'         => 'required|in:"Alert and responsive","Depressed or obtunded","Stupor","Comatose"',
-            'hydration'             => 'required|in:"Normal","0-5%","6-7%","8-9%","+10%"',
-            'pain'                  => 'required|in:"None","Vocalization","Changes in behavior","Physical changes"',
-            'body_condition'        => 'required|in:"Too thin","Ideal","Too heavy"',
-            'problem_statement'     => 'required|string|min:15|max:65000',
-            'diagnosis'             => 'nullable|string|min:3|max:500',
-            'prognosis'             => 'required|in:"Pending","Good","Fair","Guarded","Grave","Poor"',
-            'treatment_plan'        => 'nullable|string|min:3|max:2000',
-            'consult_status'        => 'required|in:"Lab tests pending", "Radiology tests pending", "Closed"',
+            'age'                     => 'required|string|min:3|max:255',
+            'weight'                  => 'required|numeric|numeric|between:0,9999.999|regex:/^\d+(\.\d{1,3})?$/',
+            'temperature'             => 'required|numeric|between:0,99.99|regex:/^\d+(\.\d{1,2})?$/',
+            'oxygen_saturation_level' => 'nullable|integer|between:0,100',
+            'capillary_refill_time'   => 'required|in:"Less than 1 second","1-2 seconds","Longer than 2 seconds"',
+            'heart_rate'              => 'required|integer|between:0,2000',
+            'pulse'                   => 'required|in:"Strong and synchronous with each heart beat","Irregular","Bounding","Weak or absent"',
+            'respiratory_rate'        => 'required|integer|between:0,200',
+            'reproductive_status'     => 'required|in:"Pregnant","Lactating","Neither"',
+            'consciousness'           => 'required|in:"Alert and responsive","Depressed or obtunded","Stupor","Comatose"',
+            'hydration'               => 'required|in:"Normal","0-5%","6-7%","8-9%","+10%"',
+            'pain'                    => 'required|in:"None","Vocalization","Changes in behavior","Physical changes"',
+            'body_condition'          => 'required|in:"Very thin","Thin","Normal","Fat","Very fat"',
+            'problem_statement'       => 'required|string|min:15|max:65000',
+            'disease'                 => 'required|max:255',
+            'types_of_diagnosis'      => 'required|max:255',
+            'prognosis'               => 'required|in:"Pending","Good","Fair","Guarded","Grave","Poor"',
+            'treatment_plan'          => 'nullable|string|min:3|max:2000',
+            'consult_status'          => 'required|in:"In process", "Closed"',
         ];
     }
 
@@ -94,90 +105,47 @@ class ConsultationDetailsController extends Component
 
     public function mount($pet, $consultation)
     {
-        $this->pageTitle = 'Consultation';
+        $this->pageTitle = 'Consultations / '.str_pad($consultation, 5, "0", STR_PAD_LEFT);
         $this->modalTitle = 'Consultation';
 
-        $this->pet = Pet::findOrFail($pet);
+        $this->pet_id = $pet;
         $this->consultation_id = $consultation;
 
         // Cargar en formulario el contenido del campo problem_statement
         $this->problem_statement = Consultation::findOrFail($consultation)->problem_statement;
+
+    }
+
+
+    public function getConsultationProperty()
+    {
+        return Consultation::findOrFail($this->consultation_id);
+    }
+
+    public function getPetProperty()
+    {
+        return Pet::findOrFail($this->pet_id);
+    }
+
+    public function getPrescriptionsProperty()
+    {
+        return Prescription::where('consultation_id', $this->consultation_id)->get();
     }
 
     public function render()
     {
         $this->authorize('consultations_show');
 
-        if ($this->selected_consultation_id == null) {
-            $consultation = Consultation::findOrFail($this->consultation_id);// recupero consulta con el id que se envió a través de la url
-            $this->current_consultation = $consultation; // seasignada como consulta recuperada actualmente
-
-        } elseif ($this->selected_consultation_id != null) {
-            if ($this->show != null) {
-                if ($this->show == 'next') {
-                    $consultation = $this->pet->consultations()
-                        ->orderBy('updated_at', 'asc')
-                        ->where('updated_at', '>', $this->current_consultation->updated_at)
-                        ->first();
-
-                    if ($consultation == null) {
-                        $consultation = $this->pet->consultations()
-                            ->orderBy('updated_at', 'asc')
-                            ->first();
-                    }
-
-                    $this->current_consultation = $consultation;
-                } elseif ($this->show == 'previous') {
-                    $consultation = $this->pet->consultations()
-                        ->orderBy('updated_at', 'desc')
-                        ->where('updated_at', '<', $this->current_consultation->updated_at)
-                        ->first();
-                    if ($consultation == null) {
-                        if ($consultation == null) {
-                            $consultation = $this->pet->consultations()
-                                ->orderBy('updated_at', 'desc')
-                                ->first();
-                        }
-                    }
-
-                    $this->current_consultation = $consultation; // retrieved consultation es la consulta recuperada actualmente
-                }
-            }
-
-        }
-
-        // ERROR 4040 cuando la consulta no pertenece a la mascota
-        if ($consultation->pet->id != $this->pet->id) {
+        //ERROR 404 cuando la consulta no pertenece a la mascota
+        if ($this->consultation->pet->id != $this->pet->id) {
             abort(404);
         }
 
-        switch ($consultation->prognosis) {
-            case 'Good':
-                $consultation->color = 'text-success';
-                break;
-            case 'Fair':
-                $consultation->color = 'text-olive';
-                break;
-
-            case 'Guarded':
-                $consultation->color = 'text-warning';
-                break;
-
-            case 'Grave':
-                $consultation->color = 'text-orange';
-                break;
-
-            case 'Poor':
-                $consultation->color = 'text-danger';
-                break;
-
-            default:
-                $consultation->color = 'text-muted';
-                break;
-        }
-
-        return view('livewire.consultation.details.component', compact('consultation'))
-            ->extends('admin.layout.app')
+        return view('livewire.consultation.details.component', [
+                'consultation'  => $this->consultation,
+                'pet'           => $this->pet,
+                'prescriptions' => $this->Prescriptions
+            ])->extends('admin.layout.app')
             ->section('content');
     }
 
@@ -187,6 +155,7 @@ class ConsultationDetailsController extends Component
         $this->age = $consultation->age;
         $this->weight = $consultation->weight;
         $this->temperature = $consultation->temperature;
+        $this->oxygen_saturation_level = $consultation->oxygen_saturation_level;
         $this->capillary_refill_time = $consultation->capillary_refill_time;
         $this->heart_rate = $consultation->heart_rate;
         $this->pulse = $consultation->pulse;
@@ -197,10 +166,11 @@ class ConsultationDetailsController extends Component
         $this->pain = $consultation->pain;
         $this->body_condition = $consultation->body_condition;
         $this->problem_statement = $consultation->problem_statement;
-        $this->diagnosis = $consultation->diagnosis;
+        $this->types_of_diagnosis = explode(", ", $consultation->types_of_diagnosis);
         $this->prognosis = $consultation->prognosis;
         $this->treatment_plan = $consultation->treatment_plan;
         $this->consult_status = $consultation->consult_status;
+        $this->disease = Str::ucfirst($consultation->diseases->implode('name', '; '));
 
         $this->emit('show-modal', 'show-modal');
     }
@@ -216,11 +186,46 @@ class ConsultationDetailsController extends Component
 
         $this->problem_statement = $problem_statement; // <- se asigna el parámetro a la propiedad $problem_statement
 
+        $this->types_of_diagnosis = implode(", ", $this->types_of_diagnosis);
+
+        // Asigno un color a la cansulta
+        switch ($this->prognosis) {
+            case 'Good':
+                $this->color = 'text-success';
+                break;
+
+            case 'Fair':
+                $this->color = 'text-olive';
+                break;
+
+            case 'Guarded':
+                $this->color = 'text-warning';
+                break;
+
+            case 'Grave':
+                $this->color = 'text-orange';
+                break;
+
+            case 'Poor':
+                $this->color = 'text-danger';
+                break;
+
+            case 'Pending':
+                $this->color = 'text-muted';
+                break;
+        }
+
         $validatedData = $this->validate();
-
         $consultation = consultation::findOrFail($this->selected_id);
-
+        $consultation->color = $this->color;
         $consultation->update($validatedData);
+
+        // String disease, se convierte en
+        foreach(explode("; ", $this->disease) as $disease)
+        {
+            $diseases[] = Disease::firstOrCreate(['name' => Str::of($disease)->trim()])->id;
+        }
+        $consultation->diseases()->sync($diseases);
 
         $this->emit('hide-modal', 'hide-modal');
 
@@ -234,16 +239,40 @@ class ConsultationDetailsController extends Component
         ]);
     }
 
-    public function previusConsultation($id)
+    public function delete(Consultation $consultation)
     {
-        $this->selected_consultation_id = $id;
-        $this->show = 'previous';
+        $consultation->delete();
+        redirect()->route('admin.pets.consultations', ['pet' => $this->pet]);
     }
 
-    public function nextConsultation($id)
+    public function previusConsultation()
     {
-        $this->selected_consultation_id = $id;
-        $this->show = 'next';
+
+        $consultation = $this->pet->consultations()
+            ->orderBy('updated_at', 'desc')
+            ->where('updated_at', '<', $this->consultation->updated_at)
+            ->first();
+
+        if ($consultation) {
+            redirect()->route('admin.pets.consultations.show', ['pet' => $this->pet, 'consultation' => $consultation]);
+        } else {
+            session()->flash('message', 'First consultation stored.');
+        }
+    }
+
+    public function nextConsultation()
+    {
+
+        $consultation = $this->pet->consultations()
+            ->orderBy('updated_at', 'asc')
+            ->where('updated_at', '>', $this->consultation->updated_at)
+            ->first();
+
+        if ($consultation) {
+            redirect()->route('admin.pets.consultations.show', ['pet' => $this->pet, 'consultation' => $consultation]);
+        } else {
+            session()->flash('message', 'Last consultation stored.');
+        }
     }
 
     public function updatedImages()
@@ -271,12 +300,13 @@ class ConsultationDetailsController extends Component
         ]);
 
         foreach ($this->images as $image) {
-
             $originalName = Str::of($image->getClientOriginalName())->substr(0, -4); //elimina ultimos 4 caracteres (p. ej. .png)
 
-            $newName = Carbon::now()->format('d-M-Y') . ' - ' . Str::of($originalName)->replaceMatches('/[^A-Za-z0-9]++/', ' '); // concatena fecha + nombre file
+            $newName = Carbon::now()->format('d-M-Y') . ' - ' .
+                Str::slug($originalName, '-'); // concatena fecha + nombre file + nombre mascota
 
-            $name = Str::of($newName)->title();
+            $name = Str::upper($newName);
+
             $url = uniqid() . '.' . $image->extension();
 
             $image->storeAs('public/medical-imaging', $url);
@@ -341,9 +371,9 @@ class ConsultationDetailsController extends Component
             $originalName = Str::of($test->getClientOriginalName())->substr(0, -4); //elimina ultimos 4 caracteres (p. ej. .png)
 
             $newName = Carbon::now()->format('d-M-Y') . ' - ' .
-                Str::of($originalName)->replaceMatches('/[^A-Za-z0-9]++/', ' '); // concatena fecha + nombre file + nombre mascota
+                Str::slug($originalName, '-'); // concatena fecha + nombre file + nombre mascota
 
-            $name = Str::of($newName)->title();
+            $name = Str::upper($newName);
             $url = uniqid() . '.' . $test->extension();
 
             $test->storeAs('public/tests', $url);
@@ -394,10 +424,11 @@ class ConsultationDetailsController extends Component
 
     public function resetUI()
     {
-        $this->selected_id = '';
+        $this->selected_id = null;
         $this->age = '';
         $this->weight = null;
         $this->temperature = null;
+        $this->oxygen_saturation_level = null;
         $this->capillary_refill_time = 'choose';
         $this->heart_rate = null;
         $this->pulse = 'choose';
@@ -408,11 +439,17 @@ class ConsultationDetailsController extends Component
         $this->pain = 'choose';
         $this->body_condition = 'choose';
         $this->problem_statement = '';
-        $this->diagnosis = '';
-        $this->prognosis = 'Pending';
+        $this->types_of_diagnosis = [];
+        $this->prognosis = 'choose';
+        $this->color = '';
         $this->treatment_plan = '';
         $this->consult_status = 'choose';
+        $this->disease = '';
 
-        //$this->emit('reset-ckeditor', 'reset-ckeditor');
+        // $this->selected = [];
+        // $this->select_page = false;
+
+        $this->resetValidation();
+        // $this->emit('reset-ckeditor', 'reset-ckeditor');
     }
 }

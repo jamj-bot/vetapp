@@ -27,7 +27,6 @@ class VaccineSeeder extends Seeder
             'revaccination_schedule' => 'Anual',
             'revaccination_doses'    => 1
         ]);
-        // Uso la relación para definir a qué especies está relacionada la vacuna
         $vaccine->species()->attach([3, 4]);
 
         $vaccine = Vaccine::create([
@@ -50,12 +49,12 @@ class VaccineSeeder extends Seeder
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
             'description'            => 'Previene infecciones y abortos causados por Brucella abortus.',
-            'status'                 => 'Recommended',
+            'status'                 => 'Required',
             'dosage'                 => '2 ml',
             'administration'         => 'Subcutánea',
             'vaccination_schedule'   => 'Hembras. Edad: 3+ meses.',
             'primary_doses'          => 1,
-            'revaccination_schedule' => 'Una vez en la vida',
+            'revaccination_schedule' => 'No aplica',
             'revaccination_doses'    => 0
         ]);
         $vaccine->species()->attach([3]);
@@ -95,7 +94,7 @@ class VaccineSeeder extends Seeder
             'type'                   => 'Virus inactivado',
             'manufacturer'           => 'MSD',
             'description'            => 'Para la inmunización activa contra la rabia de perros, gatos y hurones.',
-            'status'                 => 'Recommended',
+            'status'                 => 'Required',
             'dosage'                 => '1 ml',
             'administration'         => 'Perros y gatos: subcutánea o intramuscular, hurones: subcutánea.',
             'vaccination_schedule'   => 'Edad: 3+ meses.',
@@ -104,6 +103,21 @@ class VaccineSeeder extends Seeder
             'revaccination_doses'    => 1
         ]);
         $vaccine->species()->attach([1, 2]);
+
+        $vaccine = Vaccine::create([
+            'name'                   => 'PARVIGEN®',
+            'type'                   => 'Virus inactivado',
+            'manufacturer'           => 'Virbac',
+            'description'            => 'En Caninos para la inmunización activa contra Parvovirus Canino.',
+            'status'                 => 'Recommended',
+            'dosage'                 => '1 ml',
+            'administration'         => 'Subcutánea o intramuscular.',
+            'vaccination_schedule'   => 'Edad: 6 a 8 semanas. Repetir cada 2 a 3 semanas hasta las 20 semanas de edad. Esto último a criterio del médico.',
+            'primary_doses'          => 4,
+            'revaccination_schedule' => 'Anual',
+            'revaccination_doses'    => 1
+        ]);
+        $vaccine->species()->attach([1]);
 
         $vaccine = Vaccine::create([
             'name'                   => 'Rabigen® GE',
@@ -130,9 +144,24 @@ class VaccineSeeder extends Seeder
             'administration'         => 'Intramuscular o subcutánea.',
             'vaccination_schedule'   => 'Edad: 15+ dias / +2 meses (madre vacunada). Repetir: [21, 30) días / [21, 30) días antes del parto.',
             'primary_doses'          => 2,
-            'revaccination_schedule' => 'Anual / [21, 30) días antes del parto.',
+            'revaccination_schedule' => 'Anual o [21, 30) días antes del parto.',
             'revaccination_doses'    => 1
         ]);
         $vaccine->species()->attach([3, 4, 5]);
+
+        $vaccine = Vaccine::create([
+            'name'                   => 'TREMVAC-FP-CAV®',
+            'type'                   => 'Virus activo',
+            'manufacturer'           => 'MSD',
+            'description'            => 'Para la inmunización de aves reproductoras como ayuda en la prevención de las enfermedades causadas por los virus de la Encefalomielitis Aviar y la Viruela Aviar, también protege contra el virus de la Anemia Infecciosa de las aves en la progenie de reproductoras vacunadas. Las aves debidamente vacunadas quedan protegidas durante todo el ciclo de postura.',
+            'status'                 => 'Recommended',
+            'dosage'                 => '0.01 ml',
+            'administration'         => 'Punción en la membrana del ala.',
+            'vaccination_schedule'   => 'Edad: 10 a 12 semanas',
+            'primary_doses'          => 1,
+            'revaccination_schedule' => 'No aplica',
+            'revaccination_doses'    => 0
+        ]);
+        $vaccine->species()->attach([10]);
     }
 }

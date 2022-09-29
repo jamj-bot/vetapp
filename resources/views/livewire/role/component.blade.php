@@ -7,9 +7,13 @@
                     <h1 class="display-4">{{ $pageTitle }}</h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                      <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">Home</a></li>
-                      <li class="breadcrumb-item active">{{ $pageTitle }}</li>
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $pageTitle }}
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -40,27 +44,18 @@
                         <div class="card-header bg-gradient-primary">
                             <h3 class="card-title">Index</h3>
                             <div class="card-tools">
-
                                 <!-- Datatable's filters -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-sm m-1">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Show</label>
-                                            </div>
-                                            <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                                                <option disabled>Choose...</option>
-                                                <option selected value="5">5 items</option>
-                                                <option value="10">10 items</option>
-                                            </select>
-                                        </div>
+                                <div class="form-row my-2">
+
+                                    <div class="col-sm-6">
+                                        @include('common.select')
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <div class="col-sm-6">
                                         @include('common.search')
                                     </div>
                                 </div>
                                 <!-- /.Datatable filters -->
-
                             </div>
                         </div>
                         <!-- /.card-header -->
@@ -166,15 +161,20 @@
                         </div>
                           <!-- /.card-body -->
 
-                        <div class="card-footer clearfix" style="display: block;">
-                            @if(count($roles))
-                                <div class="ml-4">
-                                    @if($roles->hasPages())
-                                        {{ $roles->links() }}
-                                    @endif
+                        <!-- card-footer -->
+                        @if(count($roles))
+                            @if($roles->hasPages())
+                                <div class="card-footer clearfix" style="display: block;">
+                                    <div class="mailbox-controls">
+                                        <div class="float-right pagination pagination-sm">
+                                            <div class="ml-4">
+                                                {{ $roles->links() }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
-                        </div>
+                        @endif
                         <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->

@@ -1,17 +1,11 @@
-
-{{-- <div class="input-group input-group-sm m-1">
-    <input type="text" wire:model="search" name="table_search" class="form-control float-right" placeholder="Search">
-    <div class="input-group-append">
-        <span class="btn btn-default">
-            <i class="fas fa-search"></i>
-        </span>
-    </div>
-</div> --}}
-<div class="input-group input-group-sm m-1">
-    <input type="text" wire:model="search" class="form-control" placeholder="Search">
-    <div class="input-group-append">
-        <div class="btn bg-primary">
-            <i class="fas fa-search"></i>
+<div class="form-group">
+    <div class="input-group input-group-sm">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fas fa-search"></i>
+                <label class="form-label sr-only" for="inputSearchItems">Search</label>
+            </span>
         </div>
+        <input type="search" wire:model="search" class="form-control" id="inputSearchItems" placeholder="Type your search term">
     </div>
 </div>

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVaccinesSpeciesTable extends Migration
+class CreateParasiticideSpeciesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,15 @@ class CreateVaccinesSpeciesTable extends Migration
      */
     public function up()
     {
-        Schema::create('vaccines_species', function (Blueprint $table) {
-
+        Schema::create('parasiticide_species', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('vaccine_id');
             $table->unsignedBigInteger('species_id');
+            $table->unsignedBigInteger('parasiticide_id');
             $table->timestamps();
 
-            $table->foreign('vaccine_id')
+            $table->foreign('parasiticide_id')
                 ->references('id')
-                ->on('vaccines')
+                ->on('parasiticides')
                 ->onDelete('cascade');
 
             $table->foreign('species_id')
@@ -39,6 +38,6 @@ class CreateVaccinesSpeciesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vaccines_species');
+        Schema::dropIfExists('parasiticide_species');
     }
 }

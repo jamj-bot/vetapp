@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalFormApplyLabel">
-                        <b>{{ $vaccine_name }}</b> | {{ $applied == 0 ? 'Apply' : 'Apply (undo)' }}
+                        <span>Vaccination</span> | {{ $applied == 0 ? 'Apply' : 'Apply (undo)' }}
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -12,24 +12,6 @@
                 </div>
                 <div class="modal-body">
 
-                    <ul class="mb-4 fa-ul">
-                        <li>
-                            <span class="fa-li"><i class="fas fa-check-square text-info"></i></span>
-                            <b>Type:</b> {{ $vaccine_type }}
-                        </li>
-                        <li>
-                            <span class="fa-li"><i class="fas fa-check-square text-info"></i></span>
-                            <b>Manufacturer:</b> {{ $vaccine_manufacturer }}
-                        </li>
-                        <li>
-                            <span class="fa-li"><i class="fas fa-check-square text-info"></i></span>
-                            <b>Dosage:</b> {{ $vaccine_dosage }}
-                        </li>
-                        <li>
-                            <span class="fa-li"><i class="fas fa-check-square text-info"></i></span>
-                            <b>Administration:</b> {{ $vaccine_administration }}
-                        </li>
-                    </ul>
                     <form wire:submit.prevent="apply()" autocomplete="off">
                         <div class="form-group col-12">
                             <label for="inputBatchNumber" class="form-label font-weight-normal">Batch Number *</label>

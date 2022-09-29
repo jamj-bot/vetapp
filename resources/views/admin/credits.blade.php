@@ -69,6 +69,18 @@
                 <a href="https://www.flaticon.com/free-icons/file" title="file icons">File icons created by Roman Káčerek - Flaticon</a> <br>
                 <a href="https://www.flaticon.com/free-icons/pdf" title="pdf icons">Pdf icons created by Roman Káčerek - Flaticon</a> <br>
 
+                <a href="https://www.flaticon.com/free-icons/search" title="search icons">Search icons created by Maniprasanth - Flaticon</a> <br>
+
+                <a href="https://www.flaticon.com/free-icons/cat" title="cat icons">Cat icons created by Freepik - Flaticon</a> <br>
+
+                <a href="https://www.flaticon.com/free-icons/walk-the-pet" title="walk the pet icons">Walk the pet icons created by manshagraphics - Flaticon</a> <br>
+
+                <a href="https://www.flaticon.com/free-icons/cow" title="cow icons">Cow icons created by Freepik - Flaticon</a> <br>
+
+                <a href="https://www.flaticon.com/free-icons/pet-care" title="pet care icons">Pet care icons created by inipagistudio - Flaticon</a> <br>
+
+                <a href="https://www.flaticon.com/free-icons/animals" title="animals icons">Animals icons created by Freepik - Flaticon</a> <br>
+                <a href="https://www.flaticon.com/free-icons/animals" title="animals icons">Animals icons created by Eucalyp - Flaticon</a>
             </div>
             <!-- /.card-body -->
             <div class="card-footer" style="display: block;">

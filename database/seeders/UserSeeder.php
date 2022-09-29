@@ -19,6 +19,7 @@ class UserSeeder extends Seeder
             'phone' => '3336897418',
             'email' => 'arturo@gmail.com',
             'password' => bcrypt('1234567890'),
+            'confirmPassword' => bcrypt('1234567890'),
             'status' => 'active',
             'user_type' => 'Superadmin'
         ]);
@@ -29,6 +30,7 @@ class UserSeeder extends Seeder
             'phone' => '3345851719',
             'email' => 'jorgearturomolina@gmail.com',
             'password' => bcrypt('1234567890'),
+            'confirmPassword' => bcrypt('1234567890'),
             'status' => 'active',
             'user_type' => 'Veterinarian'
         ]);
@@ -39,12 +41,12 @@ class UserSeeder extends Seeder
             'phone' => '3345897845',
             'email' => 'padobemi@gmail.com',
             'password' => bcrypt('1234567890'),
+            'confirmPassword' => bcrypt('1234567890'),
             'status' => 'active',
             'user_type' => 'Client'
         ]);
         $user3->assignRole('Client');
 
-        // User::factory(25)->create();
-
+        User::factory(0)->create();
     }
 }

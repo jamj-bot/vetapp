@@ -1,7 +1,7 @@
 <form autocomplete="off" wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
 	@include('common.modal-header')
 		<div class="form-row">
-			<div class="form-group col-md-6">
+			<div class="form-group col-md-4">
 				<label for="inputName" class="form-label font-weight-normal">Name *</label>
 				<input wire:model.lazy="name"
 					type="text"
@@ -23,7 +23,7 @@
 				@enderror
 
 			</div>
-			<div class="form-group col-md-6">
+			<div class="form-group col-md-4">
 				<label for="inputCode" class="form-label font-weight-normal">Code *</label>
 				<input wire:model.lazy="code"
 					type="text"
@@ -43,8 +43,32 @@
                         Looks good!
                     </div>
 				@enderror
-
 			</div>
+			<div class="form-group col-md-4">
+				<label for="selectSpecies" class="form-label font-weight-normal">Species *</label>
+				<select wire:model.lazy="species_id"
+					class="custom-select custom-select-sm
+					{{ $errors->has('species_id') ? 'is-invalid':'' }}
+					{{ $errors->has('species_id') == false && $this->species_id != 'choose' ? 'is-valid border-success':'' }}"
+					id="selectSpecies"
+					aria-describedby="selectSpeciesFeedback">
+					<option value="choose" selected>Choose...</option>
+					@foreach($species as $specie)
+						<option value="{{ $specie->id }}">{{ $specie->name }}</option>
+					@endforeach
+				</select>
+
+				@error('species_id')
+					<div id="selectSpeciesFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+                @else
+                    <div id="selectSpeciesFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
+				@enderror
+			</div>
+
 		</div>
 		<!-- /. row -->
 
@@ -71,6 +95,51 @@
 				@enderror
 
 			</div>
+
+			<div class="col-md-4">
+				<label for="checkboxEstimated" class="form-label font-weight-normal">Estimated *</label>
+				<div class="form-group clearfix">
+					<div class="icheck-emerland d-inline">
+						<input wire:model.lazy="estimated" type="radio" id="radioEstimated1" name="radioEstimated" value="1">
+						<label for="radioEstimated1">
+							Estimated
+						</label>
+					</div>
+					<div class="icheck-pomegranate d-inline">
+						<input wire:model.lazy="estimated" type="radio" id="radioEstimated2" name="radioEstimated" value="0">
+						<label for="radioEstimated2">
+							Not estimated
+						</label>
+					</div>
+				</div>
+
+
+
+{{-- 				<div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+					<input type="checkbox"
+						class="custom-control-input"
+						id="checkboxEstimated"
+						aria-describedby="checkboxEstimatedFeedback"
+						wire:model.lazy="estimated"
+						{{ {{ $estimated == 1 ? 'checked' : '' }}
+						value="1">
+					<label class="custom-control-label font-weight-normal" for="checkboxEstimated">
+						{{ $estimated == 1 ? 'DOB is estimated' : 'DOB is not estimated' }}
+					</label>
+				</div> --}}
+
+				@error('estimated')
+					<div id="radioEstimatedFeedback" class="invalid-feedback">
+						{{ $message }}
+					</div>
+                @else
+                    <div id="radioEstimatedFeedback" class="valid-feedback">
+                        Looks good!
+                    </div>
+				@enderror
+
+			</div>
+
 			<div class="form-group col-md-4">
 				<label for="selectSex" class="form-label font-weight-normal">Sex *</label>
 				<select wire:model.lazy="sex"
@@ -97,31 +166,6 @@
                     </div>
 				@enderror
 
-			</div>
-
-			<div class="form-group col-md-4">
-				<label for="selectSpecies" class="form-label font-weight-normal">Species *</label>
-				<select wire:model.lazy="species_id"
-					class="custom-select custom-select-sm
-					{{ $errors->has('species_id') ? 'is-invalid':'' }}
-					{{ $errors->has('species_id') == false && $this->species_id != 'choose' ? 'is-valid border-success':'' }}"
-					id="selectSpecies"
-					aria-describedby="selectSpeciesFeedback">
-					<option value="choose" selected>Choose...</option>
-					@foreach($species as $specie)
-						<option value="{{ $specie->id }}">{{ $specie->name }}</option>
-					@endforeach
-				</select>
-
-				@error('species_id')
-					<div id="selectSpeciesFeedback" class="invalid-feedback">
-						{{ $message }}
-					</div>
-                @else
-                    <div id="selectSpeciesFeedback" class="valid-feedback">
-                        Looks good!
-                    </div>
-				@enderror
 			</div>
 		</div>
 		<!-- /. row -->
@@ -313,8 +357,8 @@
 					id="selectStatus"
 					aria-describedby="selectStatusFeedback">
 						<option value="choose" selected>Choose...</option>
-						<option value="Alive">Alive</option>
-						<option value="Dead">Dead</option>
+						<option value="Alive">Alive / Active</option>
+						<option value="Dead">Dead / Inactive</option>
 				</select>
 
 				@error('status')

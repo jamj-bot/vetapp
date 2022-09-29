@@ -5,23 +5,29 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="display-4">
-                        {{ $pageTitle }}: {{ $pet->name != null ? $pet->name : $pet->code }}
+                        {{ $pet->name != null ? $pet->name : $pet->code }} / {{ $pageTitle }}
                         @if($pet->status == 'Dead')
-                            <sup><i class="fas fa-cross"></i></sup>
+                            <sup class="font-weight-light">Inactive</sup>
                         @endif
                     </h1>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.index')}}">...</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.users') }}">...</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.users.show', $pet->user) }}">{{ $pet->user->name }}</a></li>
+                    <ol class="breadcrumb float-sm-right text-sm">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('admin.pets.show', $pet) }}">
-                                @if($pet->name) {{ $pet->name }} @else {{ $pet->code }} @endif
-                            </a>
+                            <a href="{{ route('admin.index')}}"><i class="fas fa-house-user"></i></a>
                         </li>
-                        <li class="breadcrumb-item active">{{ $pageTitle }}</li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.users') }}">Users</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.users.show', $pet->user) }}">{{ $pet->user->name }}</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.pets.show', $pet)}}"> {{ $pet->name ? $pet->name:$pet->code}}</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $pageTitle}}
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -32,73 +38,32 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-
+                <!-- Link pet -->
                 <div class="col-md-3">
-                    @can('pets_show')
-                        <a href="{{ route('admin.pets.show', $pet) }}"
-                            class="btn btn-block btn-default mb-3">
-                            <i class="far fa-arrow-alt-circle-left"></i>
-                            Pet
-                        </a>
-                    @endcan
+                    <a href="{{ route('admin.pets.show', $pet) }}"
+                        class="btn btn-block btn-default mb-3
+                        @cannot('pets_show') disabled @endcannot">
+                        <i class="far fa-arrow-alt-circle-left"></i>
+                        Pet
+                    </a>
 
-                    @can('consultations_update')
-                        <a href="javascript:void(0)"
-                            wire:click.prevent="loadDobField()"
-                            onclick="bindTextareas()"
-                            title="Create"
-                            class="btn bg-gradient-primary btn-block mb-3">
-                                <span wire:loading.remove wire:target="loadDobField">
-                                   <i class="fas fa-fw fa-plus"></i>
-                                   Add Consultation
-                                </span>
-                                <span wire:loading wire:target="loadDobField">
-                                    <i class="fas fa-fw fa-spinner fa-spin"></i>
-                                     Please, wait...
-                                </span>
-                        </a>
-                    @endcan
-
-                    <div class="card card card-primary card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">Filters</h3>
-
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="card-body p-0">
-                            <ul class="nav nav-pills flex-column">
-                                <li wire:click="$set('filter', 'All')"
-                                    class="nav-item {{ $filter == 'All' ? 'font-weight-bold' : ''}}">
-                                    <a href="javascript:void(0)"
-                                        class="nav-link">
-                                        <i class="fas fa-fw fa-inbox mr-1"></i><span> All</span>
-                                        @if($filter == 'All' )
-                                            <i class="fas fa-caret-right ml-1"></i>
-                                        @endif
-                                        <span class="badge bg-primary float-right">{{ $consultations_quantity }}</span>
-                                    </a>
-                                </li>
-                                <li wire:click="$set('filter', 'Trash')"
-                                    class="nav-item {{ $filter == 'Trash' ? 'font-weight-bold' : ''}}">
-                                    <a href="javascript:void(0)"
-                                        class="nav-link">
-                                        <i class="far fa-fw fa-trash-alt mr-1"></i><span> Trash</span>
-                                         @if($filter == 'Trash' )
-                                            <i class="fas fa-caret-right ml-1"></i>
-                                        @endif
-                                        <span class="badge bg-danger float-right">{{ $deleted_consultations_quantity }}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                        <!-- /.card-body -->
-                    </div>
-                    <!-- /.card -->
+                    <!-- Create cponsultation -->
+                    <a href="javascript:void(0)"
+                        wire:click.prevent="loadDobField()"
+                        onclick="bindTextareas()"
+                        title="Add new consultation"
+                        class="btn bg-gradient-primary btn-block mb-3
+                        @cannot('consultations_store') disabled @endcannot"
+                        wire:loading.class="disabled">
+                            <span wire:loading.remove wire:target="loadDobField">
+                               <i class="fas fa-fw fa-plus-circle"></i>
+                               Add Consultation
+                            </span>
+                            <span wire:loading wire:target="loadDobField">
+                                <i class="fas fa-fw fa-spinner fa-spin"></i>
+                                 Please, wait...
+                            </span>
+                    </a>
 
                     <!-- about card -->
                     @include('common.about-card')
@@ -123,21 +88,13 @@
 
                             <div class="card-tools">
                                 <!-- Datatable's filters -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-sm m-1">
-                                            <div class="input-group-prepend">
-                                                <label class="input-group-text" for="inputGroupSelect02">Show</label>
-                                            </div>
-                                            <select wire:model="paginate" wire:change="resetPagination" class="custom-select" id="inputGroupSelect02">
-                                                <option disabled>Choose...</option>
-                                                <option selected value="10">10 items</option>
-                                                <option value="50">50 items</option>
-                                                <option value="100">100 items</option>
-                                            </select>
-                                        </div>
+                                <div class="form-row my-2">
+
+                                    <div class="col-sm-6">
+                                        @include('common.select')
                                     </div>
-                                    <div class="col-md-6">
+
+                                    <div class="col-sm-6">
                                         @include('common.search')
                                     </div>
                                 </div>
@@ -148,98 +105,134 @@
                         <!-- /.card-header -->
 
                         <div class="card-body p-0">
+                            <!-- Control buttons -->
                             <div class="mailbox-controls">
                                 <!-- Check all button -->
-                                <div class="btn btn-default btn-sm checkbox-toggle">
-                                    <input type="checkbox"
-                                        class=""
-                                        id="check8"
-                                        wire:model="checkAllConsultations"
-                                        wire:click.prevent="updateCheckAllConsultations"
-                                        name="check8">
-                                    <label for="check8" class="sr-only">Check all</label>
-                                </div>
-
+                                    <div class="btn checkbox-toggle icheck-pomegranate ml-2">
+                                        <input type="checkbox"
+                                        id="checkAll"
+                                        wire:model="select_page"
+                                        {{ !count($consultations) ? 'disabled' : '' }}>
+                                        <label class="sr-only" for="checkAll">Click to check all items</label>
+                                    </div>
                                 <div class="btn-group">
                                     @if($this->filter == 'All')
-                                        @can('consultations_destroy')
-                                            <!-- Delete Checked button -->
+                                        <!-- Destroy hecked consultations button -->
+                                        @can('consultations_delete')
                                             <button type="button" class="btn btn-default btn-sm"
-                                                onclick="confirmDeleteConsultations('Are you sure you want delete this consultations?', 'You can recover it from Recycle Bin!', 'Consultations', 'deleteChecked')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        @endcan
-                                    @elseif($this->filter == 'Trash')
-                                        @can('consultations_destroy')
-                                            <!-- Delete Checked button -->
-                                            <button type="button" class="btn btn-default btn-sm"
-                                                onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyChecked')">
-                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                wire:click.prevent="deleteMultiple">
+                                                <!-- All but small screen -->
+                                                <span class="d-none d-sm-block">
+                                                    <i class="fas fa-fw fa-trash"></i>
+                                                    Delete [<span id="contador">{{ count($this->selected) }}</span>]
+                                                </span>
+                                                <!-- Only small screen-->
+                                                <span class="d-block d-sm-none">
+                                                    <i class="fas fa-fw fa-trash"></i>[<span id="contador">{{ count($this->selected) }}</span>]
+                                                </span>
                                             </button>
                                         @endcan
                                     @endif
 
                                     @if($this->filter == 'Trash')
+                                        <!-- Delete hecked consultations button -->
                                         @can('consultations_destroy')
-                                             <!-- Delete Checked button -->
                                             <button type="button" class="btn btn-default btn-sm"
-                                                onclick="confirmRestoreConsultations('Are you sure you want restore this consultations???', 'This action can be undone!', 'Consultations', 'restoreChecked')">
-                                                <i class="fas fa-history"></i>
+                                                onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyMultiple')">
+                                                <span class="d-none d-sm-block">
+                                                    <i class="fas fa-fw fa-trash text-danger"></i>
+                                                    Destroy [<span id="contador">{{ count($this->selected) }}</span>]
+                                                </span>
+                                                <span class="d-block d-sm-none">
+                                                    <i class="fas fa-fw fa-trash text-danger"></i>
+                                                        [<span id="contador">{{ count($this->selected) }}</span>]
+                                                </span>
+                                            </button>
+                                        @endcan
+                                    @endif
+
+                                    @if($this->filter == 'Trash')
+                                        <!-- Restore hecked consultations button -->
+                                        @can('consultations_restore')
+                                            <button type="button" class="btn btn-default btn-sm"
+                                                wire:click="restoreMultiple">
+                                                <span class="d-none d-sm-block">
+                                                    <i class="fas fa-fw fa-history"></i>
+                                                    Restore [<span id="contador2">{{ count($this->selected) }}</span>]
+                                                </span>
+                                                <span class="d-block d-sm-none">
+                                                    <i class="fas fa-fw fa-history"></i>
+                                                    [<span id="contador2">{{ count($this->selected) }}</span>]
+                                                </span>
                                             </button>
                                         @endcan
                                     @endif
                                 </div>
                                 <!-- /.btn-group -->
+
+                                <div class="float-right">
+                                    <!-- Botones para pantallas superior a sm -->
+                                    <div class="btn-group btn-group-toggle btn-group-sm" data-toggle="buttons">
+                                        <label class="btn {{ $this->filter == 'All' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
+                                            <input type="radio" name="options" id="option_b1" autocomplete="off"  wire:click="$set('filter', 'All')">
+                                            <i class="fas fa-fw fa-inbox"></i> <span class="font-weight-normal">Active</span>
+                                            <span class="ml-1 badge bg-success float-right">
+                                                {{ $consultations_quantity }}
+                                            </span>
+                                        </label>
+                                        <label class="btn {{ $this->filter == 'Trash' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
+                                            <input type="radio" name="options" id="option_b2" autocomplete="off"  wire:click="$set('filter', 'Trash')">
+                                            <i class="fas fa-fw fa-recycle"></i> <span class="font-weight-normal">Recycle</span>
+                                            <span class="ml-1 badge bg-danger float-right">
+                                                {{ $deleted_consultations_quantity }}
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- /.btn-group -->
                             </div>
 
                             <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped">
+                                <table class="table table-hover {{-- table-striped --}}">
                                     <tbody>
                                         @forelse($consultations as $consultation)
-                                            <tr id="r{{ $consultation->id }}" class="{{ $this->checkAllConsultations == true ? 'bg-gradient-light disabled' : '' }}">
+                                            <tr  id="rowcheck{{ $consultation->id }}" class="{{ $this->select_page ? 'table-active font-weight-bold' : ''}}">
                                                 <td>
-                                                    <div class="icheck-primary">
+                                                    <div class="icheck-pomegranate">
                                                         <input type="checkbox"
-                                                            value="{{ $consultation->id }}"
-                                                            id="c{{ $consultation->id }}"
-                                                            wire:model.defer="checkedConsultations"
-                                                            onchange="changeBackground(this.id)"
-                                                            {{ $this->checkAllConsultations == true ? 'disabled' : '' }}>
-                                                        <label for="check6"></label>
+                                                        id="check{{$consultation->id}}"
+                                                        wire:model.defer="selected"
+                                                        value="{{$consultation->id}}"
+                                                        onchange="updateInterface(this.id)"
+                                                        class="counter">
+                                                        <label class="sr-only" for="check{{$consultation->id}}">Click to check</label>
                                                     </div>
                                                 </td>
                                                 <td class="mailbox-star" title="{{ $consultation->consult_status }}">
                                                     <i class="fas fa-star text-xs {{ $consultation->consult_status == 'Closed' ? 'text-warning' : 'text-muted'}}">
                                                     </i>
                                                 </td>
-                                                <td class="mailbox-name text-sm" title="{{ $consultation->user->name }}">
+                                                <td class="mailbox-name text-sm text-nowrap" title="{{ $consultation->user->name }}">
                                                     @if( strlen($consultation->user->name) > 18)
                                                         {{ substr($consultation->user->name, 0, 15) }}...
                                                     @else
                                                         {{ $consultation->user->name }}
                                                     @endif
                                                 </td>
-                                                <td title="{{ $consultation->prognosis }}">
+                                                <td title="{{ $consultation->prognosis }}" class="mailbox-star">
                                                     <span class="fa-stack fa-1x m-0">
                                                         <i class="fas fa-circle fa-stack-2x {{ $consultation->color }}"></i>
                                                         <i class="fas fa-heartbeat fa-stack-1x fa-inverse text-light"></i>
                                                     </span>
                                                 </td>
-                                                <td class="mailbox-subject">
+                                                <td class="mailbox-subject text-nowrap">
                                                     <a href="{{ route('admin.pets.consultations.show', ['pet' => $pet, 'consultation' => $consultation]) }}"
-                                                        class="{{-- text-warning font-weight-bolder --}}">
-                                                        @if($consultation->diagnosis)
-                                                            @if( strlen($consultation->diagnosis) > 38)
-                                                                {{ substr($consultation->diagnosis, 0, 35) }}...
-                                                            @else
-                                                                {{ $consultation->diagnosis }}
-                                                            @endif
-                                                        @else
-                                                            Undetermined diagnosis
-                                                        @endif
+                                                        class="text-black">
+                                                        {{--  Limita el número de palabras a máximo 5; la primera letra la vuelve mayúscula, el array lo convierte en string separado por comas --}}
+                                                        {{Str::words(Str::ucfirst($consultation->diseases->implode('name', '; ')), 4, ' >>>') }}
                                                     </a>
                                                 </td>
-                                                <td class="mailbox-attachment text-xs">
+                                                <td class="mailbox-attachment text-xs text-nowrap">
                                                     @if($consultation->images()->count())
                                                         <i class="fas fa-images text-muted"></i>
                                                     @endif
@@ -247,26 +240,16 @@
                                                         <i class="fas fa-paperclip text-muted"></i>
                                                     @endif
                                                 </td>
-                                                <td class="mailbox-date">
+                                                <td class="mailbox-date text-nowrap">
                                                     <small class="text-xs">{{ $consultation->updated_at->diffForHumans() }}</small>
                                                 </td>
                                                 <td width="5px">
-                                                    <!-- COMMENT: Muestra opciones de editar y eliminar registros activos -->
+                                                    <!-- Edit and delete consultations -->
                                                     @if($this->filter == 'All')
                                                         <div class="btn-group">
-{{--                                                             @can('consultations_update')
+                                                            @can('consultations_delete')
                                                                 <a href="javascript:void(0)"
-                                                                    wire:click.prevent="edit({{ $consultation }})"
-                                                                    title="Edit"
-                                                                    class="btn btn-sm btn-link p-1 border border-0">
-                                                                        <i class="fas fa-edit text-muted"></i>
-                                                                </a>
-                                                            @endcan --}}
-
-                                                            @can('consultations_destroy')
-                                                                <a href="javascript:void(0)"
-                                                                    onclick="confirm('{{$consultation->id}}', 'Are you sure you want delete this consultation?', 'You can recover it from Recycle Bin!', 'Consultation', 'destroy')"
-                                                                    {{-- wire:click.prevent="destroy({{ $consultation }})" --}}
+                                                                    wire:click.prevent="delete({{ $consultation }})"
                                                                     title="Delete"
                                                                     class="btn btn-sm btn-link p-1 border border-0">
                                                                         <i class="fas fa-trash text-muted"></i>
@@ -274,7 +257,7 @@
                                                             @endcan
                                                         </div>
                                                     @endif
-                                                    <!-- COMMENT: Muestra opciones de restaurar o destruir los registros de la papelea -->
+                                                    <!-- Edit and destroy consultations -->
                                                     @if($this->filter == 'Trash')
                                                         <div class="btn-group">
                                                             @can('consultations_restore')
@@ -285,13 +268,12 @@
                                                                     <i class="fas fa-history text-muted"></i>
                                                                 </a>
                                                             @endcan
-
-                                                            @can('consultations_delete')
+                                                            @can('consultations_destroy')
                                                                 <a href="javascript:void(0)"
-                                                                    onclick="confirm('{{$consultation->id}}', 'Are you sure you want delete this consultation?', 'You won\'t be able to revert this!', 'Consultation', 'forceDelete')"
+                                                                    onclick="confirm('{{$consultation->id}}', 'Are you sure you want delete this consultation?', 'You won\'t be able to revert this!', 'Consultation', 'destroy')"
                                                                     title="Destroy"
                                                                     class="btn btn-sm btn-link p-1 border border-0">
-                                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                                        <i class="fas fa-trash text-danger"></i>
                                                                 </a>
                                                             @endcan
                                                         </div>
@@ -339,111 +321,137 @@
 
                                 <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                                 <div class="d-flex justify-content-center">
-                                    <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3"><i class="fas fa-fw fa-spinner fa-spin"></i></p>
+                                    <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                                        <span class="loader"></span>
+                                    </p>
                                 </div>
 
                             </div>
                             <!-- /.mail-box-messages -->
 
                             @if(count($consultations) > 10)
+                                <!-- Control buttons -->
                                 <div class="mailbox-controls">
                                     <!-- Check all button -->
-                                    <div class="btn btn-default btn-sm checkbox-toggle">
+{{--                                     <div class="btn checkbox-toggle icheck-pomegranate ml-2">
+                                        <input type="checkbox"
+                                        id="checkAll"
+                                        wire:model="select_page" {{ !count($consultations) ? 'disabled' : '' }}>
+                                        <label class="sr-only" for="checkAll">Click to check all items</label>
+                                    </div> --}}
+{{--                                     <div class="btn checkbox-toggle icheck-greensea ml-2">
                                         <input type="checkbox"
                                             class=""
-                                            id="check9"
-                                            wire:model="checkAllConsultations"
-                                            wire:click.prevent="updateCheckAllConsultations"
-                                            name="check9">
-                                        <label for="check9" class="sr-only">Check all</label>
+                                            id="check2"
+                                            wire:model="allConsultationsChecked"
+                                            wire:click.prevent="updateAllConsultationsChecked"
+                                            name="check2">
+                                        <label for="check2" class="sr-only">Check all</label>
                                     </div>
-
-                                    <div class="btn-group">
+ --}}
+{{--                                     <div class="btn-group">
                                         @if($this->filter == 'All')
-                                            @can('consultations_destroy')
-                                                <!-- Delete Checked button -->
+                                            <!-- Destroy hecked consultations button -->
+                                            @can('consultations_delete')
                                                 <button type="button" class="btn btn-default btn-sm"
-                                                    onclick="confirmDeleteConsultations('Are you sure you want delete this consultations?', 'You can recover it from Recycle Bin!', 'Consultations', 'deleteChecked')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            @endcan
-                                        @elseif($this->filter == 'Trash')
-                                            @can('consultations_destroy')
-                                                <!-- Delete Checked button -->
-                                                <button type="button" class="btn btn-default btn-sm"
-                                                    onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyChecked')">
-                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                    wire:click.prevent="deleteChecked">
+                                                    <span class="d-none d-sm-block">
+                                                        <i class="fas fa-fw fa-trash"></i> Delete
+                                                    </span>
+                                                    <span class="d-block d-sm-none">
+                                                        <i class="fas fa-fw fa-trash"></i>
+                                                    </span>
                                                 </button>
                                             @endcan
                                         @endif
 
                                         @if($this->filter == 'Trash')
+                                            <!-- Delete hecked consultations button -->
                                             @can('consultations_destroy')
-                                                 <!-- Delete Checked button -->
                                                 <button type="button" class="btn btn-default btn-sm"
-                                                    onclick="confirmRestoreConsultations('Are you sure you want restore this consultations???', 'This action can be undone!', 'Consultations', 'restoreChecked')">
-                                                    <i class="fas fa-history"></i>
+                                                    onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyMultiple')">
+                                                    <span class="d-none d-sm-block">
+                                                        <i class="fas fa-fw fa-trash text-danger"></i>Destroy
+                                                    </span>
+                                                    <span class="d-block d-sm-none">
+                                                        <i class="fas fa-fw fa-trash text-danger"></i>
+                                                    </span>
                                                 </button>
                                             @endcan
                                         @endif
-                                    </div>
+
+                                        @if($this->filter == 'Trash')
+                                            <!-- Restore hecked consultations button -->
+                                            @can('consultations_restore')
+                                                <button type="button" class="btn btn-default btn-sm"
+                                                    onclick="confirmRestoreConsultations('Are you sure you want restore this consultations???', 'This action can be undone!', 'Consultations', 'restoreMultiple')">
+                                                    <span class="d-none d-sm-block">
+                                                        <i class="fas fa-fw fa-history"></i>Restore
+                                                    </span>
+                                                    <span class="d-block d-sm-none">
+                                                        <i class="fas fa-fw fa-history"></i>
+                                                    </span>
+                                                </button>
+                                            @endcan
+                                        @endif
+                                    </div> --}}
+                                    <!-- /.btn-group -->
+
+{{--                                     <div class="float-right">
+                                        <!-- Botones para pantallas superior a sm -->
+                                        <div class="btn-group btn-group-toggle btn-group-sm" data-toggle="buttons">
+                                            <label class="btn bg-gradient-primary {{ $this->filter == 'All' ? 'active' : '' }}">
+                                                <input type="radio" name="options" id="option_b1" autocomplete="off"  wire:click="$set('filter', 'All')">
+                                                <i class="fas fa-fw fa-inbox"></i> <span class="font-weight-normal">Active</span>
+                                                <span class="ml-1 badge bg-success float-right">
+                                                    {{ $consultations_quantity }}
+                                                </span>
+                                            </label>
+                                            <label class="btn bg-gradient-primary {{ $this->filter == 'Trash' ? 'active' : '' }}">
+                                                <input type="radio" name="options" id="option_b2" autocomplete="off"  wire:click="$set('filter', 'Trash')">
+                                                <i class="fas fa-fw fa-recycle"></i> <span class="font-weight-normal">Recycle</span>
+                                                <span class="ml-1 badge bg-danger float-right">
+                                                    {{ $deleted_consultations_quantity }}
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div> --}}
                                     <!-- /.btn-group -->
                                 </div>
                             @endif
                         </div>
                         <!-- /.card-body -->
 
-
-                        <div class="card-footer p-0">
-
-                            <div class="mailbox-controls">
-                                <!-- Check all button -->
-{{--                                 <button type="button" class="btn btn-default btn-sm checkbox-toggle">
-                                    <i class="far fa-square"></i>
-                                </button>
-
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <i class="far fa-trash-alt"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <i class="fas fa-reply"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <i class="fas fa-share"></i>
-                                    </button>
-                                </div> --}}
-                                <!-- /.btn-group -->
-
-{{--                                 <button type="button" class="btn btn-default btn-sm">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button> --}}
-
-                                <div class="float-right pagination pagination-sm">
-                                    @if(count($consultations))
-                                        <div class="ml-4">
-                                            @if($consultations->hasPages())
+                        <!-- card-footer -->
+                        @if(count($consultations))
+                            @if($consultations->hasPages())
+                                <div class="card-footer p-0">
+                                    <div class="mailbox-controls">
+                                        <div class="float-right pagination pagination-sm">
+                                            <div class="ml-4">
                                                 {{ $consultations->links() }}
-                                            @endif
+                                            </div>
+
+        {{--                               1-50/200
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-sm">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-sm">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </button>
+                                            </div> --}}
+                                            <!-- /.btn-group -->
                                         </div>
-                                    @endif
-{{--                               1-50/200
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-default btn-sm">
-                                            <i class="fas fa-chevron-left"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-default btn-sm">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div> --}}
-                                    <!-- /.btn-group -->
+                                        <!-- /.float-right -->
+                                    </div>
                                 </div>
-                                <!-- /.float-right -->
-                            </div>
-                        </div>
+                            @endif
+                        @endif
+                        <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
-                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, delete, restore">
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, delete, deleteChecked, restore">
                         </div>
                     </div>
                     <!-- /.card -->
@@ -456,6 +464,8 @@
     @include('livewire.consultation.form')
 
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" integrity="sha512-8vq2g5nHE062j3xor4XxPeZiPjmRDh6wlufQlfC6pdQ/9urJkU07NM0tEREeymP++NczacJ/Q59ul+/K2eYvcg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <script src="https://cdn.ckeditor.com/ckeditor5/30.0.0/classic/ckeditor.js"></script>
 
@@ -508,52 +518,17 @@
         notify(event)
     });
 
+    window.addEventListener('destroyed', event => {
+        notify(event)
+    });
 
-    // window.addEventListener('swal:deleteConsultations', event => {
-    //     Swal.fire({
-    //         title:event.detail.title,
-    //         html:event.detail.html,
-    //         type: 'warning',
-    //         showCloseButton:true,
-    //         showCancelButton:true,
-    //         cancelButtonText:'No',
-    //         cancelButtonColor:'#d33',
-    //         confirmButtonText:'Yes',
-    //         confirmButtonColor:'#3085d6',
-    //         allowOutsideClick: false,
-    //     }).then(function(result){
-    //         if(result.value){
-    //             window.livewire.emit('deleteChecked', event.detail.checkIDs);
-    //             Swal.fire(
-    //                 'Deleted!',
-    //                 'Consultations has been deleted.',
-    //                 'success'
-    //             )
-    //         }
-    //     });
-    // });
+    window.addEventListener('restored', event => {
+        notify(event)
+    });
 
-        {{-- Funtion to confirm the deletion of items --}}
-    function confirmDeleteConsultations(title, text, model, event) {
-        Swal.fire({
-            title: title,
-            text: text,
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.value) {
-                window.livewire.emit(event),
-                Swal.fire(
-                    'Deleted!',
-                     model + ' has been deleted.',
-                    'success'
-                )
-            }
-        })
-    }
+    window.addEventListener('deleted-error', event => {
+        notify(event)
+    });
 
     {{-- Funtion to confirm the deletion of items --}}
     function confirmDestroyConsultations(title, text, model, event) {
@@ -577,28 +552,6 @@
         })
     }
 
-    {{-- Funtion to confirm restore --}}
-    function confirmRestoreConsultations(title, text, model, event) {
-        Swal.fire({
-            title: title,
-            text: text,
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, restore it!'
-        }).then((result) => {
-            if (result.value) {
-                window.livewire.emit(event),
-                Swal.fire(
-                    'Restored!',
-                     model + ' has been restored.',
-                    'success'
-                )
-            }
-        })
-    }
-
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {
             $('#modalForm').modal('show')
@@ -613,35 +566,38 @@
     });
 
 
-    // Función para agregar/quitar un backgroung al seleccionar un checkbox
-    function changeBackground(id) {
-
-        var partial_id = document.getElementById(id).value;
-        var row = document.getElementById("r"+partial_id);
-
-        row.classList.toggle("bg-gradient-light");
-        row.classList.toggle("disabled");
-        // if(id != undefined){
-
-        // }
-
-        // if(id == undefined){
-        //     window.alert("undefined");
-        //     var x = document.getElementsByTagName("tr");
-        //     var i;
-        //     for (i = 0; i < x.length; i++) {
-        //         x[i].classList.toggle("bg-gradient-light");
-        //         x[i].classList.toggle("disabled");
-        //     }
-        // }
-    }
-
     function bindTextareas() {
         document.getElementById('textareaProblemStatement').value = document.getElementById('ckeditor').value
     }
 
-</script>
+    function updateInterface(id) {
+        uncheckAll();
+        trActive(id);
+        count(id);
+    }
 
+    function uncheckAll() {
+        // Desmarca check all si estaba seleccionado al hacer clic en una row
+        if (document.getElementById('checkAll').checked) {
+            document.getElementById('checkAll').checked = false
+        }
+    }
+
+    function count() {
+        // Selecciona todos los input de tipo chechbox que tengan la clase counter y los cuenta
+        document.getElementById("contador").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
+        document.getElementById("contador2").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
+
+    }
+
+    function trActive(id) {
+        // marca los TR como activados al hacer clic en una row
+        var row = document.getElementById("rowcheck"+document.getElementById(id).value)
+        row.classList.toggle("table-active")
+        row.classList.toggle("font-weight-bold")
+    }
+
+</script>
 
 <!-- Alpine Plugins -->
 <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>

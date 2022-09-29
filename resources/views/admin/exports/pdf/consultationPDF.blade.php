@@ -28,7 +28,7 @@
                 <h5>General information</h5>
                 <ul>
                     <li>
-                        <b>Name: </b>{{ $petPDF->name }}
+                        <b>Name: </b>{{ $petPDF->name ? $petPDF->name : 'n/a' }}
                     </li>
                     <li >
                         <b>Code: </b>{{ $petPDF->code }}
@@ -59,13 +59,13 @@
                 @if($petPDF->diseases)
                     <p class="highlighted">{{ $petPDF->diseases }}</p>
                 @else
-                    <p class="highlighted"> N/A </p>
+                    <p class="highlighted"> n/a </p>
                 @endif
                 <h5>Allergies</h5>
                 @if($petPDF->allergies)
                     <p class="highlighted">{{ $petPDF->allergies }}</p>
                 @else
-                    <p class="highlighted"> N/A </p>
+                    <p class="highlighted"> n/a </p>
                 @endif
 
             </div>
@@ -79,6 +79,9 @@
                     </li>
                     <li>
                         <b>Temperature: </b>{{ $consultationPDF->temperature }} °C
+                    </li>
+                    <li>
+                        <b>Oxygen saturation level: </b>{{ $consultationPDF->oxygen_saturation_level }}%
                     </li>
                     <li>
                         <b>Capillary refill time: </b>{{ $consultationPDF->capillary_refill_time }}

@@ -3,10 +3,13 @@
 namespace App\Http\Livewire;
 
 use App\Models\Consultation;
+use App\Models\Disease;
 use App\Models\Pet;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -24,8 +27,8 @@ class ConsultationController extends Component
         $readyToLoad = false,
         $search = '',
         $filter = 'All',
-        $checkedConsultations = [],
-        $checkAllConsultations = false;
+        $selected = [],
+        $select_page;
 
     // General attributes
     public $pageTitle, $modalTitle;
@@ -37,6 +40,7 @@ class ConsultationController extends Component
         $age,
         $weight,
         $temperature,
+        $oxygen_saturation_level,
         $capillary_refill_time = 'choose',
         $heart_rate,
         $pulse = 'choose',
@@ -47,18 +51,21 @@ class ConsultationController extends Component
         $pain = 'choose',
         $body_condition = 'choose',
         $problem_statement,
-        $diagnosis,
+        $types_of_diagnosis = [],
         $prognosis = 'choose',
+        $color = '',
         $treatment_plan,
-        $consult_status = 'choose';
+        $consult_status = 'choose',
+        $disease = '';
+
+    // Stteper
 
     // Listeners
     protected $listeners = [
-        'destroy' => 'destroy', // softdelete a la consulta específica
-        'forceDelete' => 'forceDelete', // forceDelete a la consulta específica
-        'deleteChecked' => 'deleteChecked',
-        'destroyChecked' => 'destroyChecked',
-        'restoreChecked' => 'restoreChecked',
+        'softDelete' => 'softDelete', // softdelete a la consulta específica
+        'destroy' => 'destroy', // forceDelete a la consulta específica
+        'destroyMultiple' => 'destroyMultiple',
+        'restoreMultiple' => 'restoreMultiple',
     ];
 
     /**
@@ -79,23 +86,25 @@ class ConsultationController extends Component
     protected function rules()
     {
         return [
-            'age'                   => 'nullable|string|min:3|max:255',
-            'weight'                => 'required|numeric|numeric|between:0,9999.999|regex:/^\d+(\.\d{1,3})?$/',
-            'temperature'           => 'required|numeric|between:0,99.99|regex:/^\d+(\.\d{1,2})?$/',
-            'capillary_refill_time' => 'required|in:"Less than 1 second","1-2 seconds","Longer than 2 seconds"',
-            'heart_rate'            => 'required|integer|between:0,2000',
-            'pulse'                 => 'required|in:"Strong and synchronous with each heart beat","Irregular","Bounding","Weak or absent"',
-            'respiratory_rate'      => 'required|integer|between:0,200',
-            'reproductive_status'   => 'required|in:"Pregnant","Lactating","Neither"',
-            'consciousness'         => 'required|in:"Alert and responsive","Depressed or obtunded","Stupor","Comatose"',
-            'hydration'             => 'required|in:"Normal","0-5%","6-7%","8-9%","+10%"',
-            'pain'                  => 'required|in:"None","Vocalization","Changes in behavior","Physical changes"',
-            'body_condition'        => 'required|in:"Too thin","Ideal","Too heavy"',
-            'problem_statement'     => 'required|string|max:65000',
-            'diagnosis'             => 'nullable|string|min:3|max:500',
-            'prognosis'             => 'required|in:"Pending","Good","Fair","Guarded","Grave","Poor"',
-            'treatment_plan'        => 'nullable|string|min:3|max:2000',
-            'consult_status'        => 'required|in:"Lab tests pending", "Radiology tests pending", "Closed"',
+            'age'                     => 'nullable|string|min:3|max:255',
+            'weight'                  => 'required|numeric|numeric|between:0,9999.999|regex:/^\d+(\.\d{1,3})?$/',
+            'temperature'             => 'required|numeric|between:0,99.99|regex:/^\d+(\.\d{1,2})?$/',
+            'oxygen_saturation_level' => 'nullable|integer|between:0,100',
+            'capillary_refill_time'   => 'required|in:"Less than 1 second","1-2 seconds","Longer than 2 seconds"',
+            'heart_rate'              => 'required|integer|between:0,2000',
+            'pulse'                   => 'required|in:"Strong and synchronous with each heart beat","Irregular","Bounding","Weak or absent"',
+            'respiratory_rate'        => 'required|integer|between:0,200',
+            'reproductive_status'     => 'required|in:"Pregnant","Lactating","Neither"',
+            'consciousness'           => 'required|in:"Alert and responsive","Depressed or obtunded","Stupor","Comatose"',
+            'hydration'               => 'required|in:"Normal","0-5%","6-7%","8-9%","+10%"',
+            'pain'                    => 'required|in:"None","Vocalization","Changes in behavior","Physical changes"',
+            'body_condition'          => 'required|in:"Very thin","Thin","Normal","Fat","Very fat"',
+            'problem_statement'       => 'required|string|max:65000',
+            'disease'                 => 'required|max:255',
+            'types_of_diagnosis'      => 'required|max:255',
+            'prognosis'               => 'required|in:"Pending","Good","Fair","Guarded","Grave","Poor"',
+            'treatment_plan'          => 'nullable|string|min:3|max:2000',
+            'consult_status'          => 'required|in:"In process", "Closed"',
         ];
     }
 
@@ -109,6 +118,38 @@ class ConsultationController extends Component
     }
 
     /**
+     *  Check or all function
+     *
+    **/
+    public function updatedSelectPage($value)
+    {
+        if ($value) {
+            $this->selected = $this->consultations->pluck('id')->map(fn ($item) => (string) $item)->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    /**
+     *  Check or all function
+     *
+    **/
+    public function updatedFilter($value)
+    {
+        $this->select_page = false;
+        $this->selected = [];
+    }
+
+    /**
+     *  uncheck Select All
+     *
+    **/
+    public function updatedSelected()
+    {
+        $this->select_page = false;
+    }
+
+    /**
      *  Funtion to reset pagination when a user writtes in search field
      *
     **/
@@ -117,8 +158,8 @@ class ConsultationController extends Component
         $this->resetPage();
 
         // Al escribir en el buscador, se limpian los items seleccionados
-        $this->checkAllConsultations = false;
-        $this->checkedConsultations = [];
+        $this->select_page = false;
+        $this->selected = [];
     }
 
     /**
@@ -161,34 +202,46 @@ class ConsultationController extends Component
     {
         $this->pageTitle = 'Consultations';
         $this->modalTitle = "Consultation";
-
         $this->pet = Pet::find($pet);
-
-        //$this->age = Carbon::createFromDate($this->pet->dob)->diff(Carbon::now())->format('%y years, %m months and %d days');
-
-        $this->problem_statement = '<h4>Anamnesis</h4><h4>Análisis por sistema</h4><h5>Piel y anexos</h5><h5>Sistema linfático</h5><h5>Sistema musculo esquelético</h5><h5>Sistema nervioso</h5><h5>Sistema genital</h5><h5>Sistema urinario</h5><h5>Sistema respiratorio</h5><h5>Sistema cardiovascular</h5><h5>Sistema digestivo</h5><h5>Visión y oido</h5><h4>Lista de problemas</h4><h4>Lista maestra</h4><h4>Plan diagnóstico&nbsp;</h4><p>&nbsp;</p>';
+        $this->problem_statement = '<h4>Anamnesis</h4><h4>Análisis por sistema</h4>
+            <h5>Piel y anexos</h5>
+            <h5>Sistema linfático</h5>
+            <h5>Sistema musculo esquelético</h5>
+            <h5>Sistema nervioso</h5>
+            <h5>Sistema genital</h5>
+            <h5>Sistema urinario</h5>
+            <h5>Sistema respiratorio</h5>
+            <h5>Sistema cardiovascular</h5>
+            <h5>Sistema digestivo</h5>
+            <h5>Visión y oido</h5>
+            <h4>Lista de problemas</h4>
+            <h4>Lista maestra</h4>
+            <h4>Plan diagnóstico&nbsp;</h4>
+            <p>&nbsp;</p>';
     }
 
 
-    public function render()
+    public function getConsultationsProperty()
     {
-        $this->authorize('consultations_index');
 
         if ($this->readyToLoad) {
             if ($this->filter == 'All') {
                 if (strlen($this->search) > 0) {
-                    $consultations = $this->pet->consultations()
-                        ->select(['id', 'user_id', 'consult_status', 'diagnosis', 'prognosis', 'updated_at'])
-                        ->with(['user:id,name']) // eager loading
+                    return $this->pet->consultations()
+                        ->select(['id', 'user_id', 'consult_status', 'prognosis', 'color', 'updated_at'])
+                        ->with(['user:id,name', 'diseases:name']) // eager loading
                         ->where(function ($query) {
-                            $query->where('diagnosis', 'like', '%'. $this->search .'%')
-                                ->orWhere('prognosis', 'like', '%'. $this->search .'%');
+                            $query->where('prognosis', 'like', '%'. $this->search .'%');
+                        })->orWhereHas('diseases', function (Builder $query) {
+                            $query->where('name', 'like', '%'. $this->search .'%');
+                        })->orWhereHas('user', function (Builder $query) {
+                            $query->where('name', 'like', '%'. $this->search .'%');
                         })->orderBy($this->sort, $this->direction)
                             ->simplePaginate($this->paginate);
                 } else {
-                    $consultations = $this->pet->consultations()
-                        ->select(['id', 'user_id', 'consult_status', 'diagnosis', 'prognosis', 'updated_at'])
-                        ->with(['user:id,name']) // eager loading
+                    return $this->pet->consultations()
+                        ->select(['id', 'user_id', 'consult_status', 'prognosis', 'color', 'updated_at'])
+                        ->with(['user:id,name', 'diseases:name']) // eager loading
                         ->orderBy($this->sort, $this->direction)
                         ->simplePaginate($this->paginate);
                 }
@@ -196,61 +249,43 @@ class ConsultationController extends Component
 
             if ($this->filter == 'Trash') {
                 if (strlen($this->search) > 0) {
-                    $consultations = $this->pet->consultations()
+                    return $this->pet->consultations()
                         ->onlyTrashed()
-                        ->select(['id', 'user_id', 'consult_status', 'diagnosis', 'prognosis', 'updated_at'])
-                        ->with(['user:id,name']) // eager loading
+                        ->select(['id', 'user_id', 'consult_status', 'prognosis', 'color', 'updated_at'])
+                        ->with(['user:id,name', 'diseases:name']) // eager loading
                         ->where(function ($query) {
-                            $query->where('diagnosis', 'like', '%'. $this->search .'%')
-                                ->orWhere('prognosis', 'like', '%'. $this->search .'%');
+                            //$query->where('diagnosis', 'like', '%'. $this->search .'%')
+                            $query->where('prognosis', 'like', '%'. $this->search .'%');
+                        })->orWhereHas('diseases', function (Builder $query) {
+                            $query->where('name', 'like', '%'. $this->search .'%');
+                        })->orWhereHas('user', function (Builder $query) {
+                            $query->where('name', 'like', '%'. $this->search .'%');
                         })->orderBy($this->sort, $this->direction)
                             ->simplePaginate($this->paginate);
                 } else {
-                    $consultations = $this->pet->consultations()
+                    return $this->pet->consultations()
                         ->onlyTrashed()
-                        ->select(['id', 'user_id', 'consult_status', 'diagnosis', 'prognosis', 'updated_at'])
-                        ->with(['user:id,name']) // get columns from users table
+                        ->select(['id', 'user_id', 'consult_status', 'prognosis', 'color', 'updated_at'])
+                        ->with(['user:id,name', 'diseases:name']) // get columns from users table
                         ->orderBy($this->sort, $this->direction)
                         ->simplePaginate($this->paginate);
                 }
             }
-
-            // Asigno un color a la cansulta
-            foreach ($consultations as $consultation) {
-                switch ($consultation->prognosis) {
-                    case 'Good':
-                        $consultation->color = 'text-success';
-                        break;
-                    case 'Fair':
-                        $consultation->color = 'text-olive';
-                        break;
-
-                    case 'Guarded':
-                        $consultation->color = 'text-warning';
-                        break;
-
-                    case 'Grave':
-                        $consultation->color = 'text-orange';
-                        break;
-
-                    case 'Poor':
-                        $consultation->color = 'text-danger';
-                        break;
-
-                    default:
-                        $consultation->color = 'text-muted';
-                        break;
-                }
-            }
         } else {
-            $consultations = [];
+            return [];
         }
+    }
 
-        $consultations_quantity = $this->pet->consultations()->count();
-        $deleted_consultations_quantity = $this->pet->consultations()->onlyTrashed()->count();
+    public function render()
+    {
+        $this->authorize('consultations_index');
 
+        $this->diseases = Disease::all();
 
-        return view('livewire.consultation.component', compact('consultations', 'consultations_quantity', 'deleted_consultations_quantity'))
+        return view('livewire.consultation.component', [
+                'consultations' => $this->consultations,
+                'consultations_quantity' => $this->pet->consultations()->count(),
+                'deleted_consultations_quantity' => $this->pet->consultations()->onlyTrashed()->count()])
             ->extends('admin.layout.app')
             ->section('content');
     }
@@ -259,7 +294,6 @@ class ConsultationController extends Component
     {
         // Se asigna $this-pet-dob (d-m-Y) en la propiedad $age (0 years, 0 months, 0 days)
         $this->age = Carbon::createFromDate($this->pet->dob)->diff(Carbon::now())->format('%y years, %m months and %d days');
-        // $this->problem_statement = '';
 
         $this->emit('show-modal', 'show-modal');
     }
@@ -276,18 +310,49 @@ class ConsultationController extends Component
         // Se asigna el parámetro a la propiedad $problem_statement
         $this->problem_statement = $problem_statement;
 
-        $user = Auth::user();
+        $this->types_of_diagnosis = implode(", ", $this->types_of_diagnosis);
+
+        // Asigno un color a la cansulta
+        switch ($this->prognosis) {
+            case 'Good':
+                $this->color = 'text-success';
+                break;
+
+            case 'Fair':
+                $this->color = 'text-olive';
+                break;
+
+            case 'Guarded':
+                $this->color = 'text-warning';
+                break;
+
+            case 'Grave':
+                $this->color = 'text-orange';
+                break;
+
+            case 'Poor':
+                $this->color = 'text-danger';
+                break;
+
+            case 'Pending':
+                $this->color = 'text-muted';
+                break;
+        }
 
         $validatedData = $this->validate();
 
-        // instantiate a new consultation instance
-        $consultation = new Consultation($validatedData);
-
-        $consultation->user()->associate($user);
+        $consultation = new Consultation($validatedData); // new consultation instance
+        $consultation->user()->associate(Auth::user());
         $consultation->pet()->associate($this->pet);
+        $consultation->color = $this->color;
         $consultation->save();
 
-        $this->checkedConsultations = [];
+        // String disease, se convierte en
+        foreach(explode("; ", $this->disease) as $disease)
+        {
+            $diseases[] = Disease::firstOrCreate(['name' => Str::of($disease)->trim()])->id;
+        }
+        $consultation->diseases()->attach($diseases);
 
         $this->dispatchBrowserEvent('stored', [
             'title' => 'Created',
@@ -303,19 +368,14 @@ class ConsultationController extends Component
     }
 
 
-    public function destroy(Consultation $consultation)
+    public function delete(Consultation $consultation)
     {
         $this->authorize('consultations_destroy');
 
         $consultation->delete();
 
-        // $this->dispatchBrowserEvent('swal:deleteConsultations', [
-        //     'title' => 'Are you sure?',
-        //     'html'  => 'You want to delete this consultations',
-        //     'checkIDs' => $this->checkedConsultations,
-        // ]);
-
-        $this->checkedConsultations = [];
+        $this->selected = [];
+        $this->select_page = false;
 
         $this->dispatchBrowserEvent('deleted', [
             'title' => 'Deleted',
@@ -323,11 +383,17 @@ class ConsultationController extends Component
             'class' => 'bg-danger',
             'icon' => 'fas fa-check-circle fa-lg',
             'image' => auth()->user()->profile_photo_url,
-            'body' => 'Consultation deleted.'
+            'body' => 'Consultation moved to recycle bin.'
         ]);
+
+        // $this->dispatchBrowserEvent('swal:deleteConsultations', [
+        //     'title' => 'Are you sure?',
+        //     'html'  => 'You want to delete this consultations',
+        //     'checkIDs' => $this->checkedConsultations,
+        // ]);
     }
 
-    public function forceDelete($id)
+    public function destroy($id)
     {
         $this->authorize('consultations_delete');
 
@@ -335,13 +401,8 @@ class ConsultationController extends Component
 
         $consultation->forceDelete();
 
-        // $this->dispatchBrowserEvent('swal:deleteConsultations', [
-        //     'title' => 'Are you sure?',
-        //     'html'  => 'You want to delete this consultations',
-        //     'checkIDs' => $this->checkedConsultations,
-        // ]);
-
-        $this->checkedConsultations = [];
+        $this->selected = [];
+        $this->select_page = false;
 
         $this->dispatchBrowserEvent('deleted', [
             'title' => 'Deleted',
@@ -351,6 +412,77 @@ class ConsultationController extends Component
             'image' => auth()->user()->profile_photo_url,
             'body' => 'Consultation deleted.'
         ]);
+
+        // $this->dispatchBrowserEvent('swal:deleteConsultations', [
+        //     'title' => 'Are you sure?',
+        //     'html'  => 'You want to delete this consultations',
+        //     'checkIDs' => $this->checkedConsultations,
+        // ]);
+    }
+
+    public function destroyMultiple()
+    {
+        //Si no hay ningun item seleccionado
+        if (!$this->selected) {
+            $this->dispatchBrowserEvent('deleted-error', [
+                'title' => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class' => 'bg-light',
+                'icon' => 'fas fa-exclamation-triangle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => 'No consultations selected.'
+            ]);
+            return;
+        }
+
+        if ($this->selected) {
+            Consultation::whereKey($this->selected)->forceDelete();
+
+            $this->dispatchBrowserEvent('destroyed', [
+                'title' => 'Destroyed',
+                'subtitle' => 'Succesfully!',
+                'class' => 'bg-danger',
+                'icon' => 'fas fa-check-circle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => 'Consultations destroyed.'
+            ]);
+        }
+
+        $this->selected = [];
+        $this->select_page = false;
+    }
+
+    public function deleteMultiple()
+    {
+        $this->authorize('consultations_destroy');
+
+        //Si no hay ningun item seleccionado
+        if (!$this->selected) {
+            $this->dispatchBrowserEvent('deleted-error', [
+                'title' => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class' => 'bg-light',
+                'icon' => 'fas fa-exclamation-triangle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => 'No consultations selected.'
+            ]);
+            return;
+        }
+
+        if ($this->selected) {
+            Consultation::destroy($this->selected);
+            $this->dispatchBrowserEvent('deleted', [
+                'title' => 'Deleted',
+                'subtitle' => 'Succesfully!',
+                'class' => 'bg-danger',
+                'icon' => 'fas fa-check-circle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => 'Consultations moved to Recycle bin.'
+            ]);
+        }
+
+        $this->selected = [];
+        $this->select_page = false;
     }
 
     public function restore($id)
@@ -361,113 +493,59 @@ class ConsultationController extends Component
 
         $consultation->restore();
 
-        $this->checkedConsultations = [];
+        $this->selected = [];
+        $this->select_page = false;
 
         $this->dispatchBrowserEvent('deleted', [
             'title' => 'Restored',
             'subtitle' => 'Succesfully!',
             'class' => 'bg-info',
-            'icon' => 'fas fa-check-circle fa-lg',
+            'icon' => 'fas fa-info fa-lg',
             'image' => auth()->user()->profile_photo_url,
             'body' => 'Consultation restored.'
         ]);
     }
 
-    public function updateCheckAllConsultations()
+    public function restoreMultiple()
     {
-        if ($this->filter == 'All') {
-            if ($this->checkAllConsultations == false) {
-                $this->checkedConsultations =  $this->pet->consultations()
-                    ->where(function($query) {
-                        $query->where('diagnosis', 'like', '%'. $this->search .'%')
-                            ->orWhere('problem_statement', 'like', '%'. $this->search .'%');
-                    })
-                    ->orderBy($this->sort, $this->direction)
-                    ->simplePaginate($this->paginate)
-                    ->pluck('id');
-                $this->checkAllConsultations = true;
-            } else {
-                $this->checkedConsultations = [];
-                $this->checkAllConsultations = false;
-            }
-        } elseif ($this->filter == 'Trash') {
-            if ($this->checkAllConsultations == false) {
-                $this->checkedConsultations =  $this->pet->consultations()
-                    ->onlyTrashed()
-                    ->where(function($query) {
-                        $query->where('diagnosis', 'like', '%'. $this->search .'%')
-                            ->orWhere('problem_statement', 'like', '%'. $this->search .'%');
-                    })
-                    ->orderBy($this->sort, $this->direction)
-                    ->simplePaginate($this->paginate)
-                    ->pluck('id');
-                $this->checkAllConsultations = true;
-            } else {
-                $this->checkedConsultations = [];
-                $this->checkAllConsultations = false;
-            }
+        //Si no hay ningun item seleccionado
+        if (!$this->selected) {
+            $this->dispatchBrowserEvent('deleted-error', [
+                'title' => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class' => 'bg-light',
+                'icon' => 'fas fa-info fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => 'No consultations selected.'
+            ]);
+            return;
         }
-    }
 
-    public function deleteChecked()
-    {
-        $ids = $this->checkedConsultations;
-        Consultation::whereKey($ids)->delete();
-        $this->checkedConsultations = [];
-        $this->checkAllConsultations = false;
+        if ($this->selected) {
+            Consultation::whereKey($this->selected)->restore();
 
-        $this->dispatchBrowserEvent('deleted', [
-            'title' => 'Deleted',
-            'subtitle' => 'Succesfully!',
-            'class' => 'bg-danger',
-            'icon' => 'fas fa-check-circle fa-lg',
-            'image' => auth()->user()->profile_photo_url,
-            'body' => 'Consultations deleted.'
-        ]);
-    }
+            $this->dispatchBrowserEvent('restored', [
+                'title' => 'Restored',
+                'subtitle' => 'Succesfully!',
+                'class' => 'bg-info',
+                'icon' => 'fas fa-info fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => 'Consultations restored.'
+            ]);
+        }
 
-    public function destroyChecked()
-    {
-        $ids = $this->checkedConsultations;
-        Consultation::whereKey($ids)->forceDelete();
-        $this->checkedConsultations = [];
-        $this->checkAllConsultations = false;
-
-        $this->dispatchBrowserEvent('destroyed', [
-            'title' => 'Destroyed',
-            'subtitle' => 'Succesfully!',
-            'class' => 'bg-danger',
-            'icon' => 'fas fa-check-circle fa-lg',
-            'image' => auth()->user()->profile_photo_url,
-            'body' => 'Consultations destroyed.'
-        ]);
-    }
-
-    public function restoreChecked()
-    {
-        $ids = $this->checkedConsultations;
-
-        Consultation::whereKey($ids)->restore();
-        $this->checkedConsultations = [];
-        $this->checkAllConsultations = false;
-
-        $this->dispatchBrowserEvent('restored', [
-            'title' => 'Restored',
-            'subtitle' => 'Succesfully!',
-            'class' => 'bg-success',
-            'icon' => 'fas fa-check-circle fa-lg',
-            'image' => auth()->user()->profile_photo_url,
-            'body' => 'Consultations restored.'
-        ]);
+        $this->selected = [];
+        $this->select_page = false;
     }
 
 
     public function resetUI()
     {
-        $this->selected_id = '';
+        $this->selected_id = null;
         $this->age = '';
         $this->weight = null;
         $this->temperature = null;
+        $this->oxygen_saturation_level = null;
         $this->capillary_refill_time = 'choose';
         $this->heart_rate = null;
         $this->pulse = 'choose';
@@ -478,10 +556,15 @@ class ConsultationController extends Component
         $this->pain = 'choose';
         $this->body_condition = 'choose';
         $this->problem_statement = '';
-        $this->diagnosis = '';
+        $this->types_of_diagnosis = [];
         $this->prognosis = 'choose';
+        $this->color = '';
         $this->treatment_plan = '';
         $this->consult_status = 'choose';
+        $this->disease = '';
+
+        $this->selected = [];
+        $this->select_page = false;
 
         $this->resetValidation();
         $this->emit('reset-ckeditor', 'reset-ckeditor');

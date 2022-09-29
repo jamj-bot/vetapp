@@ -14,16 +14,23 @@ class Pets extends Component
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
 
-    // Receiving parameter
+    // Parameter
     public $user;
 
     // Datatable attributes
-    public $paginate = '50', $sort = 'pets.id', $direction = 'desc', $readyToLoad = false, $search = '', $filter = 'Alive';
+    public $paginate = '50',
+        $sort = 'pets.updated_at',
+        $direction = 'desc',
+        $search = '',
+        $readyToLoad = false,
+        $filter = 'Alive',
+        $selected = [],
+        $select_page = false;
 
     // General component attrbibutes
-    public $modalTitle;
+    public $pageTitle, $modalTitle;
 
-    // Crude Atributes
+    // Crud Atributes
     public $selected_id,
         $species_id = 'choose',
         $code,
@@ -32,6 +39,7 @@ class Pets extends Component
         $zootechnical_function,
         $sex = 'choose',
         $dob,
+        $estimated = 0,
         $desexed = 'choose',
         $desexing_candidate = 1,
         $alerts,
@@ -43,7 +51,6 @@ class Pets extends Component
     protected $listeners = [
         'destroy'
     ];
-
 
     /**
      *  Function that returns the validation rules
@@ -59,6 +66,7 @@ class Pets extends Component
             'zootechnical_function' => 'nullable|max:140',
             'sex'                   => 'required|in:"Male", "Female", "Unknown"',
             'dob'                   => 'required|date',
+            'estimated'             => 'required|boolean',
             'desexed'               => 'required|in:"Desexed", "Not desexed", "Unknown"',
             'desexing_candidate'    => 'nullable|boolean',
             'alerts'                => 'nullable|max:255',
@@ -78,12 +86,47 @@ class Pets extends Component
     }
 
     /**
+     *  Check or all function
+     *
+    **/
+    public function updatedSelectPage($value)
+    {
+        if ($value) {
+            $this->selected = $this->pets->pluck('id')->map(fn ($item) => (string) $item)->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    /**
+     *  uncheck Select All
+     *
+    **/
+    public function updatedSelected()
+    {
+        $this->select_page = false;
+    }
+
+    /**
+     *  uncheck Select All
+     *
+    **/
+    public function updatedFilter()
+    {
+        $this->selected = [];
+    }
+
+    /**
      *  Funtion to reset pagination when a user writtes in search field
      *
     **/
     public function updatingSearch()
     {
         $this->resetPage();
+
+        // Al escribir en el buscador, se limpian los items seleccionados
+        $this->select_page = false;
+        $this->selected = [];
     }
 
     /**
@@ -124,20 +167,25 @@ class Pets extends Component
 
     public function mount()
     {
+        $this->pageTitle = 'Pets';
         $this->modalTitle = 'Pets';
     }
 
 
-    public function render()
+    public function getPetsProperty()
     {
-        $this->authorize('pets_index');
-
         if ($this->readyToLoad) {
             if (strlen($this->search) > 0) {
-
-                $pets = $this->user->pets()
+                return $this->user->pets()
                     ->join('species as s', 's.id', 'pets.species_id')
-                    ->select('pets.id', 'pets.code', 'pets.name', 'pets.breed', 'pets.status', 's.name as common_name', 's.scientific_name')
+                    ->select('pets.id',
+                        'pets.code',
+                        'pets.name',
+                        'pets.breed',
+                        'pets.status',
+                        'pets.updated_at as updated_at',
+                        's.name as common_name',
+                        's.scientific_name')
                     ->where('status', $this->filter)
                     ->where(function($query){
                         $query->where('pets.code' , 'like', '%' . $this->search . '%')
@@ -150,7 +198,7 @@ class Pets extends Component
                     ->orderBy($this->sort, $this->direction)
                     ->paginate($this->paginate);
             } else {
-                $pets = $this->user->pets()
+                return $this->user->pets()
                     ->join('species as s', 's.id', 'pets.species_id')
                     ->select('pets.id', 'pets.code', 'pets.name', 'pets.breed', 'pets.status', 's.name as common_name', 's.scientific_name')
                     ->where('pets.status', $this->filter)
@@ -158,20 +206,35 @@ class Pets extends Component
                     ->paginate($this->paginate);
             }
         } else {
-            $pets = [];
+            return [];
         }
+    }
 
-        $species = Species::orderBy('name', 'desc')->get();
+    public function getSpeciesProperty()
+    {
+        return Species::orderBy('name', 'desc')->get();
+    }
 
-        return view('livewire.pets', compact('pets', 'species'));
+
+    public function render()
+    {
+        $this->authorize('pets_index');
+
+        return view('livewire.inline.pets', [
+            'species' => $this->species,
+            'pets'    => $this->pets
+        ]);
     }
 
     public function store()
     {
         $this->authorize('pets_store');
 
-        $validatedData = $this->validate();
+        if ($this->name == null) {
+            $this->name = $this->code;
+        }
 
+        $validatedData = $this->validate();
 
         $this->user->pets()->create($validatedData);
 
@@ -197,6 +260,7 @@ class Pets extends Component
         $this->zootechnical_function = $pet->zootechnical_function;
         $this->sex = $pet->sex;
         $this->dob = $pet->dob->format('Y-m-d');
+        $this->estimated = $pet->estimated;
         $this->desexed = $pet->desexed;
         $this->desexing_candidate = $pet->desexing_candidate;
         $this->alerts = $pet->alerts;
@@ -245,6 +309,45 @@ class Pets extends Component
         ]);
     }
 
+    public function destroyMultiple()
+    {
+        $this->authorize('pets_destroy');
+
+        //Si no hay ningun item seleccionado
+        if (!$this->selected) {
+            $this->dispatchBrowserEvent('destroy-error', [
+                'title' => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class' => 'bg-light',
+                'icon' => 'fas fa-exclamation-triangle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => '0 items selected'
+            ]);
+            return;
+        }
+
+        if ($this->selected) {
+            // Seleccionando los nombres de las especies que sí se pueden borrar
+            $petsDeleted = Pet::whereIn('id', $this->selected)
+                ->select('name')
+                ->pluck('name')
+                ->toArray();
+
+            Pet::destroy($this->selected);
+
+            $this->dispatchBrowserEvent('deleted', [
+                'title' => 'Deleted',
+                'subtitle' => 'Succesfully!',
+                'class' => 'bg-danger',
+                'icon' => 'fas fa-check-circle fa-lg',
+                'image' => auth()->user()->profile_photo_url,
+                'body' => count($petsDeleted). ' items moved to Recycle bin: ' . implode(", ", $petsDeleted)
+            ]);
+        }
+
+        $this->resetUI();
+    }
+
     public function resetUI()
     {
         $this->selected_id = '';
@@ -255,12 +358,19 @@ class Pets extends Component
         $this->zootechnical_function = '';
         $this->sex = 'choose';
         $this->dob = '';
+        $this->estimated = 0;
         $this->desexed = 'choose';
         $this->desexing_candidate = 1;
         $this->alerts = '';
         $this->diseases = '';
         $this->allergies = '';
         $this->status = 'choose';
+
+        $this->selected = [];
+        $this->select_page = false;
+        $this->search = '';
+
         $this->resetValidation();
+        $this->resetPage();
     }
 }
