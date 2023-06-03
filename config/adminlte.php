@@ -48,9 +48,9 @@ return [
     |
     */
 
-    'logo' => '<b>Vet</b>APP 3',
-    'logo_img' => 'vendor/adminlte/dist/img/veterinary.png',
-    'logo_img_class' => 'brand-image img-rounded elevation-3',
+    'logo' => '<b>VetAPP 3</b>',
+    'logo_img' => 'vendor/adminlte/dist/img/veterinary.svg',
+    'logo_img_class' => 'brand-image img-rounded elevation-0',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
     'logo_img_alt' => 'VetAPP 3',
@@ -307,10 +307,24 @@ return [
         ],
         // ['header' => 'MANAGE USERS'],
         [
-            'text'  => 'Users',
+            'text'  => 'Clients',
             'route' => 'admin.users',
             'active'      => ['admin/users*'],
             'icon'  => 'fas fa-fw fa-address-book',
+            'can'   => 'users_index',
+        ],
+        [
+            'text'  => 'Veterinarians',
+            'route' => 'admin.veterinarians',
+            'active'      => ['admin/veterinarians*'],
+            'icon'  => 'fas fa-fw fa-user-md',
+            'can'   => 'users_index',
+        ],
+        [
+            'text'  => 'Administrators',
+            'route' => 'admin.administrators',
+            'active'      => ['admin/administrators*'],
+            'icon'  => 'fas fa-fw fa-user-shield',
             'can'   => 'users_index',
         ],
         [
@@ -352,6 +366,13 @@ return [
             'icon'  => 'fas fa-fw fa-bug',
             'can'   => 'parasiticides_index',
             'route' => 'admin.parasiticides',
+        ],
+        [
+            'text'  => 'Enhanced Search',
+            'route' => 'admin.case-study-search',
+            'active'      => ['admin/case-study-search*'],
+            'icon'  => 'fas fa-fw fa-search-plus',
+            // 'can'   => 'users_index',
         ],
         [
             'text'  => 'Recycle Bin',

@@ -29,15 +29,21 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(UserSeeder::class);
+        $this->call(VeterinarianSeeder::class);
         $this->call(SpeciesSeeder::class);
+        $this->call(DiseaseSeeder::class);
         $this->call(PetSeeder::class);
         $this->call(VaccineSeeder::class);
         $this->call(VaccinationSeeder::class);
         $this->call(ParasiticideSeeder::class);
         $this->call(DewormingSeeder::class);
         $this->call(ConsultationSeeder::class);
-        $this->call(DiseaseSeeder::class);
         $this->call(MedicineSeeder::class);
 
+
+        $this->call(ScheduleSeeder::class);
+        $this->call(ServiceSeeder::class);
+
+        $this->call(AppointmentSeeder::class);
     }
 }

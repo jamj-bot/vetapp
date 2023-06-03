@@ -1,37 +1,55 @@
 @livewireStyles
 <link rel="stylesheet" href="/css/admin_custom.css">
 
+{{-- Select2 --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+
+{{-- <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/select2-bootstrap4-theme@1.0.0/dist/select2-bootstrap4.min.css"> --}}
+
+
 <style type="text/css">
 
     h1 {
         font-size: clamp(1.3rem, 8vw - 1.6rem, 2rem)!important
     }
 
-    .profile-background-gradient {
-        background: linear-gradient(180deg, #0C003C 0%, #BFFFAF 100%),
-            linear-gradient(165deg, #480045 25%, #E9EAAF 100%),
-            linear-gradient(145deg, #480045 25%, #E9EAAF 100%),
-            linear-gradient(300deg, rgba(233, 223, 255, 0) 0%, #AF89FF 100%),
-            linear-gradient(90deg, #45EBA5 0%, #45EBA5 30%, #21ABA5 30%, #21ABA5 60%, #1D566E 60%, #1D566E 70%, #163A5F 70%, #163A5F 100%);
-            background-blend-mode: overlay, overlay, overlay, multiply, normal;
+
+
+    .select2-selection__choice__display {
+        color: #212529;
     }
 
-    .profile-background-gradient2 {
-        background: radial-gradient(100% 225% at 100% 0%, #FF0000 0%, #000000 100%),
-            linear-gradient(236deg, #00C2FF 0%, #000000 100%),
-            linear-gradient(135deg, #CDFFEB 0%, #CDFFEB 36%, #009F9D 36%, #009F9D 60%, #07456F 60%, #07456F 67%, #0F0A3C 67%, #0F0A3C 100%);
-        background-blend-mode: overlay, hard-light, normal;
+    .select2-results__options {
+        background-color: white;
+        color: #212529;
     }
 
-    .profile-background-gradient3 {
-        background: linear-gradient(123deg, #FFFFFF 0%, #00B2FF 100%),
-            linear-gradient(236deg, #BAFF99 0%, #005E64 100%),
-            linear-gradient(180deg, #FFFFFF 0%, #002A5A 100%),
-            linear-gradient(225deg, #0094FF 20%, #BFF4ED 45%, #280F34 45%, #280F34 70%, #FF004E 70%, #E41655 85%, #B30753 85%, #B30753 100%),
-            linear-gradient(135deg, #0E0220 15%, #0E0220 35%, #E40475 35%, #E40475 60%, #48E0E4 60%, #48E0E4 68%, #D7FBF6 68%, #D7FBF6 100%);
-        background-blend-mode: overlay, overlay, overlay, darken, normal;
+.select2-results__option--selectable {
+    background-color: white;
+    color: #212529;
+}
+
+
+/* .select2-results__option--selected {
+    background-color: purple;
+    color: white;
+}
+
+.select2-results__option--highlighted {
+    background-color: green;
+    color: white;
+}*/
+
+
+/*    Muestra los iconos de las tablas al hacer hover en el tr*/
+    .datatable tr .icon {
+        visibility: hidden;
     }
 
+    .datatable tr:hover .icon {
+        visibility: visible;
+    }
 
 /*    .loader{
         display: block;
@@ -248,5 +266,6 @@ button:active .icon svg {
      -ms-transform: scale(0.8);
          transform: scale(0.8);
 }
+
 
 </style>

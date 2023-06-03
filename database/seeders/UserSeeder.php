@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Veterinarian;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -19,7 +20,6 @@ class UserSeeder extends Seeder
             'phone' => '3336897418',
             'email' => 'arturo@gmail.com',
             'password' => bcrypt('1234567890'),
-            'confirmPassword' => bcrypt('1234567890'),
             'status' => 'active',
             'user_type' => 'Superadmin'
         ]);
@@ -30,22 +30,70 @@ class UserSeeder extends Seeder
             'phone' => '3345851719',
             'email' => 'jorgearturomolina@gmail.com',
             'password' => bcrypt('1234567890'),
-            'confirmPassword' => bcrypt('1234567890'),
             'status' => 'active',
-            'user_type' => 'Veterinarian'
+            'user_type' => 'Admin'
         ]);
-        $user2->assignRole('admin');
+        $user2->assignRole('Admin');
 
         $user3 = User::create([
-            'name' => 'Pablo Donato Bernal Mizrahi',
+            'name' => 'Pablo Donato Bernal',
             'phone' => '3345897845',
             'email' => 'padobemi@gmail.com',
             'password' => bcrypt('1234567890'),
-            'confirmPassword' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'Veterinarian'
+        ]);
+        $user3->assignRole('Veterinarian');
+
+        Veterinarian::create([
+            'user_id' => $user3->id,
+            'dgp'     => '23808935'
+        ]);
+
+        $user4 = User::create([
+            'name' => 'Luis Soto',
+            'phone' => '3345659819',
+            'email' => 'soto_rendon_luis@gdlzoo.org.mx',
+            'password' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'Veterinarian'
+        ]);
+        $user4->assignRole('Veterinarian');
+
+        Veterinarian::create([
+            'user_id' => $user4->id,
+            'dgp'     => '10813555'
+        ]);
+
+        $user5 = User::create([
+            'name' => 'Maria Pérez',
+            'phone' => '3645894517',
+            'email' => 'mary_veterinaria@gmail.com',
+            'password' => bcrypt('1234567890'),
             'status' => 'active',
             'user_type' => 'Client'
         ]);
-        $user3->assignRole('Client');
+        $user5->assignRole('Client');
+
+        $user6 = User::create([
+            'name' => 'Paulina Hernández',
+            'phone' => '3345581715',
+            'email' => 'i_love_pau@terra.com.mx',
+            'password' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'Client'
+        ]);
+        $user6->assignRole('Client');
+
+        $user7 = User::create([
+            'name' => 'Alfonso San Miguel',
+            'phone' => '3314568987',
+            'email' => 'a_san_miguiel@outlook.com',
+            'password' => bcrypt('1234567890'),
+            'status' => 'active',
+            'user_type' => 'Client'
+        ]);
+        $user7->assignRole('Client');
 
         User::factory(0)->create();
     }

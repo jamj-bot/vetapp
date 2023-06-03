@@ -40,35 +40,20 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-md-3">
-
 					<!-- Profile Image -->
-					<div class="card card-widget widget-user">
-						<div class="widget-user-header text-white" style="background-image: linear-gradient(to top, #00dbde 0%, #007bff 100%);">
-							<h3 class="widget-user-username text-right">{{ $pet->species->name }}</h3>
-							{{-- <h5 class="widget-user-desc text-right lead">{{ $pet->species->scientific_name }}</h5> --}}
+			        <div class="card mb-4">
+						<div class="card-body text-center">
+							<img src="{{$pet->pet_profile_photo ? asset('storage/pet-profile-photos/' . $pet->pet_profile_photo) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}" alt="avatar"
+							  class="rounded-circle img-fluid elevation-2" style="width: 100px; height: 100px; object-fit: cover;">
+							<h5 class="my-3">{{ $pet->name }}</h5>
+							<p class="text-muted mb-1">1 open consultation(s)</p>
+							<p class="text-muted mb-4">Vaccination schedule incompleted</p>
+							{{-- <div class="d-flex justify-content-center mb-2"> --}}
+						  		<a href="{{ route('admin.users.show', $pet->user) }}" class="btn btn-sm btn-block bg-gradient-lightblue">{{ $pet->user->name }}</a>
+								{{-- <button type="button" class="btn btn-sm btn-block btn-outline-info">Message</button> --}}
+							{{-- </div> --}}
 						</div>
-						<div class="widget-user-image">
-							<img class="img-fluid img-circle elevation-2 shadow"
-								loading="lazy"
-								src="{{$pet->pet_profile_photo ? asset('storage/pet-profile-photos/' . $pet->pet_profile_photo) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}"
-								style="width: 100px; height: 100px; object-fit: cover; background: antiquewhite;"
-								alt="{{ $pet->name }}">
-						</div>
-						<div class="card-footer p-0">
-							<ul class="nav flex-column pt-5">
-								<li class="nav-item">
-									<span class="nav-link text-black">
-										<span class="font-weight-bolder">Owner:</span>
-										<a href="{{ route('admin.users.show', $pet->user) }}"
-											class="btn btn-block bg-gradient-success">
-											<i class="far fa-arrow-alt-circle-left"></i>
-											{{ $pet->user->name }}
-										</a>
-									</span>
-								</li>
-							</ul>
-						</div>
-					</div>
+			        </div>
 					<!-- /.card -->
 
                     <!-- about card -->
@@ -172,23 +157,22 @@
 								<!-- /.tab-pane -->
 
 								<div class="tab-pane" id="vaccinations">
-									@livewire('vaccinations', ['pet' => $pet])
-									{{-- @livewire('pet-index') --}}
+									@livewire('inline.vaccinations', ['pet' => $pet])
 								</div>
 								<!-- /.tab-pane -->
 
 								<div class="tab-pane" id="dewormings">
-									@livewire('dewormings', ['pet' => $pet])
+									@livewire('inline.dewormings', ['pet' => $pet])
 								</div>
 								<!-- /.tab-pane -->
 
 								<div class="tab-pane" id="images">
-									@livewire('recently-added-images', ['pet' => $pet])
+									@livewire('inline.recently-added-images', ['pet' => $pet])
 								</div>
 								<!-- /.tab-pane -->
 
 								<div class="tab-pane" id="lab-tests">
-									@livewire('recently-added-tests', ['pet' => $pet])
+									@livewire('inline.recently-added-tests', ['pet' => $pet])
 								</div>
 								<!-- /.tab-pane -->
 
@@ -327,12 +311,8 @@
 	@include('common.modal-image')
 @stop
 
-
 @section('css')
 	@include('admin.layout.styles')
-
-	<!-- Alpine Plugins -->
-	<script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 
 	<!-- Chart Plugins -->
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"
@@ -342,18 +322,9 @@
 @stop
 
 @section('js')
+	<!-- Alpine Plugins -->
+	<script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+	<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+
 	@include('admin.layout.scripts')
-
-	<script type="text/javascript">
-	    function changeSrcHref(source, link, height = null) {
-	        document.getElementById('myObject').data=source
-	        document.getElementById('myAnchor').href=link
-
-	        if (height) {
-	            document.getElementById('myObject').height = height
-	        } else {
-	        	document.getElementById('myObject').height = ''
-	        }
-	    }
-	</script>
 @stop

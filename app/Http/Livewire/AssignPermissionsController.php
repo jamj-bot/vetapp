@@ -16,13 +16,21 @@ class AssignPermissionsController extends Component
     protected $paginationTheme = 'bootstrap';
 
     // Datatable attributes
-    public $paginate = '50', $sort = 'name', $direction = 'asc', $search = '';
+    //public $paginate = '50', $sort = 'name', $direction = 'asc', $search = '';
 
     // Component attributes
     public $pageTitle;
 
     // Model attributes
-    public $role_id = 0, $permissionSelected = [], $oldPermissions = [], $readyToLoad = false;
+    public $paginate        = '50',
+        $sort               = 'name',
+        $direction          = 'asc',
+        $search             = '',
+        $role_id            = 0,
+        $permissionSelected = [],
+        $oldPermissions     = [],
+        $readyToLoad        = false,
+        $select_page        = false;
 
     // Listener
     public $listeners = [
@@ -31,11 +39,20 @@ class AssignPermissionsController extends Component
 
     // Query string to  urls with datatable filters
     protected $queryString = [
-        'search' => ['except' => ''],
-        'paginate' => ['except' => '50'],
-        'sort' => ['except' => 'name'],
+        'search'    => ['except' => ''],
+        'paginate'  => ['except' => '50'],
+        'sort'      => ['except' => 'name'],
         'direction' => ['except' => 'asc']
     ];
+
+    public function updatedSelectPage()
+    {
+        if ($this->select_page) {
+            $this->syncAll();
+        } else {
+            $this->revokeAll();
+        }
+    }
 
      /**
      *  Funtion to reset pagination when a user writtes in search field
@@ -88,56 +105,64 @@ class AssignPermissionsController extends Component
         $this->role_id = 'choose';
     }
 
-    public function render()
+    public function getPermissionsProperty()
     {
-        $this->authorize('assign_permissions_index');
-
         if ($this->readyToLoad) {
             if (strlen($this->search) > 0) {
                 // Recupero los permisos buscados por le campo search
-                $permissions = Permission::select('name', 'id', DB::raw("0 as checked"))
+                return Permission::select('name', 'id', DB::raw("0 as checked"))
                     ->where('name', 'like', '%' . $this->search . '%')
                     ->orderBy($this->sort, $this->direction)
                     ->paginate($this->paginate);
             } else {
                 // recupero todos los permisos seleccionando nombre, id y agregando un nuevo campo llamado checked con valor de 0
-                $permissions = Permission::select('name', 'id', DB::raw("0 as checked"))
+                return Permission::select('name', 'id', DB::raw("0 as checked"))
                     ->orderBy($this->sort, $this->direction)
                     ->paginate($this->paginate);
             }
         } else {
-            $permissions = [];
+            return [];
         }
+    }
 
-        // Si el usuario tiene seleccionado un rol:
-            // Uno las tablas role_has_permisions através del id del permiso, cuando el role id y los guardo en un array.
+    public function getRolesProperty()
+    {
+        return Role::orderBy('id', 'asc')->get();
+    }
+
+    public function render()
+    {
+        $this->authorize('assign_permissions_index');
+
+        /**
+            1. Selecciona un role
+            2. PARA todos los permissions
+                2.1 VERIFICA si el $role seleccionado tiene asignado el permission actual
+                2.2.SI es VERDAD
+                    2.2.1. AGREGA al permission actueal el atributo checked y le asigna el valor 1.
+        **/
+
         if ($this->role_id != 'choose') {
-            $list = Permission::join('role_has_permissions as rp', 'rp.permission_id', 'permissions.id')
-                ->where('role_id', $this->role_id)
-                ->pluck('permissions.id')
-                ->toArray();
-
-            $this->oldPermissions = $list;
-        }
-
-        // Si el usuario tiene seleccionado un rol:
-            // Para cada permission
-                //Busco el rol que coincida con el rol releccionado
-                // Verifico si el rol tiene el permiso
-                    // Si el rol tiene permiso, entonces, el campo checked se vulve 1, en caso contrario queda igual
-        if ($this->role_id != 'choose') {
-            foreach ($permissions as $permission) {
-                $role = Role::find($this->role_id);
+            $role = Role::find($this->role_id);
+            foreach ($this->permissions as $permission) {
                 $hasPermission = $role->hasPermissionTo($permission->name);
                 if ($hasPermission) {
                     $permission->checked = 1;
                 }
             }
+
+            // Si el total de permisos es mayor que el total de permisos asignados
+            if ( Permission::all()->count() > $role->permissions->count() ) {
+                $this->select_page = false;
+            } else {
+                $this->select_page = true;
+            }
         }
 
-        $roles = Role::orderBy('id', 'asc')->get();
-
-        return view('livewire.assign-permissions.component', compact('roles', 'permissions'))
+        return view('livewire.assign-permissions.component', [
+            'roles' => $this->roles,
+            'permissions' => $this->permissions
+            ])
             ->extends('admin.layout.app')
             ->section('content');
     }
@@ -201,6 +226,7 @@ class AssignPermissionsController extends Component
                 'image' => auth()->user()->profile_photo_url,
                 'body' => 'Please select a valid role. There is no one selected to assign a permission to.'
             ]);
+            $this->select_page = false;
             return;
         }
 
@@ -230,6 +256,7 @@ class AssignPermissionsController extends Component
                 'image' => auth()->user()->profile_photo_url,
                 'body' => 'Please select a valid role. There is no one selected to assign a permission to.'
             ]);
+            $this->select_page = false;
             return;
         }
 

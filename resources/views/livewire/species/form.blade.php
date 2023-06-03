@@ -1,4 +1,4 @@
-<form autocomplete="off">
+<form autocomplete="off" wire:submit.prevent="submit">
 	@include('common.modal-header')
 
 		<div class="form-row">

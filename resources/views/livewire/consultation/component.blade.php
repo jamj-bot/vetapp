@@ -5,7 +5,7 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="display-4">
-                        {{ $pet->name != null ? $pet->name : $pet->code }} / {{ $pageTitle }}
+                        {{ $pet->name != null ? $pet->name : $pet->code }}'s Medical History
                         @if($pet->status == 'Dead')
                             <sup class="font-weight-light">Inactive</sup>
                         @endif
@@ -38,37 +38,18 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <!-- Link pet -->
                 <div class="col-md-3">
-                    <a href="{{ route('admin.pets.show', $pet) }}"
-                        class="btn btn-block btn-default mb-3
-                        @cannot('pets_show') disabled @endcannot">
-                        <i class="far fa-arrow-alt-circle-left"></i>
-                        Pet
-                    </a>
-
-                    <!-- Create cponsultation -->
-                    <a href="javascript:void(0)"
-                        wire:click.prevent="loadDobField()"
-                        onclick="bindTextareas()"
-                        title="Add new consultation"
-                        class="btn bg-gradient-primary btn-block mb-3
-                        @cannot('consultations_store') disabled @endcannot"
-                        wire:loading.class="disabled">
-                            <span wire:loading.remove wire:target="loadDobField">
-                               <i class="fas fa-fw fa-plus-circle"></i>
-                               Add Consultation
-                            </span>
-                            <span wire:loading wire:target="loadDobField">
-                                <i class="fas fa-fw fa-spinner fa-spin"></i>
-                                 Please, wait...
-                            </span>
-                    </a>
+                    @can('pets_show')
+                        <a href="{{ route('admin.pets.show', $pet) }}"
+                            class="btn btn-block bg-gradient-primary shadow-sm mb-3">
+                            <i class="fas fa-fw fa-dog"></i>
+                            Pet's profile
+                        </a>
+                    @endcan
 
                     <!-- about card -->
                     @include('common.about-card')
                     <!-- /.card -->
-
                 </div>
                 <!-- /.col -->
 
@@ -80,25 +61,21 @@
 
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            @if($this->filter == 'All')
-                                <h3 class="card-title">Consultations</h3>
-                            @elseif($this->filter == 'Trash')
-                                <h3 class="card-title">Trashed consultations</h3>
-                            @endif
+                            <h3 class="card-title">
+                                @if($this->select_page)
+                                    <span id="dynamicText{{$this->pageTitle}}">{{ count($this->selected) }} item(s) selected</span>
+                                @else
+                                    <span id="dynamicText{{$this->pageTitle}}">Consultations</span>
+                                @endif
+                            </h3>
 
+                            <!-- Datatable's filters -->
                             <div class="card-tools">
-                                <!-- Datatable's filters -->
-                                <div class="form-row my-2">
+                                <!-- Datatable's filters when screen < md-->
+                                @include('common.datatable-filters-smaller-md')
 
-                                    <div class="col-sm-6">
-                                        @include('common.select')
-                                    </div>
-
-                                    <div class="col-sm-6">
-                                        @include('common.search')
-                                    </div>
-                                </div>
-                                <!-- /.Datatable filters -->
+                                <!-- Datatable's filters when screen > md-->
+                                @include('common.datatable-filters-wider-md')
                             </div>
                             <!-- /.card-tools -->
                         </div>
@@ -107,105 +84,71 @@
                         <div class="card-body p-0">
                             <!-- Control buttons -->
                             <div class="mailbox-controls">
-                                <!-- Check all button -->
-                                    <div class="btn checkbox-toggle icheck-pomegranate ml-2">
-                                        <input type="checkbox"
-                                        id="checkAll"
-                                        wire:model="select_page"
-                                        {{ !count($consultations) ? 'disabled' : '' }}>
-                                        <label class="sr-only" for="checkAll">Click to check all items</label>
+
+                                <!-- Datatable's buttons -->
+                                <div class="d-flex justify-content-between my-1">
+                                    <div class="col-auto d-flex justify-content-center">
+                                        <!-- Check all button -->
+                                        <div class="icheck-nephritis">
+                                            <input type="checkbox"
+                                            id="checkAll{{$this->pageTitle}}"
+                                            wire:model="select_page"
+                                            wire:loading.attr="disabled">
+                                            <label class="sr-only" for="checkAll{{$this->pageTitle}}">Click to check all items</label>
+                                        </div>
+
+                                        @include('common.destroy-multiple-and-undo-buttons')
                                     </div>
-                                <div class="btn-group">
-                                    @if($this->filter == 'All')
-                                        <!-- Destroy hecked consultations button -->
-                                        @can('consultations_delete')
-                                            <button type="button" class="btn btn-default btn-sm"
-                                                wire:click.prevent="deleteMultiple">
-                                                <!-- All but small screen -->
-                                                <span class="d-none d-sm-block">
-                                                    <i class="fas fa-fw fa-trash"></i>
-                                                    Delete [<span id="contador">{{ count($this->selected) }}</span>]
-                                                </span>
-                                                <!-- Only small screen-->
-                                                <span class="d-block d-sm-none">
-                                                    <i class="fas fa-fw fa-trash"></i>[<span id="contador">{{ count($this->selected) }}</span>]
-                                                </span>
+                                    <div class="col-auto">
+                                         <div x-data="{
+                                                {{-- Enreda la propiedad 'model' y almacena su valor de manera persistente. --}}
+                                                filter_consultations:    $persist(@entangle('filter')),
+                                            }">
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-default dropdown-toggle shadow-sm border-0" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-fw fa-filter"></i> {{ $this->filter }}
                                             </button>
-                                        @endcan
-                                    @endif
-
-                                    @if($this->filter == 'Trash')
-                                        <!-- Delete hecked consultations button -->
-                                        @can('consultations_destroy')
-                                            <button type="button" class="btn btn-default btn-sm"
-                                                onclick="confirmDestroyConsultations('Are you sure you want destroy this consultations?', 'This action can not be undone!', 'Consultations', 'destroyMultiple')">
-                                                <span class="d-none d-sm-block">
-                                                    <i class="fas fa-fw fa-trash text-danger"></i>
-                                                    Destroy [<span id="contador">{{ count($this->selected) }}</span>]
-                                                </span>
-                                                <span class="d-block d-sm-none">
-                                                    <i class="fas fa-fw fa-trash text-danger"></i>
-                                                        [<span id="contador">{{ count($this->selected) }}</span>]
-                                                </span>
-                                            </button>
-                                        @endcan
-                                    @endif
-
-                                    @if($this->filter == 'Trash')
-                                        <!-- Restore hecked consultations button -->
-                                        @can('consultations_restore')
-                                            <button type="button" class="btn btn-default btn-sm"
-                                                wire:click="restoreMultiple">
-                                                <span class="d-none d-sm-block">
-                                                    <i class="fas fa-fw fa-history"></i>
-                                                    Restore [<span id="contador2">{{ count($this->selected) }}</span>]
-                                                </span>
-                                                <span class="d-block d-sm-none">
-                                                    <i class="fas fa-fw fa-history"></i>
-                                                    [<span id="contador2">{{ count($this->selected) }}</span>]
-                                                </span>
-                                            </button>
-                                        @endcan
-                                    @endif
-                                </div>
-                                <!-- /.btn-group -->
-
-                                <div class="float-right">
-                                    <!-- Botones para pantallas superior a sm -->
-                                    <div class="btn-group btn-group-toggle btn-group-sm" data-toggle="buttons">
-                                        <label class="btn {{ $this->filter == 'All' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
-                                            <input type="radio" name="options" id="option_b1" autocomplete="off"  wire:click="$set('filter', 'All')">
-                                            <i class="fas fa-fw fa-inbox"></i> <span class="font-weight-normal">Active</span>
-                                            <span class="ml-1 badge bg-success float-right">
-                                                {{ $consultations_quantity }}
-                                            </span>
-                                        </label>
-                                        <label class="btn {{ $this->filter == 'Trash' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
-                                            <input type="radio" name="options" id="option_b2" autocomplete="off"  wire:click="$set('filter', 'Trash')">
-                                            <i class="fas fa-fw fa-recycle"></i> <span class="font-weight-normal">Recycle</span>
-                                            <span class="ml-1 badge bg-danger float-right">
-                                                {{ $deleted_consultations_quantity }}
-                                            </span>
-                                        </label>
+                                            <div class="dropdown-menu">
+                                                <button class="dropdown-item {{ $this->filter == 'All' ? 'active':'' }}" type="button" wire:click="$set('filter', 'All')">
+                                                    Status: All
+                                                </button>
+                                                <button class="dropdown-item {{ $this->filter == 'In process' ? 'active':'' }}" type="button" wire:click="$set('filter', 'In process')">
+                                                    Status: In process
+                                                </button>
+                                                <button class="dropdown-item {{ $this->filter == 'Closed' ? 'active':'' }}" type="button" wire:click="$set('filter', 'Closed')">
+                                                    Status: Closed
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button"
+                                            wire:click.prevent="loadDobField()"
+                                            onclick="bindTextareas()"
+                                            class="btn bg-gradient-success btn-block btn-sm shadow-sm border-0"
+                                            data-toggle="modal"
+                                            data-target="#modalForm{{$this->pageTitle}}">
+                                            <i class="fas fa-fw fa-plus-circle text-light"></i> Add {{ Str::of($this->pageTitle)->singular() }}
+                                        </button>
                                     </div>
                                 </div>
-                                <!-- /.btn-group -->
                             </div>
 
                             <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover {{-- table-striped --}}">
+                                <table class="table table-hover table-striped datatable">
                                     <tbody>
                                         @forelse($consultations as $consultation)
-                                            <tr  id="rowcheck{{ $consultation->id }}" class="{{ $this->select_page ? 'table-active font-weight-bold' : ''}}">
-                                                <td>
-                                                    <div class="icheck-pomegranate">
+                                            <tr id="rowcheck{{$this->pageTitle}}{{ $consultation->id }}" class="{{ $this->select_page ? 'table-active text-muted' : ''}}">
+                                                <td width="10px">
+                                                    <div class="icheck-nephritis">
                                                         <input type="checkbox"
-                                                        id="check{{$consultation->id}}"
+                                                        id="check{{$this->pageTitle}}{{$consultation->id}}"
                                                         wire:model.defer="selected"
                                                         value="{{$consultation->id}}"
-                                                        onchange="updateInterface(this.id)"
-                                                        class="counter">
-                                                        <label class="sr-only" for="check{{$consultation->id}}">Click to check</label>
+                                                        onchange="updateInterface(this.id, '{{$this->pageTitle}}')"
+                                                        class="counter{{$this->pageTitle}}">
+                                                        <label class="sr-only" for="check{{$this->pageTitle}}{{$consultation->id}}">Click to check</label>
                                                     </div>
                                                 </td>
                                                 <td class="mailbox-star" title="{{ $consultation->consult_status }}">
@@ -243,41 +186,26 @@
                                                 <td class="mailbox-date text-nowrap">
                                                     <small class="text-xs">{{ $consultation->updated_at->diffForHumans() }}</small>
                                                 </td>
-                                                <td width="5px">
-                                                    <!-- Edit and delete consultations -->
-                                                    @if($this->filter == 'All')
-                                                        <div class="btn-group">
-                                                            @can('consultations_delete')
-                                                                <a href="javascript:void(0)"
-                                                                    wire:click.prevent="delete({{ $consultation }})"
-                                                                    title="Delete"
-                                                                    class="btn btn-sm btn-link p-1 border border-0">
-                                                                        <i class="fas fa-trash text-muted"></i>
-                                                                </a>
-                                                            @endcan
-                                                        </div>
-                                                    @endif
-                                                    <!-- Edit and destroy consultations -->
-                                                    @if($this->filter == 'Trash')
-                                                        <div class="btn-group">
-                                                            @can('consultations_restore')
-                                                                <a href="javascript:void(0)"
-                                                                    wire:click.prevent="restore({{ $consultation->id }})"
-                                                                    title="Restore"
-                                                                    class="btn btn-sm btn-link border border-0">
-                                                                    <i class="fas fa-history text-muted"></i>
-                                                                </a>
-                                                            @endcan
-                                                            @can('consultations_destroy')
-                                                                <a href="javascript:void(0)"
-                                                                    onclick="confirm('{{$consultation->id}}', 'Are you sure you want delete this consultation?', 'You won\'t be able to revert this!', 'Consultation', 'destroy')"
-                                                                    title="Destroy"
-                                                                    class="btn btn-sm btn-link p-1 border border-0">
-                                                                        <i class="fas fa-trash text-danger"></i>
-                                                                </a>
-                                                            @endcan
-                                                        </div>
-                                                    @endif
+                                                <td width="10px">
+                                                    @can('consultations_update')
+                                                        <a href="javascript:void(0)"
+                                                            data-toggle="modal"
+                                                            wire:click.prevent="edit({{ $consultation }})"
+                                                            title="Edit"
+                                                            class="btn btn-sm btn-link border border-0 icon" style="width: 50px">
+                                                                <i class="fas fa-edit text-muted"></i>
+                                                        </a>
+                                                    @endcan
+                                                </td>
+                                                <td width="10px">
+                                                    @can('consultations_destroy')
+                                                        <a href="javascript:void(0)"
+                                                            wire:click.prevent="destroy({{ $consultation->id }})"
+                                                            title="Delete"
+                                                            class="btn btn-sm btn-link border border-0 icon">
+                                                                <i class="fas fa-trash text-muted"></i>
+                                                        </a>
+                                                    @endcan
                                                 </td>
                                             </tr>
                                         @empty
@@ -285,32 +213,7 @@
                                             @if($readyToLoad == true)
                                                 <tr>
                                                     <td colspan="7">
-                                                        @if(strlen($search) <= 0)
-                                                        <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
-                                                            <div class="col-12 d-flex justify-content-center align-items-center text-muted">
-                                                                <p>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                                                                    </svg>
-                                                                </p>
-                                                                <p class="display-4">
-                                                                    Empty
-                                                                </p>
-                                                            </div>
-                                                        @else
-                                                        <!-- COMMENT: Muestra 'No results' cuando no hay resultados en una búsqueda -->
-                                                            <div class="col-12 d-flex justify-content-center align-items-center text-muted">
-                                                                <p>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                                                                    </svg>
-                                                                </p>
-                                                                <p>
-                                                                    There Aren’t Any Great Matches for Your Search: <b>'{{$search}}'
-                                                                </p>
-                                                            </div>
-                                                        @endif
+                                                        @include('common.datatable-feedback')
                                                     </td>
                                                 </tr>
                                             @endif
@@ -469,7 +372,7 @@
 
 <script src="https://cdn.ckeditor.com/ckeditor5/30.0.0/classic/ckeditor.js"></script>
 
-<script>
+{{-- <script>
     ClassicEditor
         .create( document.querySelector( '#ckeditor' ), {
             heading: {
@@ -483,29 +386,17 @@
 
         } )
         .then(function(ckeditor){
+            // ckeditor.model.document.on('change:data', () => {
+            //     document.querySelector("#textareaProblemStatement").value = ckeditor.getData();
+            // })
             ckeditor.model.document.on('change:data', () => {
-                document.querySelector("#textareaProblemStatement").value = ckeditor.getData();
+                @this.set('problem_statement', ckeditor.getData());
             })
         })
         .catch( error => {
             console.error( error );
         } );
-</script>
-
-
-{{--  <script>
-    ClassicEditor
-        .create(document.querySelector('#treatment_plan'))
-        .then(editor => {
-            editor.model.document.on('change:data', () => {
-                @this.set('treatment_plan', editor.getData());
-            })
-        })
-        .catch(error => {
-            console.error(error);
-        });
-</script>
- --}}
+</script> --}}
 
 <script>
     window.addEventListener('updated', event => {
@@ -530,74 +421,52 @@
         notify(event)
     });
 
-    {{-- Funtion to confirm the deletion of items --}}
-    function confirmDestroyConsultations(title, text, model, event) {
-        Swal.fire({
-            title: title,
-            text: text,
-            type: 'error',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.value) {
-                window.livewire.emit(event),
-                Swal.fire(
-                    'Destroyed!',
-                     model + ' has been deleted.',
-                    'success'
-                )
-            }
-        })
-    }
-
     document.addEventListener('DOMContentLoaded', function(){
+
         window.livewire.on('show-modal', msg =>  {
-            $('#modalForm').modal('show')
+            $('#modalForm{{$this->pageTitle}}').modal('show')
         });
+
         window.livewire.on('hide-modal', msg =>  {
-            $('#modalForm').modal('hide')
+            $('#modalForm{{$this->pageTitle}}').modal('hide')
         });
-        window.livewire.on('reset-ckeditor', msg =>  {
-            // buscar la manera de resetear el textarea usado por el ck editor porque de esta manera no se puede :(
-            document.getElementById("ckeditor").value = "";
-        });
+
+        // window.livewire.on('reinitializeCkEditor', () => {
+        //     // Destruye la instancia actual de CKEditor
+        //     if (document.querySelector('.ck-editor__editable')) {
+        //         document.querySelector('.ck-editor__editable').remove();
+        //     }
+
+        //     // Vuelve a inicializar CKEditor
+        //     ClassicEditor
+        //         .create(document.querySelector('#ckeditor'), {
+        //             heading: {
+        //                 options: [
+        //                     { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+        //                     { model: 'heading4', view: 'h4', title: 'Title', class: 'ck-heading_heading4' },
+        //                     { model: 'heading5', view: 'h5', title: 'Subtitle', class: 'ck-heading_heading5' }
+        //                 ]
+        //             },
+        //             toolbar: ['undo', 'redo', '|', 'heading', 'bold', 'italic', '|', 'numberedList', 'bulletedList'],
+        //         })
+        //         .then(function(ckeditor) {
+        //             ckeditor.model.document.on('change:data', () => {
+        //                 @this.set('problem_statement', ckeditor.getData());
+        //             })
+        //         })
+        //         .catch(error => {
+        //             console.error(error);
+        //         });
+        // });
+        // window.livewire.on('reset-ckeditor', msg =>  {
+        //     // buscar la manera de resetear el textarea usado por el ck editor porque de esta manera no se puede :(
+        //     document.getElementById("ckeditor").value = "";
+        // });
     });
-
-
-    function bindTextareas() {
-        document.getElementById('textareaProblemStatement').value = document.getElementById('ckeditor').value
-    }
-
-    function updateInterface(id) {
-        uncheckAll();
-        trActive(id);
-        count(id);
-    }
-
-    function uncheckAll() {
-        // Desmarca check all si estaba seleccionado al hacer clic en una row
-        if (document.getElementById('checkAll').checked) {
-            document.getElementById('checkAll').checked = false
-        }
-    }
-
-    function count() {
-        // Selecciona todos los input de tipo chechbox que tengan la clase counter y los cuenta
-        document.getElementById("contador").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
-        document.getElementById("contador2").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
-
-    }
-
-    function trActive(id) {
-        // marca los TR como activados al hacer clic en una row
-        var row = document.getElementById("rowcheck"+document.getElementById(id).value)
-        row.classList.toggle("table-active")
-        row.classList.toggle("font-weight-bold")
-    }
 
 </script>
 
+
 <!-- Alpine Plugins -->
 <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>

@@ -36,11 +36,16 @@ class PermissionSeeder extends Seeder
          *  — Mejorar texto de los toast:
          *      - Ejemplo de texto escrito correctamente: Record added succesfully.
          *
-         *  — Optimizar / estandarizar la utilización de Toast / Sweet Alert:
+         *  — Refactorizar / estandarizar la utilización de Toast / Sweet Alert:
          *      - Utilizar un Sweet alert en el caso de que vaya a realizar un force delete ("Esta opción no se puede deshacer").
          *      - Utilizar un toast en caso de que se vaya a realizar un delete ("Se envió a Recycle bin").
          *
          *  — Rediseñar la sección de Recycle bin
+
+         *  — Permisos nuevos para nuevas funcionalidades
+
+         *  — Agregar el atributo 'genero' al modelo Species, con las opciones: Mamifero, ave, reptil, anfibio, peces, invertebrado.
+         *       https://www.vetcon.es/invertebrados-exoticos/
          **/
 
 
@@ -57,7 +62,14 @@ class PermissionSeeder extends Seeder
          *      -vet name, cédula profesional,
          *      -drug name, strength, and quantity (metronidazol, 10 mg, tablets, QTY 14),
          *      -date of the order, directions for use, any refill information (if warranted)
-         *
+
+         *  — $users = User::role('writer')->get(); // Returns only users with the role 'writer'
+         *  — Buscar la manera de ordeyBy relationship en many to many
+         *  — Buscar la manera de implementar el modo softdelete en el modelo Permission
+
+
+         *  — https://www.merck-animal-health-usa.com/nobivac/nobivac-feline-1-hcp
+
          **/
 
         /**
@@ -130,6 +142,20 @@ class PermissionSeeder extends Seeder
         ])->syncRoles(1);
         Permission::create([
             'name' => 'consultations_delete_files'
+        ])->syncRoles(1);
+
+        //------ Prescriptions permissions ------
+        Permission::create([
+            'name' => 'prescriptions_void'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'prescriptions_store'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'prescriptions_index'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'prescriptions_export'
         ])->syncRoles(1);
 
         //------ Vaccines permissions ------
@@ -286,6 +312,19 @@ class PermissionSeeder extends Seeder
             'name' => 'assign_permissions_sync_all'
         ])->syncRoles(1);
 
+        //------ Appointments permissions ------
+        Permission::create([
+            'name' => 'appointments_update'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'appointments_store'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'appointments_index'
+        ])->syncRoles(1);
+        Permission::create([
+            'name' => 'appointments_destroy'
+        ])->syncRoles(1);
 
         //------ Trash permissions ------
         Permission::create([
@@ -297,7 +336,6 @@ class PermissionSeeder extends Seeder
         Permission::create([
             'name' => 'trash_destroy'
         ])->syncRoles(1);
-
 
         //------ UserProfile permission ------
         Permission::create([

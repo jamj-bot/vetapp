@@ -18,6 +18,7 @@ class CreateMedicinesTable extends Migration
             $table->string('name');
             $table->string('strength');
             $table->string('dosage_form');
+            $table->string('therapeutic_properties');
             // $table->string('quantity');
             // $table->string('instructions');
 

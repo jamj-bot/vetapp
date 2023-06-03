@@ -19,3 +19,4 @@
         {{ $pet->allergies }}
     </div>
 @endif
+

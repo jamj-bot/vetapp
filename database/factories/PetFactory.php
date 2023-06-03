@@ -25,6 +25,7 @@ class PetFactory extends Factory
     {
 
         $desexed = $this->faker->randomElement(['Desexed', 'Not desexed', 'Unknown']);
+        $clients = User::role('client')->get();
 
         if ($desexed = 'Desexed') {
             $desexing_candidate = 1;
@@ -33,7 +34,7 @@ class PetFactory extends Factory
         }
 
         return [
-            'user_id'               => User::all()->random()->id,
+            'user_id'               => $clients->random()->id,
             'species_id'            => Species::all()->random()->id,
             'code'                  => $this->faker->unique()->numerify('##########'),
             'name'                  => $this->faker->randomElement([$this->faker->firstName('male'|'female')]),
@@ -60,7 +61,7 @@ class PetFactory extends Factory
                                         ]),
             'zootechnical_function' => $this->faker->randomElement(['Beef Cattle', 'Dairy Cattle', 'Dual-purpose', 'Companion', null]),
             'sex'                   => $this->faker->randomElement(['Male', 'Female', 'Unknown']),
-            'dob'                   => $this->faker->dateTimeBetween('2010-01-01', '2021-01-01'),
+            'dob'                   => $this->faker->dateTimeBetween('-6 years', now()),
             'estimated'             => $this->faker->boolean(10),
             'desexed'               => $desexed,
             'desexing_candidate'    => $desexing_candidate,

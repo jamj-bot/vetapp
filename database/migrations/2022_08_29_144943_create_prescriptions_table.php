@@ -23,6 +23,7 @@ class CreatePrescriptionsTable extends Migration
             $table->string('number_of_repeats')->nullable();
             $table->string('interval_between_repeats')->nullable();
             $table->string('further_information', 600)->nullable();
+            $table->boolean('voided')->default(0);
             $table->timestamps();
 
             $table->foreign('consultation_id')

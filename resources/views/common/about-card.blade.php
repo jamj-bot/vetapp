@@ -18,41 +18,42 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <i class="fas fa-fw fa-microchip mr-1" style="color: #3784b9" title="Code"></i>
+                {{-- <img src="{{asset('storage/icons/barcode.svg')}}" height="18"/> --}}
                 <span class="sr-only">Code</span>
                 {{ $pet->code }}
             </li>
 
             <li class="list-group-item">
                 <div x-data="{ open: false }">
-                    <span @click="open = ! open" title="More" style="cursor: pointer">
+                    <div @click="open = ! open" title="More" style="cursor: pointer">
                         <i class="fas fa-fw fa-birthday-cake mr-1" style="color: #4b85cb" title="Date of birth"></i>
                         <span class="sr-only">Date of birth</span>
                         {{ $pet->dob->format('d-m-Y') }} <sup class="text-muted">{{$pet->estimated ? 'est.' : ''}}</sup>
                         <span class="float-right"><i class="fas fa-caret-down text-xs text-muted"></i></span>
-                    </span>
+                    </div>
 
-                    <p x-show="open" class="mb-0" x-collapse.duration.750ms>
+                    <div x-show="open" class="mb-0" x-collapse.duration.750ms @click.outside="open = false">
                         <i class="fas fa-fw fa-birthday-cake mr-1 mt-3" style="color: #6b84da" title="Age"></i>
                         <span class="sr-only">Age</span>
                         {{ \Carbon\Carbon::createFromDate($pet->dob)->diff(\Carbon\Carbon::now())->format('%y years, %m months and %d days') }} <sup class="text-muted">{{$pet->estimated ? 'est.' : ''}}</sup>
-                    </p>
+                    </div>
                 </div>
             </li>
 
             <li class="list-group-item">
                 <div x-data="{ open: false }">
-                    <span @click="open = ! open" title="More"  style="cursor: pointer">
+                    <div @click="open = ! open" title="More"  style="cursor: pointer">
                         <i class="fas fa-fw fa-paw mr-1" style="color: #9080e2" title="Species"></i>
                         <span class="sr-only">Species</span>
                         {{ $pet->species->name }}
                         <span class="float-right"><i class="fas fa-caret-down text-xs text-muted"></i></span>
-                    </span>
+                    </div>
 
-                    <p x-show="open" class="mb-0 font-italic" x-collapse.duration.750ms>
+                    <div x-show="open" class="mb-0 font-italic" x-collapse.duration.750ms @click.outside="open = false">
                         <i class="fas fa-fw fa-paw mr-1 mt-3" style="color: #b878e2" title="Scientific name"></i>
                         <span class="sr-only">Scientific name</span>
                         {{ $pet->species->scientific_name }}
-                    </p>
+                    </div>
                 </div>
             </li>
 
@@ -67,7 +68,7 @@
                     <i class="fas fa-fw fa-weight mr-1" style="color: #cb67d7" title="Body condition"></i>
                     <span class="sr-only">Body condition</span>
                     {{ $pet->consultations()->latest()->first()->body_condition }}
-                    <span class="text-muted text-xs"> / {{ $pet->consultations()->latest()->first()->updated_at->diffForHumans() }}</span>
+                    <span class="text-muted text-xs"> / {{ $pet->consultations()->latest()->first()->created_at->diffForHumans() }}</span>
                 </li>
             @endif
 

@@ -14,6 +14,6 @@ class DewormingSeeder extends Seeder
      */
     public function run()
     {
-        Deworming::factory(10)->create();
+        Deworming::factory(1)->create();
     }
 }

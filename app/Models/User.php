@@ -32,7 +32,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'confirmPassword',
         'phone',
         'user_type',
         'status'
@@ -96,6 +95,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the veterinarian associated with the user.
+     */
+    public function veterinarian()
+    {
+        return $this->hasOne(Veterinarian::class);
+    }
+
+
+    /**
      * Get the pets for the user.
      */
     public function pets()
@@ -104,10 +112,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the pets for the user where status is 'dead'
+     */
+    public function dead_pets()
+    {
+        return $this->hasMany(Pet::class)->where('status', 'Dead');
+    }
+
+
+    /**
      * Get the consultation of the pet.
      */
     public function consultations()
     {
         return $this->hasMany(Consultation::class);
+    }
+
+    /**
+     * Get the consultation of the pet.
+     */
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
     }
 }

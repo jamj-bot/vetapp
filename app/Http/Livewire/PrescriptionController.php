@@ -7,6 +7,7 @@ use App\Models\Medicine;
 use App\Models\Pet;
 use App\Models\Prescription;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -20,9 +21,17 @@ class PrescriptionController extends Component
     public $pageTitle, $modalTitle;
 
     public $prescribedMedicines = [];
-    public $allMedicines = [];
+    public $selectedMedicines; // For select input
 
-    public $date, $expiry, $order, $repeat = 'choose', $number_of_repeats, $interval_between_repeats, $further_information;
+    public
+        $date,
+        $expiry,
+        $order,
+        $repeat = 'choose',
+        $number_of_repeats,
+        $interval_between_repeats = '',
+        $further_information;
+
     public $search = '';
 
 
@@ -34,22 +43,25 @@ class PrescriptionController extends Component
         return [
             'date'                     => ['required', 'date', 'after:yesterday', 'before:tomorrow'],
             'expiry'                   => ['nullable', 'date', 'after_or_equal:date'],
-            //'order'                  => "required|numeric|digits:10|unique:prescriptions,order,{$this->selected_id}",
-            'order'                    => ['required', 'numeric', 'digits:10', 'unique:prescriptions,order'],
             'repeat'                   => ['required', 'boolean'],
             'number_of_repeats'        => [
                                             'required_if:repeat,1',
-                                            'min:1', 'max:1000',
+                                            'min:1', 'max:4',
                                             'numeric',
                                              Rule::when($this->repeat == 0, ['nullable']),
                                           ],
             'interval_between_repeats' => [
-                                            'required_if:repeat,1',
-                                            'min:4', 'max:255',
+                                            'required_if:repeat,true',
                                             'string',
-                                             Rule::when($this->repeat == 0, ['nullable']),
+                                            Rule::when($this->repeat == false, ['nullable']),
+                                            'in:1 week,2 weeks,3 weeks,1 month,2 months,3 months',
                                           ],
-            'further_information'      => ['nullable', 'string', 'min:3', 'max:2048']
+            'further_information'      => ['nullable', 'string', 'min:3', 'max:2048'],
+
+            // Reglas de validación para los medicamentos recetados
+            'prescribedMedicines.*.medicine_id'           => ['required', 'numeric', 'exists:medicines,id', 'distinct'],
+            'prescribedMedicines.*.quantity'              => ['required', 'string', 'min:1', 'max:255'],
+            'prescribedMedicines.*.indications_for_owner' => ['required', 'string', 'min:3', 'max:255'],
         ];
      }
 
@@ -64,91 +76,186 @@ class PrescriptionController extends Component
 
     public function mount($pet, $consultation)
     {
+        $this->selectedMedicines = collect();
+
+        $this->date = $this->date = now()->toDateString();
+
         $this->pet = Pet::findOrFail($pet);
         $this->consultation = Consultation::findOrFail($consultation);
         $this->pageTitle = 'Prescription';
 
-        $this->allMedicines = Medicine::where('name', 'like', '%'. $this->search .'%')->orderBy('name')->get();
         $this->prescribedMedicines = [
-            ['medicine_id' => '', 'quantity' => 1, 'indications_for_owner' => '']
+            [
+                'medicine_id'           => '',
+                'name'                  => '',
+                'quantity'              => '',
+                'indications_for_owner' => ''
+            ]
         ];
+    }
+
+    public function getMedicinesProperty()
+    {
+        $stopWords = ['de', 'para', 'of', 'the']; // Defino palabras que deseo eliminar de la búsqueda
+        $keywords = preg_split('/[\s,]+/', $this->search); // Defino las palabras clave en un array.
+        $keywords = array_filter($keywords); // Elimina palabras clave que sean una cadena vacía.
+        $keywords = array_diff($keywords, $stopWords); // Elimino las palabras que deseo eliminar de la busqueda
+
+        return Medicine::when(count($keywords) > 0, function ($query) use ($keywords) {
+            foreach ($keywords as $keyword) {
+                $query->orWhere(function ($query) use ($keyword) {
+                    $query->where('name', 'like', '%'. $keyword .'%')
+                        ->orWhere('therapeutic_properties', 'like', '%'. $keyword .'%');
+                });
+            }
+        })
+        ->when(strlen($this->search) == 0, function ($query) {
+            $query->take(10);
+        })->orderBy('name')->get();
     }
 
     public function getPrescriptionsProperty()
     {
-        return Prescription::where('consultation_id', $this->consultation->id)->get();
+        return Prescription::where('consultation_id', $this->consultation->id)->orderBy('created_at', 'desc')->get();
     }
 
     public function render()
     {
-        return view('livewire.prescription.component', ['prescriptions' => $this->prescriptions])
+        $this->authorize('prescriptions_index');
+
+        // Si el pet_id de la consultation no es igual a id de la pet a la que se está prescribiendo: ERROR 404
+        if ($this->consultation->pet->id != $this->pet->id) {
+            abort(404);
+        }
+
+        return view('livewire.prescription.component', [
+                'prescriptions' => $this->prescriptions,
+                'medicines' => $this->medicines
+            ])
             ->extends('admin.layout.app')
             ->section('content');
 
     }
 
+    public function setMedicine($index)
+    {
+        // Agregando la medicine a la coleccion $this->selectedMedicines
+        $medicineIds = [];
+        foreach ($this->prescribedMedicines as $prescribedMedicine) {
+            $medicineIds[] = $prescribedMedicine['medicine_id'];
+        }
+        $this->selectedMedicines = Medicine::whereIn('id', $medicineIds)->get();
+    }
+
     public function addMedicine()
     {
-        $this->prescribedMedicines[] = ['medicine_id' => '', 'quantity' => 1, 'indications_for_owner' => ''];
+        $this->prescribedMedicines[] =
+            [
+                'medicine_id'           => '',
+                'name'                  => '',
+                'quantity'              => '',
+                'indications_for_owner' => ''
+            ];
     }
 
     public function removeMedicine($index)
     {
+        // Eliminando elemento de la coleccion $this->selectedMedicines por el id de elemento.
+        $medicineIdToRemove = $this->prescribedMedicines[$index]['medicine_id'];
+        $this->selectedMedicines = $this->selectedMedicines->reject(function ($medicine) use
+            ($medicineIdToRemove) {
+                return $medicine->id == $medicineIdToRemove;
+            });
+
+
+        // Eliminando del array $this->prescibedMedicines por el indice del array.
         if (count($this->prescribedMedicines) > 1) {
             unset($this->prescribedMedicines[$index]);
             $this->prescribedMedicines = array_values($this->prescribedMedicines);
             $this->resetValidation();
         } else {
-            $this->dispatchBrowserEvent('not-deleted', [
-                'title' => 'Not deleted',
-                'subtitle' => 'Warning!',
-                'class' => 'bg-warning',
-                'icon' => 'fas fa-warning fa-lg',
-                'image' => auth()->user()->profile_photo_url,
-                'body' => 'User information has been updated correctly.'
-            ]);
+            $this->prescribedMedicines = [
+                [
+                    'medicine_id'           => '',
+                    'name'                  => '',
+                    'quantity'              => '',
+                    'indications_for_owner' => ''
+                ]
+            ];
         }
     }
 
+    // [
+    //     'email.required' => 'The :attribute cannot be empty.',
+    //     'email.email' => 'The :attribute format is not valid.',
+    // ],
+    // ['email' => 'Email Address']
+
     public function store()
     {
+        $this->authorize('prescriptions_store');
+
         $validatedData = $this->validate();
 
         $prescription = $this->consultation->prescriptions()->create($validatedData);
 
-        $validatedData2 = $this->validate(
-            [
-                'prescribedMedicines.*.medicine_id'           => 'required|numeric|exists:medicines,id|distinct',
-                'prescribedMedicines.*.quantity'              => 'required|numeric|min:1|max:2000',
-                'prescribedMedicines.*.indications_for_owner' => 'required|string|min:3|max:580',
-            ],
-            // [
-            //     'email.required' => 'The :attribute cannot be empty.',
-            //     'email.email' => 'The :attribute format is not valid.',
-            // ],
-            // ['email' => 'Email Address']
-        );
-
         $prescription->instructions()->createMany(
-            $validatedData2['prescribedMedicines']
+            $validatedData['prescribedMedicines']
         );
 
         $this->resetUI();
+
+        $this->dispatchBrowserEvent('stored', [
+            'title' => 'Created',
+            'subtitle' => 'Succesfully!',
+            'class' => 'bg-primary',
+            'icon' => 'fas fa-plus fa-lg',
+            'image' => auth()->user()->profile_photo_url,
+            'body' => 'The prescription [order: ' . $prescription->order . '] has been stored.'
+        ]);
+    }
+
+
+    public function void($id)
+    {
+        $this->authorize('prescriptions_void');
+
+        $prescription = Prescription::findOrFail($id);
+        $prescription->update([
+            'voided' => 1
+        ]);
+        $prescription->save();
+
+        $this->dispatchBrowserEvent('voided', [
+            'title' => 'Voided',
+            'subtitle' => 'Succesfully!',
+            'class' => 'bg-danger',
+            'icon' => 'fas fa-check-circle fa-lg',
+            'image' => auth()->user()->profile_photo_url,
+            'body' => 'The prescription [order: ' . $prescription->order . '] has been voided.'
+        ]);
     }
 
 
     public function resetUI()
     {
-        $this->date = '';
+        $this->date = $this->date = now()->toDateString();
         $this->expiry = '';
         $this->order = '';
         $this->repeat = 'choose';
         $this->number_of_repeats = null;
         $this->interval_between_repeats = '';
         $this->further_information = '';
+        $this->search = '';
         $this->prescribedMedicines = [
-            ['medicine_id' => '', 'quantity' => 1, 'indications_for_owner' => '']
+            [
+                'medicine_id'           => '',
+                'name'                  => '',
+                'quantity'              => '',
+                'indications_for_owner' => ''
+            ]
         ];
+        $this->selectedMedicines = collect();
     }
 }
 

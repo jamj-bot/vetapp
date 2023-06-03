@@ -30,9 +30,9 @@ class VaccineFactory extends Factory
             'dosage'                 => $this->faker->word,
             'administration'         => $this->faker->sentence,
             'vaccination_schedule'   => $this->faker->sentence,
-            'primary_doses'          => $this->faker->randomElement([1, 2, 3]),
+            'vaccination_doses'      => $this->faker->randomElement([1, 2, 3]),
             'revaccination_schedule' => $this->faker->sentence,
-            'revaccination_doses'    => $this->faker->randomElement([1, 2, 3]);
+            'revaccination_doses'    => $this->faker->randomElement([1, 2, 3]),
         ];
     }
 }

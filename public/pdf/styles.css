@@ -109,6 +109,10 @@
             padding: 1rem;
         }
 
+        .muted {
+            padding: 1rem;
+            color: #949ca3;
+        }
 
         .warning {
             background-color: #ffff7f;

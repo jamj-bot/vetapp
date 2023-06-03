@@ -28,7 +28,8 @@ class PrescriptionFactory extends Factory
             'repeat'                   => $this->faker->boolean(10),
             'number_of_repeats'        => $this->faker->numberBetween(1, 3),
             'interval_between_repeats' => $this->faker->randomElement(['1 month', '3 months', '2 months']),
-            'further_information'      => $this->faker->paragraphs($nb = 2, $asText = true)
+            'further_information'      => $this->faker->paragraphs($nb = 2, $asText = true),
+            'voided'                   => $this->faker->boolean(5),
         ];
     }
 }

@@ -15,36 +15,36 @@ class SpeciesController extends Component
     protected $paginationTheme = 'bootstrap';
 
     // Attributes to datatable
-    public $paginate = '50',
+    public $paginate = '25',
         $sort = 'name',
         $direction = 'asc',
         $search = '',
         $readyToLoad = false,
         $selected = [],
+        $deleted = [],
         $select_page = false;
 
-    // Attributes to datatable
+    // Datatable attributes
     public $pageTitle, $modalTitle;
 
-    // Attributes to CRUD
+    // CRUD attributes
     public $name, $scientific_name, $selected_id;
 
     // Listener
     protected $listeners = [
         'destroy',
-        'updatedSelected'
     ];
 
     // Query string to  urls with datatable filters
     protected $queryString = [
-        'search' => ['except' => ''],
-        'paginate' => ['except' => '10'],
-        'sort' => ['except' => 'name'],
+        'search'    => ['except' => ''],
+        'paginate'  => ['except' => '25'],
+        'sort'      => ['except' => 'name'],
         'direction' => ['except' => 'asc']
     ];
 
      /**
-     *  Function that returns the validation rules
+     *  Validation rules
      *
     **/
      protected function rules()
@@ -65,7 +65,7 @@ class SpeciesController extends Component
     }
 
     /**
-     *  Check or all function
+     *  Check all items
      *
     **/
     public function updatedSelectPage($value)
@@ -78,16 +78,18 @@ class SpeciesController extends Component
     }
 
     /**
-     *  uncheck Select All
+     *  Reset $select_page and $selected properties is updated
      *
     **/
-    public function updatedSelected()
+    public function updatedPaginate()
     {
         $this->select_page = false;
+        $this->selected = [];
     }
 
     /**
-     *  Funtion to reset pagination when a user writtes in search field
+     *  Reset the pagination while search property is updated
+     *  and reset select_page and selected properties is updated
      *
     **/
     public function updatingSearch()
@@ -114,6 +116,8 @@ class SpeciesController extends Component
     **/
     public function order($sort)
     {
+        // $this->select_page = false;
+        // $this->selected = [];
 
         if ($this->sort == $sort) {
             if ($this->direction == 'desc') {
@@ -145,15 +149,13 @@ class SpeciesController extends Component
     public function getSpeciesProperty()
     {
         if ($this->readyToLoad) {
-            if (strlen($this->search) > 0) {
-                return Species::where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('scientific_name', 'like', '%' . $this->search . '%')
-                    ->orderBy($this->sort, $this->direction)
-                    ->paginate($this->paginate);
-            } else {
-                return Species::orderBy($this->sort, $this->direction)
-                    ->paginate($this->paginate);
-            }
+            return Species::when(strlen($this->search) > 0, function ($query) {
+                    $query->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('scientific_name', 'like', '%' . $this->search . '%');
+                })
+                ->orderBy($this->sort, $this->direction)
+                ->paginate($this->paginate);
+
         } else {
             return [];
         }
@@ -168,11 +170,21 @@ class SpeciesController extends Component
             ->section('content');
     }
 
+    public function submit()
+    {
+        if ($this->selected_id) {
+            $this->update();
+        } else {
+            $this->store();
+        }
+    }
+
     public function store()
     {
         $this->authorize('species_store');
 
         $validatedData = $this->validate();
+
         Species::create($validatedData);
 
         $this->emit('hide-modal', 'hide-modal');
@@ -233,10 +245,14 @@ class SpeciesController extends Component
                 'image' => auth()->user()->profile_photo_url,
                 'body' => 'Item can’t be moved to Recycle bin because cannot be deleted.'
             ]);
+
+            $this->resetUI();
             return;
         }
 
         Species::find($id)->delete();
+
+        $this->pushDeleted($id);
 
         $this->dispatchBrowserEvent('deleted', [
             'title' => 'Deleted',
@@ -246,13 +262,15 @@ class SpeciesController extends Component
             'image' => auth()->user()->profile_photo_url,
             'body' => 'Item moved to Recycle bin.'
         ]);
+
+        $this->resetUI();
     }
 
     public function destroyMultiple()
     {
         $this->authorize('species_destroy');
 
-        //Si no hay ningun item seleccionado
+        //Si no hay items seleccionados
         if (!$this->selected) {
             $this->dispatchBrowserEvent('destroy-error', [
                 'title' => 'Not deleted',
@@ -265,20 +283,17 @@ class SpeciesController extends Component
             return;
         }
 
-        // Seleccionado items que no se pueden borrar
-        $not_deleted = [];
+        // Eliminando del array $selected aquellos items que no se pueden borrar
+        $notDeleted = [];
         foreach ($this->selected as $key => $id) {
             if (Pet::withTrashed()->where('species_id', $id)->count()) {
-                array_push($not_deleted, $id);
+                array_push($notDeleted, $id);
                 unset($this->selected[$key]);
             }
         }
 
-        // si hay items que no se pueden borrar, mando la alerta
-        if ($not_deleted) {
-
-            // Obteniendo los nombre de los items que no se pueden borrar
-            $speciesNotDeleted = Species::whereIn('id', $not_deleted)
+        if ($notDeleted) {
+            $notDeletedItems = Species::whereIn('id', $notDeleted)
                 ->select('name')
                 ->pluck('name')
                 ->toArray();
@@ -289,13 +304,16 @@ class SpeciesController extends Component
                 'class' => 'bg-warning',
                 'icon' => 'fas fa-exclamation-triangle fa-lg',
                 'image' => auth()->user()->profile_photo_url,
-                'body' => count($speciesNotDeleted) . ' items can’t be moved to Recycle bin because cannot be deleted: ' . implode(", ", $speciesNotDeleted)
+                'body' => count($notDeletedItems) . ' items can’t be moved to Recycle bin because cannot be deleted: ' . implode(", ", $notDeletedItems)
             ]);
         }
 
+        // Eliminando los items que sí se pueden borrar
         if ($this->selected) {
-            // Seleccionando los nombres de las especies que sí se pueden borrar
-            $speciesDeleted = Species::whereIn('id', $this->selected)
+            // Agregando al array $deleted aquellos que items que sí se pueden borrar
+            $this->pushDeleted();
+
+            $deletedtems = Species::whereIn('id', $this->selected)
                 ->select('name')
                 ->pluck('name')
                 ->toArray();
@@ -308,14 +326,61 @@ class SpeciesController extends Component
                 'class' => 'bg-danger',
                 'icon' => 'fas fa-check-circle fa-lg',
                 'image' => auth()->user()->profile_photo_url,
-                'body' => count($speciesDeleted). ' items moved to Recycle bin: ' . implode(", ", $speciesDeleted)
+                'body' => count($deletedtems). ' items moved to Recycle bin: ' . implode(", ", $deletedtems)
             ]);
         }
 
         $this->resetUI();
     }
 
-    function resetUI() {
+    public function undoMultiple()
+    {
+        // última posición del array $deleted
+        $last = array_key_last($this->deleted);
+
+        // Restaura los ids contenidos en la última posición del array
+        Species::onlyTrashed()
+            ->whereIn('id', $this->deleted[$last])
+            ->restore();
+
+        $restoredItems = Species::whereIn('id', $this->deleted[$last])
+            ->select('name')
+            ->pluck('name')
+            ->toArray();
+
+        $this->dispatchBrowserEvent('restored', [
+            'title' => 'Restored',
+            'subtitle' => 'Succesfully!',
+            'class' => 'bg-success',
+            'icon' => 'fas fa-check-circle fa-lg',
+            'image' => auth()->user()->profile_photo_url,
+            'body' => count($restoredItems). ' items restored: ' . implode(", ", $restoredItems)
+        ]);
+
+        // Elimina el último elemento del array de arrays
+        unset($this->deleted[$last]);
+    }
+
+    /**
+     * Inserta un nuevo array de ids en el array $deleted;
+     *
+    **/
+    public function pushDeleted($id = null)
+    {
+        if ($id) {
+            $this->selected = [$id];
+        }
+
+        if (count($this->deleted) < 10) {
+            array_push($this->deleted, $this->selected);
+        } elseif (count($this->deleted) == 10) {
+            unset($this->deleted[0]);
+            array_push($this->deleted, $this->selected);
+        }
+    }
+
+    public function resetUI()
+    {
         $this->selected_id = '';
         $this->name = '';
         $this->scientific_name = '';

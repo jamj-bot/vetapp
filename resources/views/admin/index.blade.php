@@ -24,26 +24,5 @@
     @livewireScripts
 @section('js')
 
-{{--     <script>
-
-        // dark-mode media query matched or not
-        let matched = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if(matched) {
-            document.body.classList.add('dark-mode')
-        }
-
-        // Enable and unable dark-mode
-        var checkbox = document.getElementById('theme');
-
-        checkbox.addEventListener('change', function() {
-            if(this.checked) {
-                document.body.classList.add('dark-mode')
-            } else {
-                document.body.classList.remove('dark-mode')
-            }
-        });
-
-    </script>--}}
 @stop
 

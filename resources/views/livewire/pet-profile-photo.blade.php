@@ -1,15 +1,14 @@
-<div>
+<div class="p-3">
     <form x-data="imgPreview" x-cloak wire:submit.prevent="updatePhoto">
         <!-- Current Profile Photo -->
         <template x-if="imgsrc">
             <div class="mt-4 mb-2 widget-user-image">
-                <img class="img-fluid img-circle elevation-2 shadow border border-3"
+                <img class="rounded-circle img-fluid elevation-1"
                     :src="imgsrc"
-                    style="width: 100px; height: 100px; object-fit: cover; background: antiquewhite;"
+                    style="width: 48px; height: 48px; object-fit: cover;"
                     alt="{{ $this->pet->name }}">
             </div>
         </template>
-
 
         <div class="my-4">
             <input type="file"
@@ -54,7 +53,7 @@
                        {{ __('Save') }}
                     </span>
                     <span wire:loading wire:target="updatePhoto">
-                        <i class="fas fa-fw fa-spinner fa-spin"></i>
+                        <div class="spinner-grow spinner-grow-sm"></div>
                         {{ __('Saving') }}
                     </span>
             </button>
@@ -66,7 +65,7 @@
 <script type="text/javascript">
     document.addEventListener('alpine:init', () => {
         Alpine.data('imgPreview', () => ({
-            imgsrc:'{{ asset('storage/pet-profile-photos/' . $this->pet->pet_profile_photo) }}',
+            imgsrc:'{{$pet->pet_profile_photo ? asset('storage/pet-profile-photos/' . $pet->pet_profile_photo) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}',
             previewFile() {
                 let file = this.$refs.myFile.files[0];
                 if(!file || file.type.indexOf('image/') === -1) return;
@@ -82,3 +81,47 @@
         }))
     });
 </script>
+
+
+{{-- <button type="submit" class="btn btn-outline-link disabled">
+  <img src="{{asset('storage/pet-profile-photos/plus.svg')}}" height="36"/>
+</button>
+<button type="submit" class="btn btn-outline-link">
+  <img src="{{asset('storage/pet-profile-photos/plus.svg')}}" height="36"/>
+
+</button>
+<button type="submit" class="btn btn-outline-link disabled">
+  <img src="{{asset('storage/pet-profile-photos/undo.svg')}}" height="36"/>
+  undo
+
+</button>
+<button type="submit" class="btn btn-outline-link">
+  <img src="{{asset('storage/pet-profile-photos/undo.svg')}}" height="36"/>
+undo
+</button>
+
+<button type="submit" class="btn btn-default btn-sm disabled">
+  <img src="{{asset('storage/pet-profile-photos/trash.svg')}}" height="28px" />
+</button>
+<button type="submit" class="btn btn-default btn-sm">
+  <img src="{{asset('storage/pet-profile-photos/trash.svg')}}" height="28px" />
+</button>
+
+<br>
+<button type="submit" class="btn btn-outline-link disabled">
+next
+  <img src="{{asset('storage/pet-profile-photos/next.svg')}}" height="36"/>
+</button>
+<button type="submit" class="btn btn-outline-link">
+    next
+  <img src="{{asset('storage/pet-profile-photos/next.svg')}}" height="36"/>
+</button>
+
+<button type="submit" class="btn btn-outline-link disabled">
+  <img src="{{asset('storage/pet-profile-photos/back.svg')}}" height="36"/>
+  previous
+</button>
+<button type="submit" class="btn btn-outline-link">
+  <img src="{{asset('storage/pet-profile-photos/back.svg')}}" height="36"/>
+  previous
+</button> --}}

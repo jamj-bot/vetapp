@@ -21,10 +21,22 @@ class Prescription extends Model
         'repeat',
         'number_of_repeats',
         'interval_between_repeats',
-        'further_information'
+        'further_information',
+        'voided'
     ];
 
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+
+
+            $year = now()->format('Y');
+            $maxOrder = Prescription::where('order', 'like', "$year%")->max('order');
+            $model->order = $maxOrder ? $maxOrder + 1 : $year . '00001';
+        });
+    }
 
     /**
      * Get the consultation that owns the prescription.

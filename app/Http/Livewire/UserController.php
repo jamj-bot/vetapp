@@ -4,7 +4,9 @@ namespace App\Http\Livewire;
 
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
@@ -17,8 +19,15 @@ class UserController extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    // Datatable attributes
-    public $paginate = '50', $sort = 'name', $direction = 'asc', $readyToLoad = false, $search = '';
+    // Datatble attributes
+    public $paginate = '50',
+        $sort        = 'name',
+        $direction   = 'asc',
+        $search      = '',
+        $readyToLoad = false,
+        $selected    = [],
+        $deleted     = [],
+        $select_page = false;
 
     // General attributes
     public $pageTitle, $modalTitle;
@@ -28,10 +37,10 @@ class UserController extends Component
         $phone,
         $email,
         $password,
-        $confirmPassword,
-        $status = 'choose',
-        $user_type = 'choose',
-        $selected_id;
+        $password_confirmation,
+        $status      = 'choose',
+        $user_type   = 'choose',
+        $selected_id = null;
 
     // Listeners
     protected $listeners = [
@@ -43,9 +52,9 @@ class UserController extends Component
      *
      **/
     protected $queryString = [
-        'search' => ['except' => ''],
-        'paginate' => ['except' => '50'],
-        'sort' => ['except' => 'name'],
+        'search'    => ['except' => ''],
+        'paginate'  => ['except' => '50'],
+        'sort'      => ['except' => 'name'],
         'direction' => ['except' => 'asc']
     ];
 
@@ -56,14 +65,38 @@ class UserController extends Component
     protected function rules()
     {
         return [
-            'name'            => 'required|string|min:3|max:255',
-            'phone'           => 'required|regex:/[0-9]{10}/',
-            'email'           => "required|email|unique:users,email,{$this->selected_id}",
-            'password'        => 'required|string|min:8',
-            'confirmPassword' => 'required|string|same:password',
-            'user_type'       => 'required|not_in:choose',
-            'status'          => 'required|not_in:choose'
+            'name'                  => ['required', 'string', 'min:3', 'max:255'],
+            'phone'                 => ['required', 'regex:/[0-9]{10}/'],
+            'email'                 => ['required', 'email', "unique:users,email,{$this->selected_id}"],
+            'password'              => [
+                                            Rule::when($this->selected_id != null , ['nullable']),
+                                            Rule::when($this->selected_id == null , ['required']),
+                                            'string',
+                                            'min:8',
+                                            'confirmed'
+                                        ],
+            'password_confirmation' => [
+                                            Rule::when($this->selected_id != null, ['nullable']),
+                                            Rule::when($this->selected_id == null , ['required']),
+                                            'string',
+                                            'min:8'
+                                        ],
+            'user_type'             => ['required', 'not_in:choose'],
+            'status'                => ['required', 'not_in:choose']
         ];
+    }
+
+    /**
+     *  Check all items
+     *
+    **/
+    public function updatedSelectPage($value)
+    {
+        if ($value) {
+            $this->selected = $this->users->pluck('id')->map(fn ($item) => (string) $item)->toArray();
+        } else {
+            $this->selected = [];
+        }
     }
 
     /**
@@ -76,12 +109,26 @@ class UserController extends Component
     }
 
     /**
-     *  Funtion to reset pagination when a user writtes in search field
+     *  Reset $select_page and $selected properties when pagination is updated
+     *
+    **/
+    public function updatedPaginate()
+    {
+        $this->select_page = false;
+        $this->selected = [];
+    }
+
+    /**
+     *  Resetea la paginación y se limpian los items seleccionados cuando se escribe en el campo search
      *
     **/
     public function updatingSearch()
     {
         $this->resetPage();
+
+        // Al escribir en campo search, se limpian los items seleccionados
+        $this->select_page = false;
+        $this->selected = [];
     }
 
     /**
@@ -123,35 +170,51 @@ class UserController extends Component
 
     public function mount()
     {
-        $this->pageTitle = 'Users';
-        $this->modalTitle = "User";
+        $this->pageTitle = 'Clients';
+        $this->modalTitle = 'Client';
+    }
+
+    public function getUsersProperty()
+    {
+        if ($this->readyToLoad) {
+            return User::when(strlen($this->search) > 0, function ($query) {
+                $query->where('name', 'like', '%' . $this->search .'%')
+                    ->orWhere('user_type', 'like', '%' . $this->search .'%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('status', 'like', '%' . $this->search . '%');
+                })
+                ->role('Client')
+                ->orderBy($this->sort, $this->direction)
+                ->paginate($this->paginate);
+        } else {
+            return [];
+        }
+    }
+
+    public function getRolesProperty()
+    {
+        return Role::select('name')->orderBy('id', 'asc')->get();
     }
 
     public function render()
     {
         $this->authorize('users_index');
-        //sleep(1);
-        if ($this->readyToLoad) {
-            if (strlen($this->search) > 0 ) {
-                $users = User::where('name', 'like', '%' . $this->search .'%')
-                    ->orWhere('user_type', 'like', '%' . $this->search .'%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%')
-                    ->orWhere('status', 'like', '%' . $this->search . '%')
-                    ->orderBy($this->sort, $this->direction)
-                    ->paginate($this->paginate);
 
-            } else {
-                $users = User::orderBy($this->sort, $this->direction)->paginate($this->paginate);
-            }
-        } else {
-            $users = [];
-        }
-
-        $roles = Role::select('name')->orderBy('id', 'asc')->get();
-
-        return view('livewire.user.component', compact('users', 'roles'))
+        return view('livewire.user.component', [
+                'users' => $this->users,
+                'roles' => $this->roles,
+            ])
             ->extends('admin.layout.app')
             ->section('content');
+    }
+
+    public function submit()
+    {
+        if ($this->selected_id) {
+            $this->update();
+        } else {
+            $this->store();
+        }
     }
 
     public function store()
@@ -159,7 +222,14 @@ class UserController extends Component
         $this->authorize('users_store');
 
         $validatedData = $this->validate();
-        $user = User::create($validatedData);
+        $user = User::create([
+            'name'      => $this->name,
+            'phone'     => $this->phone,
+            'email'     => $this->email,
+            'password'  => bcrypt($this->password),
+            'status'    => $this->status,
+            'user_type' => $this->user_type
+        ]);
 
         // Se asigna el rol que el usuario haya seleccionado en el campo profile
         $user->syncRoles($this->user_type);
@@ -169,12 +239,12 @@ class UserController extends Component
         $this->resetUI();
 
         $this->dispatchBrowserEvent('stored', [
-            'title' => 'Created',
+            'title'    => 'Created',
             'subtitle' => 'Succesfully!',
-            'class' => 'bg-primary',
-            'icon' => 'fas fa-plus fa-lg',
-            'image' => auth()->user()->profile_photo_url,
-            'body' => '¡User has been stored correctly! You can find it in the user list.'
+            'class'    => 'bg-primary',
+            'icon'     => 'fas fa-plus fa-lg',
+            'image'    => auth()->user()->profile_photo_url,
+            'body'     => '¡User has been stored correctly! You can find it in the user list.'
         ]);
 
         session()->flash('user_id', $user->id);
@@ -183,14 +253,14 @@ class UserController extends Component
 
     public function edit(User $user)
     {
-        $this->selected_id = $user->id;
-        $this->name = $user->name;
-        $this->phone = $user->phone;
-        $this->email = $user->email;
-        $this->password = '';
-        $this->confirmPassword = '';
-        $this->status = $user->status;
-        $this->user_type = $user->user_type; #user->role->name
+        $this->selected_id           = $user->id;
+        $this->name                  = $user->name;
+        $this->phone                 = $user->phone;
+        $this->email                 = $user->email;
+        $this->password              = '';
+        $this->password_confirmation = '';
+        $this->status                = $user->status;
+        $this->user_type             = $user->user_type; #user->role->name
 
         $this->emit('show-modal', 'show-modal');
     }
@@ -202,53 +272,168 @@ class UserController extends Component
         $validatedData = $this->validate();
         $user = User::find($this->selected_id);
 
-        $user->update([
-            'name' => $this->name,
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'password' => bcrypt($this->password),
-            'status' => $this->status,
-            'user_type' => $this->user_type
-        ]);
-
-        //$user->update($validatedData);
-
-        // Se asigna el rol que el usuario haya seleccionado en el campo profile
-        $user->syncRoles($this->user_type);
-
-        $this->emit('hide-modal', 'hide-modal');
-
-        $this->resetUI();
-
-        $this->dispatchBrowserEvent('updated', [
-            'title' => 'Updated',
-            'subtitle' => 'Succesfully!',
-            'class' => 'bg-success',
-            'icon' => 'fas fa-check-circle fa-lg',
-            'image' => auth()->user()->profile_photo_url,
-            'body' => 'User information has been updated correctly.'
-        ]);
+        /**
+            caso de uso:
+                -actualizar la información del usuario sin tener que cambiar la contraseña
+                    la contraseña se debe dejar en blanco.
+                -actualizar la información del usuario cambiando la contraseña
+                    la contraseña no se puede dejar en blanco.
 
 
-        session()->flash('user_id', $user->id);
-        session()->flash('message', 'Updated.');
+            if (Hash::check($this->password, $user->password)) {
+                // Correct password...
+            }
+        **/
+            $user->update([
+                'name'      => $this->name,
+                'phone'     => $this->phone,
+                'email'     => $this->email,
+                'password'  => $this->password != null? bcrypt($this->password) : $user->password,
+                'status'    => $this->status,
+                'user_type' => $this->user_type
+            ]);
+
+            $user->syncRoles($this->user_type); // Se asigna el rol que el usuario haya seleccionado en el campo profile
+
+            $this->emit('hide-modal', 'hide-modal');
+
+            $this->resetUI();
+
+            $this->dispatchBrowserEvent('updated', [
+                'title'    => 'Updated',
+                'subtitle' => 'Succesfully!',
+                'class'    => 'bg-success',
+                'icon'     => 'fas fa-check-circle fa-lg',
+                'image'    => auth()->user()->profile_photo_url,
+                'body'     => 'User information has been updated.'
+            ]);
+
+            session()->flash('user_id', $user->id);
+            session()->flash('message', 'Updated.');
     }
 
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        $this->authorize('users_destroy');
-        $user->delete();
+        $this->authorize('user_destroy');
+
+        User::find($id)->delete();
+
+        $this->pushDeleted($id);
+
+        $this->dispatchBrowserEvent('deleted', [
+            'title' => 'Deleted',
+            'subtitle' => 'Succesfully!',
+            'class' => 'bg-danger',
+            'icon' => 'fas fa-check-circle fa-lg',
+            'image' => auth()->user()->profile_photo_url,
+            'body' => 'Item moved to Recycle bin.'
+        ]);
+
+        $this->resetUI();
+    }
+
+    public function destroyMultiple()
+    {
+        $this->authorize('user_destroy');
+
+        //Si no hay items seleccionados
+        if (!$this->selected) {
+            $this->dispatchBrowserEvent('destroy-error', [
+                'title'    => 'Not deleted',
+                'subtitle' => 'Warning!',
+                'class'    => 'bg-light',
+                'icon'     => 'fas fa-exclamation-triangle fa-lg',
+                'image'    => auth()->user()->profile_photo_url,
+                'body'     => '0 items selected'
+            ]);
+            return;
+        }
+
+        // Eliminando los items que sí se pueden borrar
+        if ($this->selected) {
+            // Agregando al array $deleted aquellos que items que sí se pueden borrar
+            $this->pushDeleted();
+
+            $deletedItems = User::whereIn('id', $this->selected)
+                ->select('name')
+                ->pluck('name')
+                ->toArray();
+
+            User::destroy($this->selected);
+
+            $this->dispatchBrowserEvent('deleted', [
+                'title'    => 'Deleted',
+                'subtitle' => 'Succesfully!',
+                'class'    => 'bg-danger',
+                'icon'     => 'fas fa-check-circle fa-lg',
+                'image'    => auth()->user()->profile_photo_url,
+                'body'     => count($deletedItems). ' items moved to Recycle bin: ' . implode(", ", $deletedItems)
+            ]);
+        }
+
+        $this->resetUI();
+    }
+
+    public function undoMultiple()
+    {
+        // última posición del array $deleted
+        $last = array_key_last($this->deleted);
+
+        // Restaura los ids contenidos en la última posición del array
+        User::onlyTrashed()
+            ->whereIn('id', $this->deleted[$last])
+            ->restore();
+
+        $restoredItems = User::whereIn('id', $this->deleted[$last])
+            ->select('name')
+            ->pluck('name')
+            ->toArray();
+
+        $this->dispatchBrowserEvent('restored', [
+            'title'    => 'Restored',
+            'subtitle' => 'Succesfully!',
+            'class'    => 'bg-success',
+            'icon'     => 'fas fa-check-circle fa-lg',
+            'image'    => auth()->user()->profile_photo_url,
+            'body'     => count($restoredItems). ' items restored: ' . implode(", ", $restoredItems)
+        ]);
+
+        // Elimina el último elemento del array de arrays
+        unset($this->deleted[$last]);
+    }
+
+    /**
+     * Inserta un nuevo array de ids en el array $deleted;
+     *
+    **/
+    public function pushDeleted($id = null)
+    {
+        if ($id) {
+            $this->selected = [$id];
+        }
+
+        if (count($this->deleted) < 10) {
+            array_push($this->deleted, $this->selected);
+        } elseif (count($this->deleted) == 10) {
+            unset($this->deleted[0]);
+            array_push($this->deleted, $this->selected);
+        }
     }
 
     function resetUI() {
-        $this->selected_id = '';
+        $this->selected_id = null;
         $this->name = '';
         $this->phone = '';
         $this->email = '';
         $this->password = '';
-        $this->confirmPassword = '';
+        $this->password_confirmation = '';
         $this->status = 'choose';
         $this->user_type = 'choose';
+
+        $this->selected = [];
+        $this->select_page = false;
+        $this->search = '';
+
         $this->resetValidation();
         $this->resetPage();
     }

@@ -1,5 +1,5 @@
 <div class="mt-4">
-    <form {{-- wire:submit.prevent="changeOwner()" --}}>
+    <form wire:submit.prevent="changeOwner()">
         <div wire:ignore>
             <label for="select2-dropdown" class="sr-only">Change owner</label>
             <select class="form-control" id="select2-dropdown" aria-describedby="select2DropdownFeedback">
@@ -18,7 +18,7 @@
             <button type="button" wire:click.prevent="resetUI()" class="btn bg-gradient-secondary">
                     Cancel
             </button>
-            <button type="button" class="btn bg-gradient-danger" type="submit" wire:click.prevent="changeOwner">
+            <button type="submit" class="btn bg-gradient-danger">
                 Change owner
             </button>
         </div>
@@ -28,7 +28,7 @@
 
 
 {{-- https://github.com/ttskch/select2-bootstrap4-theme --}}
-<link rel="stylesheet" href="/path/to/select2.css">
+{{-- <link rel="stylesheet" href="/path/to/select2.css"> --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
 
 <script type="text/javascript">

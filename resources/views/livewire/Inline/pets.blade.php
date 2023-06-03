@@ -1,43 +1,68 @@
 <div wire:init="loadItems">
-{{--     <div class="row">
-        <div class="col-12"> --}}
-{{--             <div class="form-row d-flex justify-content-end">
-                <div class="form-group col-12 col-sm-8 col-md-6">
-                    <div class="btn-group btn-group-toggle btn-group-sm btn-block mb-2" data-toggle="buttons">
-                        <label class="btn bg-gradient-gray {{ $this->filter == 'Alive' ? 'active' : '' }}">
-                            <input type="radio" name="options" id="option_b1" autocomplete="off"  wire:click="$set('filter', 'Alive')">
-                            <i class="fas fa-fw fa-dog"></i> <span class="font-weight-normal text-xs">Active</span>
-
-                        </label>
-                        <label class="btn bg-gradient-gray {{ $this->filter == 'Dead' ? 'active' : '' }}">
-                            <input type="radio" name="options" id="option_b2" autocomplete="off"  wire:click="$set('filter', 'Dead')">
-                            <i class="fas fa-fw fa-paw"></i> <span class="font-weight-normal text-xs">Inactive</span>
-                        </label>
-                    </div>
-                </div>
-            </div> --}}
-{{--         </div>
-    </div>
- --}}
-
     <!-- Datatable's filters when screen < md-->
     @include('common.datatable-filters-smaller-md')
 
     <!-- Datatable's filters when screen > md-->
     @include('common.datatable-filters-wider-md')
 
-    <div class="card">
+    <!-- Datatable's buttons -->
+    <div class="d-flex justify-content-between mb-3">
+        <div class="col-auto">
+            <!-- Undo and destroy Buttons -->
+            @can('species_destroy')
+                @include('common.destroy-multiple-and-undo-buttons')
+            @endcan
+        </div>
+
+        <div class="col-auto">
+            <!-- Filter Button -->
+            <div x-data="{
+                    {{-- Enreda la propiedad 'model' y almacena su valor de manera persistente. --}}
+                    direction_pets: $persist(@entangle('direction')),
+                    paginate_pets:  $persist(@entangle('paginate')),
+                    filter_pets:    $persist(@entangle('filter')),
+                    sort_pets:      $persist(@entangle('sort')),
+                }">
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-default dropdown-toggle shadow-sm border-0" type="button" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-fw fa-filter"></i> {{ $this->filter }} pets
+                </button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item {{ $this->filter != 'Alive' && $this->filter != 'Dead' ? 'active':'' }}" type="button" wire:click="$set('filter', 'All')">
+                        All
+                    </button>
+                    <button class="dropdown-item {{ $this->filter == 'Alive' ? 'active':'' }}" type="button" wire:click="$set('filter', 'Alive')">
+                        Status: Alive
+                    </button>
+                    <button class="dropdown-item {{ $this->filter == 'Dead' ? 'active':'' }}" type="button" wire:click="$set('filter', 'Dead')">
+                        Status: Dead
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <!-- Add Button -->
+            @can('species_store')
+                @include('common.add-button')
+            @endcan
+        </div>
+    </div>
+
+    <div class="card card-outline card-lightblue">
         <div class="card-header border-transparent">
             <h3 class="card-title">
-                {{ $filter == 'Alive' ? 'Active / alive Pets ':'Inactive / dead Pets ' }}
+                @if($this->select_page)
+                    <span id="dynamicText{{$this->pageTitle}}">{{ count($this->selected) }} item(s) selected</span>
+                @else
+                    <span id="dynamicText{{$this->pageTitle}}">
+                        {{ $filter == 'Alive' ? 'Active Pets' : '' }}
+                        {{ $filter == 'Dead' ? 'Inactive Pets' : '' }}
+                        {{ $filter == 'All' ? 'Pets' : '' }}
+                    </span>
+                @endif
             </h3>
-
-            <div class="card-tools">
-                <!-- Add Button -->
-                @can('pets_store')
-                    @include('common.add-button')
-                @endcan
-            </div>
         </div>
         <!-- /.card-header -->
 
@@ -45,25 +70,6 @@
         <div class="card-body p-0 d-md-none">
             <div class="table-responsive">
                 <table class="table m-0 table-hover text-sm">
-                    <!-- Datatable's buttons -->
-                    <div class="form-row d-flex justify-content-end m-2">
-                        <div class="form-group col-12 col-sm-auto">
-                            <div class="btn-group btn-group-toggle btn-group-sm btn-block" data-toggle="buttons">
-                                <label class="btn {{ $this->filter == 'Alive' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
-                                    <input type="radio" name="options" id="option_b1" autocomplete="off"  wire:click="$set('filter', 'Alive')">
-                                    <i class="fas fa-fw fa-dog"></i> <span class="font-weight-normal text-xs">Active</span>
-
-                                </label>
-                                <label class="btn {{ $this->filter == 'Dead' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
-                                    <input type="radio" name="options" id="option_b2" autocomplete="off"  wire:click="$set('filter', 'Dead')">
-                                    <i class="fas fa-fw fa-paw"></i> <span class="font-weight-normal text-xs">Inactive</span>
-                                </label>
-                            </div>
-
-                        </div>
-                    </div>
-                    <!-- Datatable's buttons -->
-
                     <thead>
                         <tr class="text-uppercase">
                             <th>
@@ -77,11 +83,13 @@
                                 <td>
                                     <div class="d-flex justify-content-between align-items-center mx-1">
                                         <div>
-                                            <img class="img-circle elevation-2 shadow border border-2"
+                                            <a href="{{ route('admin.pets.show', $pet->id) }}">
+                                                <img class="img-fluid rounded-circle elevation-2 shadow"
                                                 loading="lazy"
-                                                src="{{$pet->pet_profile_photo ? asset('storage/pet-profile-photos/' . $pet->pet_profile_photo) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}"
-                                                style="width: 48px; height: 48px; object-fit: cover; background: antiquewhite;"
+                                                src="{{$pet->image ? asset('storage/pet-profile-photos/' . $pet->image) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}"
+                                                style="width: 35px; height: 35px; object-fit: cover;"
                                                 alt="{{ $pet->name }}">
+                                            </a>
                                         </div>
                                         <div class="d-flex flex-column text-right">
                                             <span class="text-uppercase">
@@ -116,20 +124,6 @@
                                 <td colspan="1">
                                     <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
                                         <div>
-                                            <span class="text-uppercase font-weight-bold">Breed</span>
-                                        </div>
-                                        <div class="d-flex flex-column text-right">
-                                            <span class="{{ !$pet->breed ? 'text-muted' : '' }}">
-                                                {{ $pet->breed ? $pet->breed : 'Unspecified' }}
-                                            </span>
-                                            <span class="{{ !$pet->zootechnical_function ? 'text-muted' : '' }}">
-                                                {{ $pet->zootechnical_function ? $pet->zootechnical_function : 'Undetermined' }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mx-3">
-                                        <div>
                                             <span class="text-uppercase font-weight-bold">Species</span>
                                         </div>
                                         <div class="d-flex flex-column text-right">
@@ -142,7 +136,18 @@
                                         </div>
                                     </div>
 
-                                    <div class="d-flex justify-content-between align-items-center mx-3">
+                                    <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                        <div>
+                                            <span class="text-uppercase font-weight-bold">Breed</span>
+                                        </div>
+                                        <div class="d-flex flex-column text-right">
+                                            <span class="{{ !$pet->breed ? 'text-muted' : '' }}">
+                                                {{ $pet->breed ? $pet->breed : 'Mixed / unknown breed' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
                                         <div>
                                             <span class="text-uppercase font-weight-bold sr-only">Options</span>
                                         </div>
@@ -159,7 +164,7 @@
                                                 @endcan
                                                 @can('pets_destroy')
                                                     <a href="javascript:void(0)"
-                                                        wire:click.prevent="destroy({{ $pet }})"
+                                                        wire:click.prevent="destroy({{ $pet->id }})"
                                                         title="Delete"
                                                         class="btn btn-sm btn-link border border-0">
                                                             <i class="fas fa-trash text-muted"></i>
@@ -186,7 +191,6 @@
                 <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
                 <div class="d-flex justify-content-center">
                     <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
-                        {{-- <i class="fas fa-fw fa-spinner fa-spin"></i> --}}
                         <span class="loader"></span>
                     </p>
                 </div>
@@ -194,48 +198,23 @@
         </div>
 
         <!-- Datatable's when screen > md-->
-        <div class="card-body p-0 d-none d-md-block" {{-- style="display: block;" --}}>
+        <div class="card-body p-0 d-none d-md-block">
             <div class="table-responsive">
-                <table class="table m-0 table-hover text-sm">
-
-                    <!-- Datatable's buttons -->
-                    <div class="form-row d-flex justify-content-between m-2">
-                        <div class="col-md-auto">
-                            <button id="destroyMultiple" wire:click="destroyMultiple" type="button" class="btn btn-default btn-sm btn-block {{ $this->select_page ? '' : 'd-none' }}">
-                                <i class="fas fa-fw fa-trash"></i>
-                                Delete <span id="counter" class="font-weight-bold">{{ count($this->selected) }}</span> items
-                            </button>
-                        </div>
-
-                        <div class="form-group col-md-4">
-                            <div class="btn-group btn-group-toggle btn-group-sm btn-block" data-toggle="buttons">
-                                <label class="btn {{ $this->filter == 'Alive' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
-                                    <input type="radio" name="options" id="option_b1" autocomplete="off"  wire:click="$set('filter', 'Alive')">
-                                    <i class="fas fa-fw fa-dog"></i> <span class="font-weight-normal text-xs">Active</span>
-
-                                </label>
-                                <label class="btn {{ $this->filter == 'Dead' ? 'bg-gradient-primary active' : 'bg-gradient-gray' }}">
-                                    <input type="radio" name="options" id="option_b2" autocomplete="off"  wire:click="$set('filter', 'Dead')">
-                                    <i class="fas fa-fw fa-paw"></i> <span class="font-weight-normal text-xs">Inactive</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Datatable's buttons -->
-
+                <table class="table m-0 table-hover text-sm datatable">
                     <thead>
                         <tr class="text-uppercase">
                             <th>
-                                <div class="icheck-pomegranate">
+                                <div class="icheck-info">
                                     <input type="checkbox"
-                                    id="checkAll"
-                                    wire:model="select_page">
-                                    <label class="sr-only" for="checkAll">Click to check all items</label>
+                                    id="checkAll{{$this->pageTitle}}"
+                                    wire:model="select_page"
+                                    wire:loading.attr="disabled">
+                                    <label class="sr-only" for="checkAll{{$this->pageTitle}}">Click to check all items</label>
                                 </div>
                             </th>
-                            <th wire:click="order('code')">
-                                Code
-                                @if($sort == 'code')
+                            <th colspan="2" wire:click="order('name')">
+                                Name
+                                @if($sort == 'name')
                                     @if($direction == 'asc')
                                         <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
                                     @else
@@ -245,9 +224,9 @@
                                     <i class="text-xs text-muted fas fa-sort"></i>
                                 @endif
                             </th>
-                            <th wire:click="order('name')">
-                                Name
-                                @if($sort == 'name')
+                            <th wire:click="order('code')">
+                                Code
+                                @if($sort == 'code')
                                     @if($direction == 'asc')
                                         <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
                                     @else
@@ -291,22 +270,26 @@
                     </thead>
                     <tbody>
                         @forelse($pets as $pet)
-                            <tr id="rowcheck{{ $pet->id }}" class="{{ $this->select_page ? 'table-active font-weight-bold' : ''}}">
+                            <tr id="rowcheck{{$this->pageTitle}}{{ $pet->id }}" class="{{ $this->select_page ? 'table-active text-muted' : ''}}">
                                 <td width="10px">
-                                    <div class="icheck-pomegranate">
+                                    <div class="icheck-info">
                                         <input type="checkbox"
-                                        id="check{{$pet->id}}"
+                                        id="check{{$this->pageTitle}}{{$pet->id}}"
                                         wire:model.defer="selected"
                                         value="{{$pet->id}}"
-                                        onchange="updateInterface(this.id)"
-                                        class="counter">
-                                        <label class="sr-only" for="check{{$pet->id}}">Click to check</label>
+                                        onchange="updateInterface(this.id, '{{$this->pageTitle}}')"
+                                        class="counter{{$this->pageTitle}}">
+                                        <label class="sr-only" for="check{{$this->pageTitle}}{{$pet->id}}">Click to check</label>
                                     </div>
                                 </td>
                                 <td>
-                                    <p class="d-flex flex-column  mb-0">
-                                        {{ $pet->code }}
-                                    </p>
+                                    <a href="{{ route('admin.pets.show', $pet->id) }}">
+                                         <img class="{{--img-fluid--}} rounded-circle elevation-2 shadow"
+                                            loading="lazy"
+                                            src="{{$pet->image ? asset('storage/pet-profile-photos/' . $pet->image) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}"
+                                            style="width: 35px; height: 35px; object-fit: cover;"
+                                            alt="{{ $pet->name }}">
+                                    </a>
                                 </td>
                                 <td class="text-nowrap">
                                     <a class="font-weight-bold btn-block text-uppercase {{ $pet->status == 'Alive' ? 'text-primary':'text-orange'}}"
@@ -317,9 +300,14 @@
                                         @endif
                                     </a>
                                 </td>
+                                <td>
+                                    <p class="d-flex flex-column  mb-0">
+                                        {{ $pet->code }}
+                                    </p>
+                                </td>
                                 <td class="text-nowrap">
                                     <p class="d-flex flex-column mb-0">
-                                        {{ $pet->breed ? $pet->breed : 'Unspecified' }}
+                                        {{ $pet->breed ? $pet->breed : 'Mixed / unknown breed' }}
                                     </p>
                                 </td>
                                 <td class="text-nowrap">
@@ -331,7 +319,7 @@
                                             data-toggle="modal"
                                             wire:click.prevent="edit({{ $pet }})"
                                             title="Edit"
-                                            class="btn btn-sm btn-link border border-0">
+                                            class="btn btn-sm btn-link border border-0 icon">
                                                 <i class="fas fa-edit text-muted"></i>
                                         </a>
                                     @endcan
@@ -340,9 +328,9 @@
                                     @can('pets_destroy')
                                         <a href="javascript:void(0)"
                                             data-toggle="modal"
-                                            wire:click.prevent="destroy({{ $pet }})"
+                                            wire:click.prevent="destroy({{ $pet->id }})"
                                             title="Delete"
-                                            class="btn btn-sm btn-link border border-0">
+                                            class="btn btn-sm btn-link border border-0 icon">
                                                 <i class="fas fa-trash text-muted"></i>
                                         </a>
                                     @endcan
@@ -352,7 +340,7 @@
                             <!-- COMMENT: Muestra cuando el componente esta readyToLoad -->
                             @if($readyToLoad == true)
                                 <tr>
-                                    <td colspan="7">
+                                    <td colspan="8">
                                         @include('common.datatable-feedback')
                                     </td>
                                 </tr>
@@ -397,7 +385,9 @@
     @include('livewire.forms.form-pets')
 </div>
 
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" integrity="sha512-8vq2g5nHE062j3xor4XxPeZiPjmRDh6wlufQlfC6pdQ/9urJkU07NM0tEREeymP++NczacJ/Q59ul+/K2eYvcg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
 <script>
     window.addEventListener('updated', event => {
@@ -413,47 +403,16 @@
         notify(event)
     });
 
+    window.addEventListener('restored', event => {
+        notify(event)
+    });
 
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {
-            $('#modalForm').modal('show')
+            $('#modalForm{{$this->pageTitle}}').modal('show')
         });
         window.livewire.on('hide-modal', msg =>  {
-            $('#modalForm').modal('hide')
+            $('#modalForm{{$this->pageTitle}}').modal('hide')
         });
     });
-
-    function updateInterface(id) {
-        uncheckAll();
-        trActive(id);
-        count();
-    }
-
-    function uncheckAll() {
-        // Desmarca checkAll si estaba seleccionado al hacer clic en una row
-        if (document.getElementById('checkAll').checked) {
-            document.getElementById('checkAll').checked = false
-        }
-    }
-
-    function trActive(id) {
-        // marca los TR como activados al hacer clic en una row
-        var row = document.getElementById("rowcheck"+document.getElementById(id).value)
-        row.classList.toggle("table-active")
-        row.classList.toggle("font-weight-bold")
-    }
-
-    function count() {
-        // Selecciona todos los input de tipo chechbox que tengan la clase counter y los cuenta
-
-        document.getElementById("counter").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
-
-        if (document.querySelectorAll('input[type="checkbox"]:checked.counter').length < 1) {
-            document.getElementById("destroyMultiple").classList.add("d-none");
-        }
-        if (document.querySelectorAll('input[type="checkbox"]:checked.counter').length > 0) {
-            document.getElementById("destroyMultiple").classList.remove("d-none");
-        }
-    }
-
 </script>

@@ -17,6 +17,7 @@ class CreateConsultationsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('pet_id');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('age');
             $table->decimal('weight', 7, 3);
             $table->decimal('temperature', 4, 2);
@@ -58,6 +59,10 @@ class CreateConsultationsTable extends Migration
                 ->references('id')
                 ->on('pets')
                 ->onDelete('cascade');
+
+            $table->foreign('parent_id')
+                ->references('id')
+                ->on('consultations');
         });
     }
 

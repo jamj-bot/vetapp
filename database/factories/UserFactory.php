@@ -25,17 +25,16 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
-            'phone' => $this->faker->unique()->numerify('33########'),
-            'email' => $this->faker->unique()->safeEmail(),
+            'name'              => $this->faker->name(),
+            'phone'             => $this->faker->unique()->numerify('33########'),
+            'email'             => $this->faker->unique()->freeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'confirmPassword' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'status' => $this->faker->randomElement(['active', 'locked']),
-            'user_type' => $this->faker->randomElement(['Guest', 'Client', 'Client', 'Client', 'Veterinarian', 'Admin']),
-            'remember_token' => Str::random(10),
-            'created_at' => $this->faker->dateTimeBetween('-5 years', now()),
-            'deleted_at' => $this->faker->randomElement([now(), null, null, null, null, null, null, null]),
+            'password'          => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'status'            => $this->faker->randomElement(['active', 'locked']),
+            'user_type'         => $this->faker->randomElement(['Guest', 'Client', 'Client', 'Client', 'Veterinarian', 'Admin']),
+            'remember_token'    => Str::random(10),
+            'created_at'        => $this->faker->dateTimeBetween('-5 years', now()),
+            'deleted_at'        => $this->faker->randomElement([now(), null, null, null, null, null, null, null]),
         ];
     }
 

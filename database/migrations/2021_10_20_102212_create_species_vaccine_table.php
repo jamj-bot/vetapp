@@ -11,8 +11,7 @@ class CreateSpeciesVaccineTable extends Migration
      *
      *
      * COMMANDO: php artisan make:migration create_category_product_table --create=category_product
-     * la tabla pivote debe estar en singular y aparantemente debe comenzar con la tabla que primero se creó
-     * y luego la siguiente.
+     * la tabla pivote debe estar en singular y deben ir en orden alfabético.
      *
      * @return void
      */

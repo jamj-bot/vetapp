@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model; // Soft Delete
 use Illuminate\Database\Eloquent\SoftDeletes; // Soft Delete
 use Spatie\Permission\Traits\HasRoles; // Laravel Permission
+use Illuminate\Support\Str;
 
 class Vaccine extends Model
 {
@@ -22,7 +23,7 @@ class Vaccine extends Model
         'dosage',
         'administration',
         'vaccination_schedule',
-        'primary_doses',
+        'vaccination_doses',
         'revaccination_schedule',
         'revaccination_doses'
     ];
@@ -54,4 +55,32 @@ class Vaccine extends Model
     {
         return $this->belongsToMany(Species::class);
     }
+
+    public function diseases()
+    {
+        return $this->belongsToMany(Disease::class);
+    }
+
+    /**
+     * Get the string of all diseases.
+     *
+     * @return string
+     */
+    public function getAllDiseasesAttribute()
+    {
+        $stringDiseases = Str::ucfirst($this->diseases->implode('name', ', '));
+        return "$stringDiseases.";
+    }
+
+    /**
+     * Get the string of target species.
+     *
+     * @return string
+     */
+    public function getAllSpeciesAttribute()
+    {
+        $stringSpecies = Str::ucfirst($this->species->implode('name', ', '));
+        return "$stringSpecies.";
+    }
+
 }

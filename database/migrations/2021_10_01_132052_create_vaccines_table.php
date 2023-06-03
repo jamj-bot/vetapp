@@ -23,9 +23,9 @@ class CreateVaccinesTable extends Migration
             $table->string('dosage'); // cuántos ml darle
             $table->string('administration'); // como dárselos
             $table->string('vaccination_schedule'); // Cuándo vacunar por primera vez
-            $table->integer('primary_doses'); // Cuántas dosis aplicar en la vacunación
-            $table->string('revaccination_schedule'); // Cuándo revacunar
-            $table->integer('revaccination_doses'); // Cuántas dosis hay que aplicar en la revacunación
+            $table->integer('vaccination_doses'); // Cuántas dosis aplicar en la vacunación
+            $table->string('revaccination_schedule')->nullable(); // Cuándo revacunar
+            $table->integer('revaccination_doses')->nullable(); // Cuántas dosis hay que aplicar en la revacunación
             $table->timestamps();
             $table->softDeletes();
         });

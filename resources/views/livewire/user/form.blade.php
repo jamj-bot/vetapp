@@ -1,4 +1,5 @@
-<form wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}" autocomplete="off">
+
+<form autocomplete="off" wire:submit.prevent="submit">
 	@include('common.modal-header')
 
 		<div class="form-row">
@@ -6,7 +7,7 @@
 				<label for="inputName" class="form-label font-weight-normal">Name *</label>
 				<input wire:model.lazy="name"
 					type="text"
-					class="form-control form-control-sm
+					class="form-control form-control-lg
 					{{ $errors->has('name') ? 'is-invalid':'' }}
 					{{ $errors->has('name') == false && $this->name != null ? 'is-valid border-success':'' }}"
 					id="inputName"
@@ -99,25 +100,24 @@
 
 			<div class="form-group col-md-6">
 				<label for="inputConfirmPassword" class="form-label font-weight-normal">Confirm password *</label>
-				<input wire:model.lazy="confirmPassword"
+				<input wire:model.lazy="password_confirmation"
 					type="password"
 					class="form-control form-control-sm
-					{{ $errors->has('confirmPassword') ? 'is-invalid':'' }}
-					{{ $errors->has('confirmPassword') == false && $this->confirmPassword != null ? 'is-valid border-success':'' }}"
+					{{ $errors->has('password_confirmation') ? 'is-invalid':'' }}
+					{{ $errors->has('password_confirmation') == false && $this->password_confirmation != null ? 'is-valid border-success':'' }}"
 					id="inputConfirmPassword"
 					placeholder=""
-					aria-describedby="inputConfirmPasswordFeedback">
+					aria-describedby="inputPasswordConfirmationFeedback">
 
-			   @error('confirmPassword')
-					<div id="inputConfirmPasswordFeedback" class="invalid-feedback">
+			   @error('password_confirmation')
+					<div id="inputPasswordConfirmationFeedback" class="invalid-feedback">
 						{{ $message }}
 					</div>
 		        @else
-                    <div id="inputConfirmPasswordFeedback" class="valid-feedback">
+                    <div id="inputPasswordConfirmationFeedback" class="valid-feedback">
                         Looks good!
                     </div>
 				@enderror
-
 			</div>
 		</div>
 		<!-- /. row -->

@@ -20,7 +20,7 @@
             </svg>
         </p>
         <p>
-            There Aren’t Any Great Matches for Your Search: <b>'{{$search}}'
+            There Aren’t Any Great Matches for Your Search: <b>'{{$this->search}}'
         </p>
     </div>
 @endif

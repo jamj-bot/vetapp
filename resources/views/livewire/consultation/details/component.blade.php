@@ -5,7 +5,7 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="display-4">
-                        {{ $pet->name != null ? $pet->name : $pet->code }} / {{ $pageTitle }}
+                        {{ $pet->name != null ? $pet->name : $pet->code }}'s consultation {{ $pageTitle }}
                         @if($pet->status == 'Dead')
                             <sup class="font-weight-light">Inactive</sup>
                         @endif
@@ -44,152 +44,130 @@
                 <div class="col-md-3">
                     @can('consultations_index')
                         <a href="{{ route('admin.pets.consultations', $pet) }}"
-                            class="btn btn-block btn-default mb-3">
-                            <i class="far fa-arrow-alt-circle-left"></i>
-                            Consultations
+                            class="btn btn-block bg-gradient-primary shadow-sm mb-3">
+                            <i class="fas fa-fw fa-th-list"></i>
+                            Medical History
                         </a>
                     @endcan
 
-                    @can('consultations_update')
-                        <!-- Button trigger modal -->
-                        <a href="javascript:void(0)"
-                            wire:click.prevent="edit({{ $consultation }})"
-                            onclick="bindTextareas()"
-                            title="Edit"
-                            class="btn bg-gradient-warning btn-block mb-3">
-
-                                <span wire:loading.remove wire:target="edit">
-                                   <i class="fas fa-fw fa-edit"></i>
-                                   Edit Consultation
-                                </span>
-                                <span wire:loading wire:target="edit">
-                                    <i class="fas fa-fw fa-spinner fa-spin"></i>
-                                     Please, wait...
-                                </span>
+                    <div class="btn-group-vertical btn-block shadow-sm mb-3">
+                        <a href="{{ route('admin.pets.consultations.prescription',
+                            ['pet' => $pet, 'consultation' => $consultation]) }}"
+                            class="btn btn-default">
+                            <i class="fas fa-fw fa-prescription text-info text-lg"></i>
+                            Add prescription
                         </a>
-                    @endcan
+                        @can('consultations_store')
+                            @if(count($consultation->children) < 1)
+                                <button type="button"
+                                    wire:click.prevent="loadDobField()"
+                                    onclick="bindTextareas()"
+                                    class="btn btn-default"
+                                    data-toggle="modal"
+                                    data-target="#modalForm{{$this->pageTitle}}">
+                                    <i class="fas fa-fw fa-plus-circle text-success text-lg"></i>
+                                    Add subsequent consultation
+                                </button>
+                            @endif
+                        @endcan
+                        @can('consultations_update')
+                            <button type="button"
+                                wire:click.prevent="edit({{ $consultation }})"
+                                class="btn btn-default">
+                                <i class="fas fa-fw fa-edit text-orange text-lg"></i>
+                                Edit consultation
+                            </button>
+                        @endcan
+
+                        <a href="{{ route('admin.pets.consultations.export',
+                            ['pet' => $pet, 'consultation' => $consultation]) }}"
+                            class="btn btn-default"
+                            target="_blank"
+                            rel="noopener"
+                            title="Print">
+                            <i class="far fa-fw fa-file-pdf text-maroon text-lg"></i>
+                            Export consultation
+                        </a>
+                    </div>
+                    <!-- /.btn-group -->
 
                     <!-- about card -->
                     @include('common.about-card')
                     <!-- /.card -->
-
-                    <a href="{{ route('admin.pets.consultations.prescription', ['pet' => $pet, 'consultation' => $consultation]) }}"
-                        class="btn btn-block btn-default mb-3">
-                        <i class="far fa-arrow-alt-circle-left"></i>
-                        Add prescription
-                    </a>
                 </div>
                 <!-- /.col -->
 
-
                 <div class="col-md-9">
+
+                    @if (session('message'))
+                        <div class="alert alert-info alert-dismissible"
+                            x-data="{ show: true }"
+                            x-show="show" x-init="setTimeout(() => show = false, 20000)"
+                            x-transition.duration.2500ms>
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-info"></i> Alert!</h5>
+                            {{ session('message') }}
+                        </div>
+                    @endif
+
                     <!-- Alerts -->
                     @include('common.alerts')
                     <!-- /.Alerts -->
-
-{{--                     @if (session('message'))
-                        <div class="alert alert-success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                            {{ session('message') }}
-                        </div>
-                    @endif --}}
 
                     <div class="card card-primary card-outline">
                         <div class="card-header">
                             <h4 class="card-title">
                                 Consultation ID: {{ str_pad($consultation->id, 8, "0", STR_PAD_LEFT)  }}
-                                @if (session('message'))
-                                        <i class="fas fa-exclamation text-warning"></i> {{ session('message') }}
-                                @endif
                             </h4>
 
                             <div class="card-tools">
                                 <span class="text-muted text-sm" wire:loading >
                                         Please, wait... <i class="fas fa-fw fa-spinner fa-spin"></i>
-                                    </span>
-                                    <a href="javascript:void(0)"
-                                        wire:click="previusConsultation"
-                                        class="btn btn-default btn-sm"
-                                        title="Previous">
-                                            <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                    <a href="javascript:void(0)"
-                                        wire:click="nextConsultation"
-                                        class="btn btn-default btn-sm" title="Next">
-                                            <i class="fas fa-chevron-right"></i>
-                                    </a>
-                   {{--              <span class="text-muted text-sm" wire:loading >
-                                    Please, wait... <i class="fas fa-fw fa-spinner fa-spin"></i>
                                 </span>
                                 <a href="javascript:void(0)"
                                     wire:click="previusConsultation"
-                                    class="btn btn-tool" title="Previous">
-                                        <i class="fas fa-chevron-left"></i>
+                                    class="btn btn-default btn-sm {{$this->consultation->parent ? '' : 'disabled'}}"
+                                    title="Previous">
+                                        <i class="fas fa-fw fa-chevron-left"></i> Previous
                                 </a>
                                 <a href="javascript:void(0)"
                                     wire:click="nextConsultation"
-                                    class="btn btn-tool" title="Next">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a> --}}
+                                    class="btn btn-default btn-sm {{$this->consultation->children->first() ? '' : 'disabled'}}" title="Subsequent">
+                                        Subsequent <i class="fas fa-fw fa-chevron-right"></i>
+                                </a>
                             </div>
-{{--
-                            <div class="float-right">
-
-                            </div> --}}
                         </div>
                         <!-- /.card-header -->
 
                         <div class="card-body p-0">
+                            <!-- /.mailbox-controls -->
                             <div class="mailbox-read-info">
                                 <h4>
                                     {{ $consultation->user->name }}, DVM
                                     <span class="text-sm float-right">
-                                        {{ $consultation->consult_status }}
-                                        <i class="fas fa-fw {{ $consultation->consult_status != 'Closed' ? 'fa-info text-info' : 'fa-check-double text-success'}}"></i>
+                                        <span>
+                                            <i class="fas fa-fw fa-calendar text-muted"></i>
+                                            Date: {{ $consultation->created_at->format('d-M-Y') }}
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-fw fa-clock text-muted"></i>
+                                            Time: {{ $consultation->created_at->format('h:i A') }}
+                                        </span>
                                     </span>
                                 </h4>
-                                <span>
-                                    <i class="fas fa-fw fa-calendar text-muted"></i>
-                                    {{ $consultation->created_at->format('d-M-Y h:i A') }}
-                                    {{-- Consultation ID: {{ str_pad($consultation->id, 8, "0", STR_PAD_LEFT)  }} --}}
-{{--                                     <span class="mailbox-read-time float-right">
-                                        {{ $consultation->created_at->format('d-M-Y h:i A') }}
-                                    </span> --}}
-                                </span>
+                                <i class="fas fa-fw {{ $consultation->consult_status != 'Closed' ? 'fa-info text-info' : 'fa-check-double text-success'}}"></i>
+                                {{ $consultation->consult_status }}
                             </div>
                             <!-- /.mailbox-read-info -->
-
-{{--                             <div class="mailbox-controls with-border text-center">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-default btn-sm" data-container="body" title="Delete">
-                                        <i class="far fa-trash-alt"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm" data-container="body" title="Reply">
-                                        <i class="fas fa-reply"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm" data-container="body" title="Forward">
-                                        <i class="fas fa-share"></i>
-                                    </button>
-                                </div>
-                                <!-- /.btn-group -->
-
-                                <a href="{{ route('admin.pets.consultations.export', ['pet' => $pet, 'consultation' => $consultation]) }}"
-                                    class="btn btn-default btn-sm"
-                                    target="_blank"
-                                    rel="noopener"
-                                    title="Print">
-                                    <i class="far fa-fw fa-file-pdf"></i>
-                                </a>
-                            </div> --}}
-                            <!-- /.mailbox-controls -->
 
                             <div class="mailbox-read-message">
                                 <h4>Pet information</h4>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <b></i>Pet name: </b>{{ $consultation->pet->name ? $consultation->pet->name : $consultation->pet->code }}
+                                        <span class="font-weight-bold">Pet name: </span>{{ $consultation->pet->name ? $consultation->pet->name : $consultation->pet->code }}
                                     </div>
                                     <div class="col-md-6">
-                                        <b>Age: </b>{{ $consultation->age }}
+                                        <span class="font-weight-bold">Age: </span>{{ $consultation->age }}
                                         <sup class="text-muted">{{ $consultation->pet->estimated ? 'est.' : ''}}</sup>
                                     </div>
                                 </div>
@@ -199,31 +177,31 @@
                                 <h4>Vital statistics</h4>
                                 <div class="row">
                                     <div class="col-md">
-                                        <b>Weight: </b>{{ $consultation->weight }} kilograms.
+                                        <span class="font-weight-bold">Weight: </span>{{ $consultation->weight }} kilograms.
                                     </div>
                                     <div class="col-md">
-                                        <b>Temperature: </b>{{ $consultation->temperature }} °C
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md">
-                                        <b>Oxygen saturation level: </b>{{ $consultation->oxygen_saturation_level }}%
-                                    </div>
-                                    <div class="col-md">
-                                        <b>Capillary refill time: </b>{{ $consultation->capillary_refill_time }}
+                                        <span class="font-weight-bold">Temperature: </span>{{ $consultation->temperature }} °C
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <b>Heart rate: </b>{{ $consultation->heart_rate }} beats per minute
+                                        <span class="font-weight-bold">Oxygen saturation level: </span>{{ $consultation->oxygen_saturation_level }}%
                                     </div>
                                     <div class="col-md">
-                                        <b>Pulse: </b>{{ $consultation->pulse }}
+                                        <span class="font-weight-bold">Capillary refill time: </span>{{ $consultation->capillary_refill_time }}
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <b>Respiratory rate: </b>{{ $consultation->respiratory_rate }} breaths per minute
+                                        <span class="font-weight-bold">Heart rate: </span>{{ $consultation->heart_rate }} beats per minute
+                                    </div>
+                                    <div class="col-md">
+                                        <span class="font-weight-bold">Pulse: </span>{{ $consultation->pulse }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <span class="font-weight-bold">Respiratory rate: </span>{{ $consultation->respiratory_rate }} breaths per minute
                                     </div>
                                 </div>
                                 <hr>
@@ -231,23 +209,23 @@
                                 <h4>Ancillary info</h4>
                                 <div class="row">
                                     <div class="col-md">
-                                        <b>Reproductive status: </b>{{ $consultation->reproductive_status }}
+                                        <span class="font-weight-bold">Reproductive status: </span>{{ $consultation->reproductive_status }}
                                     </div>
                                     <div class="col-md">
-                                        <b>Consciouness: </b>{{ $consultation->consciousness }}
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md">
-                                        <b>Hydration: </b>{{ $consultation->hydration }}
-                                    </div>
-                                    <div class="col-md">
-                                        <b>Pain: </b>{{ $consultation->pain }}
+                                        <span class="font-weight-bold">Consciouness: </span>{{ $consultation->consciousness }}
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md">
-                                        <b>Body condition: </b>{{ $consultation->body_condition }}
+                                        <span class="font-weight-bold">Hydration: </span>{{ $consultation->hydration }}
+                                    </div>
+                                    <div class="col-md">
+                                        <span class="font-weight-bold">Pain: </span>{{ $consultation->pain }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <span class="font-weight-bold">Body condition: </span>{{ $consultation->body_condition }}
                                     </div>
                                 </div>
                                 <hr>
@@ -290,8 +268,31 @@
                                 <hr>
 
                                 <h4>Treatment plan</h4>
-                                {{ $consultation->treatment_plan }}
+                                {!! $consultation->treatment_plan !!}
                                 <hr>
+
+                                <h4>Prescriptions</h4>
+
+                                @foreach($prescriptions as $prescription)
+                                    <span class="font-weight-bold">Date: </span>{{ $prescription->date }} | <span class="font-weight-bold">Order: </span>{{ $prescription->order }}
+                                    <ol>
+                                        @foreach($prescription->instructions as $instruction)
+                                        <li>
+                                            <span>
+                                                <span class="font-weight-bolder">
+                                                    {{ $instruction->medicine->name }}
+                                                    {{ $instruction->medicine->dosage_form }}
+                                                    {{ $instruction->medicine->strength }}
+                                                </span>
+                                            </span>
+                                            <br>
+                                            <span>
+                                                {{ $instruction->indications_for_owner }}
+                                            </span>
+                                        </li>
+                                        @endforeach
+                                    </ol>
+                                @endforeach
                             <!-- /.mailbox-read-message -->
                         </div>
                         <!-- /.card-body -->
@@ -452,8 +453,8 @@
                                                                         <a href="javascript:void(0)" data-toggle="modal" data-target="#modalImages"
                                                                             onclick="changeSrcHref('{{ asset('/storage/'. $test->url) }}', '{{url('admin/pets/'.$pet->id.'/consultations/'.$test->testable_id)}}', '2048px')"
                                                                             title="Show">
-                                                                            <img src="{{ url('vendor/adminlte/dist/img/pdf.png') }}"
-                                                                                style="width: 48px; height: 48px; object-fit: cover;">
+                                                                            <img src="{{ url('vendor/adminlte/dist/img/pdf.svg') }}"
+                                                                                {{-- style="width: 48px; height: 48px; object-fit: cover;"--}}>
                                                                         </a>
                                                                     </div>
                                                                     <div class="product-info">
@@ -547,32 +548,13 @@
                         <!-- /.card-footer -->
                         <div class="card-footer">
                             @can('consultations_destroy')
-                                <button class="button2" wire:click="delete({{$consultation}})">
+                                <button class="button2 float-right" wire:click="destroy({{ $consultation }})">
                                     <span class="text">Delete</span>
                                     <span class="icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path></svg>
                                     </span>
                                 </button>
                             @endcan
-
-
-{{-- <button class="my-button">
-    <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M20 17h2v2H2v-2h2v-7a8 8 0 1 1 16 0v7zm-2 0v-7a6 6 0 1 0-12 0v7h12zm-9 4h6v2H9v-2z" fill="currentColor"></path>
-    </svg>
-</button> --}}
-
-
-{{--                             @can('consultations_export')
-                                <a href="{{ route('admin.pets.consultations.export', ['pet' => $pet, 'consultation' => $consultation]) }}"
-                                    class="btn btn-default"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    title="Export to PDF">
-                                    <i class="far fa-fw fa-file-pdf"></i> Export
-                                </a>
-                            @endcan --}}
                         </div>
                         <!-- /.card-footer -->
                     </div>
@@ -586,6 +568,7 @@
     @include('common.modal-image')
 </div>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" integrity="sha512-8vq2g5nHE062j3xor4XxPeZiPjmRDh6wlufQlfC6pdQ/9urJkU07NM0tEREeymP++NczacJ/Q59ul+/K2eYvcg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <script>
     window.addEventListener('updated', event => {
@@ -603,20 +586,16 @@
     document.addEventListener('DOMContentLoaded', function(){
 
         window.livewire.on('show-modal', msg =>  {
-            $('#modalForm').modal('show')
+            $('#modalForm{{$this->pageTitle}}').modal('show')
         });
 
         window.livewire.on('hide-modal', msg =>  {
-            $('#modalForm').modal('hide')
+            $('#modalForm{{$this->pageTitle}}').modal('hide')
         });
 
         window.livewire.on('clear-input-field', msg =>  {
             $("#inputField").val('')
         });
-        // window.livewire.on('reset-ckeditor', msg =>  {
-        //     // buscar la manera de resetear el textarea usado por el ck editor porque de esta manera no se puede :(
-        //     document.getElementById("ckeditor").value = "";
-        // });
     });
 </script>
 
@@ -627,8 +606,7 @@
 <!-- CKEDITOR CDN -->
 <script src="https://cdn.ckeditor.com/ckeditor5/30.0.0/classic/ckeditor.js"></script>
 
-<!-- CKEDITOR PERONALIZATION -->
-<script>
+{{-- <script>
     ClassicEditor
         .create( document.querySelector( '#ckeditor' ), {
             heading: {
@@ -642,14 +620,17 @@
 
         } )
         .then(function(ckeditor){
+            // ckeditor.model.document.on('change:data', () => {
+            //     document.querySelector("#textareaProblemStatement").value = ckeditor.getData();
+            // })
             ckeditor.model.document.on('change:data', () => {
-                document.querySelector("#textareaProblemStatement").value = ckeditor.getData();
+                @this.set('problem_statement', ckeditor.getData());
             })
         })
         .catch( error => {
             console.error( error );
         } );
-</script>
+</script> --}}
 
 <script type="text/javascript">
     function changeSrcHref(source, link, height = null) {

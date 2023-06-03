@@ -1,4 +1,4 @@
-<div wire:init="loadItems()">
+<div wire:init="loadItems()" >
     <!--Content header (Page header)-->
     <section class="content-header">
         <div class="container-fluid">
@@ -24,102 +24,80 @@
     <section class="content">
         <div class="container-fluid">
 
-            <!-- Buttons -->
-            <div class="form-row d-flex justify-content-end">
-                <div class="form-group col-md-3">
-                    @can('vaccines_store')
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn bg-gradient-primary btn-block shadow" data-toggle="modal" data-target="#modalForm">
-                           <i class="fas fa-fw fa-plus"></i> Add Vaccine
-                        </button>
-                    @endcan
-                </div>
-            </div>
-
-
             <!--Datatable -->
             <div class="row">
                 <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-gradient-primary">
-                            <h3 class="card-title">Index</h3>
-                            <div class="card-tools">
-                                <!-- Datatable's filters -->
-                                <div class="form-row my-2">
 
-                                    <div class="col-sm-6">
-                                        @include('common.select')
-                                    </div>
+                    <!-- Datatable's filters when screen < md-->
+                    @include('common.datatable-filters-smaller-md')
 
-                                    <div class="col-sm-6">
-                                        @include('common.search')
-                                    </div>
+                    <!-- Datatable's filters when screen > md-->
+                    @include('common.datatable-filters-wider-md')
+
+                    <!-- Datatable's buttons -->
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="col-auto">
+                            @include('common.destroy-multiple-and-undo-buttons')
+                        </div>
+
+                        <div class="col-auto">
+                            <div class="dropdown d-none d-md-block">
+                                <button class="btn btn-sm btn-default dropdown-toggle shadow-sm border-0" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-fw fa-columns"></i> Columns
+                                </button>
+                                <div class="dropdown-menu">
+                                    <button id="btn-administration" class="dropdown-item" type="button"
+                                        onclick="changeColumnsVisibility(this.id)">
+                                        Route of administration
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button id="btn-vaccination" class="dropdown-item" type="button"
+                                        onclick="changeColumnsVisibility(this.id)">
+                                        Vaccination Schedule
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button id="btn-revaccination" class="dropdown-item" type="button"
+                                        onclick="changeColumnsVisibility(this.id)">
+                                        Revaccination Schedule
+                                    </button>
                                 </div>
-                                <!-- /.Datatable filters -->
                             </div>
+                        </div>
+
+
+                        <div class="col-auto">
+                            <!-- Add Button -->
+                            @can('vaccines_store')
+                                @include('common.add-button')
+                            @endcan
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-gradient-teal">
+                            <h3 class="card-title">
+                                @if($this->select_page)
+                                    <span id="dynamicText{{$this->pageTitle}}">{{ count($this->selected) }} item(s) selected</span>
+                                @else
+                                    <span id="dynamicText{{$this->pageTitle}}">Vaccines</span>
+                                @endif
+                            </h3>
                         </div>
                         <!-- /.card-header -->
 
-                        <div class="card-body table-responsive p-0">
+                        <!-- Datatable's when screen < md (card-body)-->
+                        <div class="card-body table-responsive p-0 d-md-none">
                             <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
-                                    <tr class="text-uppercase text-sm text-nowrap">
-                                        <th wire:click="order('name')">
+                                    <tr class="text-uppercase">
+                                        <th>
                                             Name
-                                            @if($sort == 'name')
-                                                @if($direction == 'asc')
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
-                                                @else
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
-                                                @endif
-                                            @else
-                                                <i class="text-xs text-muted fas fa-sort"></i>
-                                            @endif
                                         </th>
-                                        <th wire:click="order('manufacturer')">
-                                            Manufacturer
-
-                                            @if($sort == 'manufacturer')
-                                                @if($direction == 'asc')
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
-                                                @else
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
-                                                @endif
-                                            @else
-                                                <i class="text-xs text-muted fas fa-sort"></i>
-                                            @endif
+                                        <th title="Manufacturer">
+                                            Mfgr
                                         </th>
                                         <th>
-                                            Target species
-                                        </th>
-                                        <th wire:click="order('type')">
-                                            Type
-
-                                            @if($sort == 'type')
-                                                @if($direction == 'asc')
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
-                                                @else
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
-                                                @endif
-                                            @else
-                                                <i class="text-xs text-muted fas fa-sort"></i>
-                                            @endif
-                                        </th>
-                                        <th wire:click="order('status')">
                                             Status
-
-                                            @if($sort == 'status')
-                                                @if($direction == 'asc')
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
-                                                @else
-                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
-                                                @endif
-                                            @else
-                                                <i class="text-xs text-muted fas fa-sort"></i>
-                                            @endif
-                                        </th>
-                                        <th>
-                                            <span class="sr-only">More...</span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -127,107 +105,139 @@
                                     @forelse($vaccines as $vaccine)
                                         <tr data-widget="expandable-table" aria-expanded="false">
                                             <td>
-                                                <p class="d-flex flex-column mb-0">
+                                                <span class="text-uppercase font-weight-bold text-orange">
                                                     {{ $vaccine->name }}
-                                                </p>
+                                                </span>
                                             </td>
                                             <td>
-                                                <p class="d-flex flex-column mb-0">
-                                                    {{ $vaccine->manufacturer }}
-                                                </p>
+                                                {{ $vaccine->manufacturer }}
                                             </td>
                                             <td>
-                                                <p class="d-flex flex-column mb-0">
-                                                    {{-- <ul class="list-inline font-weight-light text-sm"> --}}
-                                                        @foreach($vaccine->species as $item )
-                                                            {{-- <li class="list-inline-item"> --}}{{ $item->name }}.{{-- </li> --}}
-                                                        @endforeach
-                                                    {{-- </ul> --}}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <p class="d-flex flex-column mb-0">
-                                                    {{ $vaccine->type }}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <p class="d-flex flex-column mb-0">
-                                                    {{ $vaccine->status }}
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <i class="fas fa-arrows-alt-v"></i>
+                                                {{ $vaccine->status }}
                                             </td>
                                         </tr>
                                         <tr class="expandable-body d-none">
-                                            <td colspan="6">
-                                                <div style="display: none;">
-                                                    <dl class="row pl-3 pr-3">
-                                                        <dt class="col-sm-3 text-uppercase">Description</dt>
-                                                        <dd class="col-sm-9">{{ $vaccine->description }}</dd>
-                                                        <dt class="col-sm-3 text-uppercase">Dosage</dt>
-                                                        <dd class="col-sm-8">{{ $vaccine->dosage }}</dd>
+                                            <td colspan="3">
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Type</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="">
+                                                            {{ $vaccine->type }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Target Species</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="">
+                                                            {{ $vaccine->allSpecies }}
+                                                        </span>
+                                                    </div>
+                                                </div>
 
-                                                        <dt class="col-sm-3 text-uppercase">Route of administration</dt>
-                                                        <dd class="col-sm-9">{{ $vaccine->administration }}</dd>
-                                                        <dt class="col-sm-3 text-uppercase">Vaccination schedule</dt>
-                                                        <dd class="col-sm-9">{{ $vaccine->vaccination_schedule }} [{{ $vaccine->primary_doses }} dosis. ]</dd>
-                                                        <dt class="col-sm-3 text-uppercase">Revaccination schedule</dt>
-                                                        <dd class="col-sm-9">{{ $vaccine->revaccination_schedule }} [{{ $vaccine->revaccination_doses }} dosis.]</dd>
-                                                        <dd class="col-sm-9 offset-sm-3">
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Description</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="text-muted font-italic">
+                                                            {{ $vaccine->allDiseases }}
+                                                        </span>
+                                                        <span>
+                                                            {{ $vaccine->description }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Dosage</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="">
+                                                            {{ $vaccine->dosage }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                               <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">RoA</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="">
+                                                            {{ $vaccine->administration }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Vaccination schedule </span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="">
+                                                           {{ $vaccine->vaccination_doses }} dosis
+                                                        </span>
+                                                        <span class="">
+                                                            {{ $vaccine->vaccination_schedule }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Revaccination schedule</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span class="">
+                                                            {{ $vaccine->revaccination_doses }} dosis
+                                                        </span>
+                                                        <span class="">
+                                                            {{ $vaccine->revaccination_schedule }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold sr-only">Options</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right ml-2">
+                                                        <span>
                                                             @can('vaccines_update')
                                                                 <a href="javascript:void(0)"
                                                                     data-toggle="modal"
                                                                     wire:click.prevent="edit({{ $vaccine }})"
                                                                     title="Edit"
-                                                                    class="btn btn-sm btn-link border border-1" style="width: 50px">
+                                                                    class="btn btn-sm btn-link border border-0" style="width: 50px">
                                                                         <i class="fas fa-edit text-muted"></i>
                                                                 </a>
                                                             @endcan
                                                             @can('vaccines_destroy')
                                                                 <a href="javascript:void(0)"
-                                                                    onclick="confirm('{{ $vaccine->id }}', 'Are you sure you want delete this Item?', 'You won\'t be able to revert this!', 'Item', 'destroy')"
+                                                                    wire:click.prevent="destroy({{ $vaccine->id }})"
                                                                     title="Delete"
-                                                                    class="btn btn-sm btn-link border border-1" style="width: 50px">
+                                                                    class="btn btn-sm btn-link border border-0 icon">
                                                                         <i class="fas fa-trash text-muted"></i>
                                                                 </a>
                                                             @endcan
-                                                        </dd>
-                                                    </dl>
+                                                        </span>
+                                                    </div>
                                                 </div>
+
                                             </td>
                                         </tr>
                                     @empty
                                         <!-- COMMENT: Muestra cuando el componente esta readyToLoad -->
                                         @if($readyToLoad == true)
                                             <tr>
-                                                <td colspan="5">
-                                                    @if(strlen($search) <= 0)
-                                                        <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
-                                                        <div class="col-12 d-flex justify-content-center align-items-center text-muted">
-                                                            <p>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                                                                </svg>
-                                                            </p>
-                                                            <p class="display-4">
-                                                                Empty
-                                                            </p>
-                                                        </div>
-                                                    @else
-                                                        <!-- COMMENT: Muestra 'No results' cuando no hay resultados en una búsqueda -->
-                                                        <div class="col-12 d-flex justify-content-center align-items-center text-muted">
-                                                            <p>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                                                                </svg>
-                                                            </p>
-                                                            <p>
-                                                                There Aren’t Any Great Matches for Your Search: <b>'{{$search}}'
-                                                            </p>
-                                                        </div>
-                                                    @endif
+                                                <td colspan="3">
+                                                    @include('common.datatable-feedback')
                                                 </td>
                                             </tr>
                                         @endif
@@ -244,8 +254,218 @@
 
                             {{-- aquí va el paginador --}}
                         </div>
-                        <!-- /.card-body -->
+                        <!-- /. Datatable's when screen < md (card-body) -->
 
+                        <!-- Datatable's when screen > md (card-body)-->
+                        <div class="card-body table-responsive p-0 d-none d-md-block">
+                            <table class="table table-head-fixed table-hover text-sm datatable">
+                                <thead>
+                                    <tr class="text-uppercase">
+                                        <th>
+                                            <div class="icheck-greensea">
+                                                <input type="checkbox"
+                                                id="checkAll{{$this->pageTitle}}"
+                                                wire:model="select_page"
+                                                wire:loading.attr="disabled">
+                                                <label class="sr-only" for="checkAll{{$this->pageTitle}}">Click to check all items</label>
+                                            </div>
+                                        </th>
+                                        <th wire:click="order('name')">
+                                            Name
+                                            @if($sort == 'name')
+                                                @if($direction == 'asc')
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
+                                                @else
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
+                                                @endif
+                                            @else
+                                                <i class="text-xs text-muted fas fa-sort"></i>
+                                            @endif
+                                        </th>
+                                        <th>
+                                            Target Species
+                                        </th>
+                                        <th wire:click="order('status')" class="text-right">
+                                            Status
+                                            @if($sort == 'status')
+                                                @if($direction == 'asc')
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
+                                                @else
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
+                                                @endif
+                                            @else
+                                                <i class="text-xs text-muted fas fa-sort"></i>
+                                            @endif
+                                        </th>
+                                        <th wire:click="order('administration')" class="d-none" id="th-administration">
+                                            RoA
+                                            @if($sort == 'administration')
+                                                @if($direction == 'asc')
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
+                                                @else
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
+                                                @endif
+                                            @else
+                                                <i class="text-xs text-muted fas fa-sort"></i>
+                                            @endif
+                                        </th>
+                                        <th wire:click="order('description')">
+                                            Description
+                                            @if($sort == 'description')
+                                                @if($direction == 'asc')
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-up-alt"></i>
+                                                @else
+                                                    <i class="text-xs text-muted fas fa-sort-alpha-down-alt"></i>
+                                                @endif
+                                            @else
+                                                <i class="text-xs text-muted fas fa-sort"></i>
+                                            @endif
+                                        </th>
+                                        <th class="text-right d-none" id="th-vaccination">
+                                            Vaccination schedule
+                                        </th>
+                                        <th class="d-none" id="th-revaccination">
+                                            Revaccination schedule
+                                        </th>
+                                        <th>
+                                            <span class="sr-only">Edit</span>
+                                        </th>
+                                        <th>
+                                            <span class="sr-only">Delete</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($vaccines as $vaccine)
+                                        <tr id="rowcheck{{$this->pageTitle}}{{ $vaccine->id }}" class="{{ $this->select_page ? 'table-active text-muted' : ''}}">
+                                            <td width="10px">
+                                                <div class="icheck-greensea">
+                                                    <input type="checkbox"
+                                                    id="check{{$this->pageTitle}}{{$vaccine->id}}"
+                                                    wire:model.defer="selected"
+                                                    value="{{$vaccine->id}}"
+                                                    onchange="updateInterface(this.id, '{{$this->pageTitle}}')"
+                                                    class="counter{{$this->pageTitle}}">
+                                                    <label class="sr-only" for="check{{$this->pageTitle}}{{$vaccine->id}}">Click to check</label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column text-left mb-0">
+                                                    <span class="text-nowrap text-uppercase font-weight-bold text-orange">
+                                                        {{ $vaccine->name }}
+                                                    </span>
+                                                    <span class="font-weight-bold text-uppercase">
+                                                        {{ $vaccine->manufacturer }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {{ $vaccine->allSpecies }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column text-right mb-0">
+                                                    <span>
+                                                        {{ $vaccine->status }}
+                                                    </span>
+                                                    <span class="text-muted">
+                                                        {{ $vaccine->type }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="d-none td-administration">
+                                                <div class="d-flex flex-column text-left mb-0">
+                                                    <span>
+                                                        {{ $vaccine->administration }}
+                                                    </span>
+                                                    <span class="text-muted">
+                                                        {{ $vaccine->dosage }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div x-data="{ open: false }">
+                                                    <span x-show="open">
+                                                        {{ $vaccine->description }}
+                                                        <span class="text-muted font-italic">
+                                                            {{ $vaccine->allDiseases }}
+                                                        </span>
+                                                    </span>
+                                                    <span x-show="! open">
+                                                         {{ substr($vaccine->description, 0, 75 ) }}
+                                                         <span class="text-muted font-italic">
+                                                            {{ Str::words($vaccine->allDiseases, 2, ' >>>') }}
+                                                        </span>
+                                                    </span>
+                                                    <button @click="open = ! open" type="text" class="btn btn-sm btn-link text-info p-0 {{ strlen($vaccine->description . $vaccine->allDiseases) >= 75 ? '' : 'd-none' }}" :class="!open ? '' : 'text-orange'">
+                                                        <span x-text="open ? '[Less]': '[More]'"></span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td class="d-none td-vaccination">
+                                                <div class="d-flex flex-column text-right mb-0">
+                                                    <span>
+                                                        {{ $vaccine->vaccination_doses }} dosis
+                                                    </span>
+                                                    <span>
+                                                        {{ $vaccine->vaccination_schedule }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="d-none td-revaccination">
+                                                <div class="d-flex flex-column text-left mb-0">
+                                                    <span>
+                                                        {{ $vaccine->revaccination_doses }} dosis
+                                                    </span>
+                                                    <span>
+                                                        {{ $vaccine->revaccination_schedule }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @can('vaccines_update')
+                                                    <a href="javascript:void(0)"
+                                                        data-toggle="modal"
+                                                        wire:click.prevent="edit({{ $vaccine }})"
+                                                        title="Edit"
+                                                        class="btn btn-sm btn-link border border-0 icon" style="width: 20px">
+                                                            <i class="fas fa-edit text-muted"></i>
+                                                    </a>
+                                                @endcan
+
+                                            </td>
+                                            <td>
+                                                @can('vaccines_destroy')
+                                                    <a href="javascript:void(0)"
+                                                        wire:click.prevent="destroy({{ $vaccine->id }})"
+                                                        title="Delete"
+                                                        class="btn btn-sm btn-link border border-0 icon">
+                                                            <i class="fas fa-trash text-muted"></i>
+                                                    </a>
+                                                @endcan
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <!-- COMMENT: Muestra cuando el componente esta readyToLoad -->
+                                        @if($readyToLoad == true)
+                                            <tr>
+                                                <td colspan="7">
+                                                    @include('common.datatable-feedback')
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforelse
+                                </tbody>
+                            </table>
+
+                            <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
+                            <div class="d-flex justify-content-center">
+                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                                    {{-- <i class="fas fa-fw fa-spinner fa-spin"></i> --}}
+                                    <span class="loader"></span>
+                                </p>
+                            </div>
+                        </div>
+                        <!-- /. Datatable's when screen > md (card-body) -->
 
                         <!-- card-footer -->
                         @if(count($vaccines))
@@ -264,7 +484,10 @@
                         <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
-                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy">
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, destroyMultiple, undoMultiple">
+  {{--                           <div wire:loading wire:target="store, update, destroy, destroyMultiple, undoMultiple">
+                                <span class="loader"></span>
+                            </div> --}}
                         </div>
                     </div>
                     <!-- /.card -->
@@ -296,13 +519,107 @@
         notify(event)
     });
 
+    window.addEventListener('restored', event => {
+        notify(event)
+    });
 
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {
-            $('#modalForm').modal('show')
+            $('#modalForm{{$this->pageTitle}}').modal('show')
         });
         window.livewire.on('hide-modal', msg =>  {
-            $('#modalForm').modal('hide')
+            $('#modalForm{{$this->pageTitle}}').modal('hide')
         });
     });
+</script>
+
+<script type="text/javascript">
+
+    window.addEventListener('rendered', function() {
+
+        if (localStorage.getItem('administration_toggled') === 'true') {
+            document.getElementById("btn-administration").classList.add("active");
+            document.getElementById("th-administration").classList.remove("d-none");
+            document.querySelectorAll("td.td-administration").forEach((td) => {
+                td.classList.remove("d-none")
+            });
+        }
+
+        if (localStorage.getItem('vaccination_toggled') === 'true') {
+            document.getElementById("btn-vaccination").classList.add("active");
+            document.getElementById("th-vaccination").classList.remove("d-none");
+            document.querySelectorAll("td.td-vaccination").forEach((td) => {
+                td.classList.remove("d-none")
+            });
+        }
+
+        if (localStorage.getItem('revaccination_toggled') === 'true') {
+            document.getElementById("btn-revaccination").classList.add("active");
+            document.getElementById("th-revaccination").classList.remove("d-none");
+            document.querySelectorAll("td.td-revaccination").forEach((td) => {
+                td.classList.remove("d-none")
+            });
+        }
+    });
+
+    function changeColumnsVisibility(id) {
+
+        if (id == 'btn-administration') {
+
+            if (localStorage.getItem('administration_toggled') === 'true'){
+               localStorage.setItem('administration_toggled','false');
+            } else{
+               localStorage.setItem('administration_toggled','true');
+            }
+            // Cambia visibilidad del TH de la columna
+            document.getElementById("btn-administration").classList.toggle("active")
+
+            // Cambia visibilidad del TH de la columna
+            document.getElementById("th-administration").classList.toggle("d-none")
+
+            // Cambia visibilidad de los TDs de la columna
+            document.querySelectorAll("td.td-administration").forEach((td) => {
+              td.classList.toggle("d-none")
+            });
+        }
+
+        if (id == 'btn-vaccination') {
+            if (localStorage.getItem('vaccination_toggled') === 'true'){
+               localStorage.setItem('vaccination_toggled','false');
+            } else{
+               localStorage.setItem('vaccination_toggled','true');
+            }
+
+            // Cambia visibilidad del TH de la columna
+            document.getElementById("btn-vaccination").classList.toggle("active")
+
+            // Cambia visibilidad del TH de la columna
+            document.getElementById("th-vaccination").classList.toggle("d-none")
+
+            // Cambia visibilidad de los TDs de la columna
+            document.querySelectorAll("td.td-vaccination").forEach((td) => {
+              td.classList.toggle("d-none")
+            });
+        }
+
+        if (id == 'btn-revaccination') {
+            if (localStorage.getItem('revaccination_toggled') === 'true'){
+               localStorage.setItem('revaccination_toggled','false');
+            } else{
+               localStorage.setItem('revaccination_toggled','true');
+            }
+
+            // Cambia visibilidad del TH de la columna
+            document.getElementById("btn-revaccination").classList.toggle("active")
+
+            // Cambia visibilidad del TH de la columna
+            document.getElementById("th-revaccination").classList.toggle("d-none")
+
+            // Cambia visibilidad de los TDs de la columna
+            document.querySelectorAll("td.td-revaccination").forEach((td) => {
+              td.classList.toggle("d-none")
+            });
+        }
+    }
+
 </script>

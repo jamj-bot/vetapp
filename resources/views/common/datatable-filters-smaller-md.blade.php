@@ -3,7 +3,7 @@
         <div class="form-row">
             <div class="form-group col-12 {{-- col-sm-6 --}}">
                 <label for="inputSearch" class="sr-only">Search items</label>
-                <input type="search" wire:model="search" class="form-control {{-- form-control-sm  --}}form-control-border" id="inputSearch" placeholder="Type your search term">
+                <input type="search" wire:model="search" class="form-control form-control-sm form-control-border" id="inputSearch" placeholder="Type your search term">
             </div>
 
             <div class="form-group col-4 {{-- col-sm-6 --}}">
@@ -34,6 +34,64 @@
                     @if($pageTitle == 'Species')
                         <option value="name">Common name</option>
                         <option value="scientific_name">Scientific name</option>
+                    @endif
+
+                    {{-- Options for Vaccines --}}
+                    @if($pageTitle == 'Vaccines')
+                        <option value="name">Name</option>
+                        <option value="manufacturer">Manufacturer</option>
+                        <option value="status">Status</option>
+                        <option value="type">Type</option>
+                        <option value="description">Description</option>
+                        <option value="administration">Administration</option>
+                    @endif
+
+                    {{-- Options for Vaccinations --}}
+                    @if($pageTitle == 'Vaccinations')
+                        <option value="name">Name</option>
+                        <option value="manufacturer">Manufacturer</option>
+                        <option value="status">Status</option>
+                        <option value="type">Type</option>
+                        <option value="description">Description</option>
+                        <option value="administration">Administration</option>
+                    @endif
+
+                    {{-- Options for Dewormings--}}
+                    @if($pageTitle == 'Dewormings')
+                        <option value="name">Name</option>
+                        <option value="manufacturer">Manufacturer</option>
+                        <option value="status">Status</option>
+                        <option value="type">Type</option>
+                        <option value="description">Description</option>
+                        <option value="administration">Administration</option>
+                    @endif
+
+                    {{-- Options for Roles--}}
+                    @if($pageTitle == 'Roles')
+                        <option value="name">Name</option>
+                    @endif
+
+                    {{-- Options for Permissions--}}
+                    @if($pageTitle == 'Permissions')
+                        <option value="name">Name</option>
+                    @endif
+
+                    {{-- Options for Assign Permissions--}}
+                    @if($pageTitle == 'Assign Permissions')
+                        <option value="name">Name</option>
+                    @endif
+
+                    {{-- Options for Users --}}
+                    @if($pageTitle == 'Users' || $pageTitle == 'Administrators' || $pageTitle == 'Veterinarians')
+                        <option value="name">Name</option>
+                        <option value="email">Email</option>
+                        <option value="status">Status</option>
+                    @endif
+
+                     {{-- Options for Dumpsters --}}
+                    @if($pageTitle == 'Dumpsters')
+                        <option value="name">Name</option>
+                        <option value="deleted_at">Deleted at</option>
                     @endif
 
                 </select>

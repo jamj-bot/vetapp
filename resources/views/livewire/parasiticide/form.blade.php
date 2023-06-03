@@ -1,4 +1,4 @@
-<form autocomplete="off" wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
+<form autocomplete="off" wire:submit.prevent="submit">
 	@include('common.modal-header')
 
 		<div class="form-row">

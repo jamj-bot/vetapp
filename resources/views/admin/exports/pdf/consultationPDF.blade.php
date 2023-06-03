@@ -132,7 +132,8 @@
 
         <div class="row">
             <h4>Diagnosis</h4>
-            <p class="highlighted">{{ $consultationPDF->diagnosis }}</p>
+            <p class="highlighted">{{ Str::ucfirst($consultationPDF->diseases->implode('name', '; ')) }}</p>
+            <p class="muted">Type(s) of dignosis: {{ Str::ucfirst(Str::lower($consultationPDF->types_of_diagnosis)) }}</p>
         </div>
 
          <div class="row">
@@ -142,7 +143,7 @@
 
         <div class="row">
             <h4>Treatment plan</h4>
-            <p>{{ $consultationPDF->treatment_plan }}</p>
+            <p>{!! $consultationPDF->treatment_plan !!}</p>
         </div>
     </section>
 </body>

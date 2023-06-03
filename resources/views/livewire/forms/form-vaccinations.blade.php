@@ -1,4 +1,4 @@
-<form autocomplete="off" wire:submit.prevent="{{ $selected_id < 0 ? 'store()' : 'update()' }}">
+<form autocomplete="off" wire:submit.prevent="submit">
 	@include('common.modal-header')
 
 		<div class="form-row">
@@ -58,12 +58,11 @@
 				@enderror
 			</div>
 
-			<div class="form-group col-md-3">
+			<div class="form-group col-6 col-md-3">
 				<label for="inputDoseNumber" class="form-label font-weight-normal">Dose *</label>
 				<input wire:model.lazy="dose_number"
 					type="number"
 					class="form-control form-control-sm
-					{{ $errors->has('dose_number') ? 'is-invalid':'' }}
 					{{ $errors->has('dose_number') == false && $this->dose_number != null ? 'is-valid border-success':'' }}"
 					id="inputDoseNumber"
 					placeholder="1"
@@ -80,15 +79,15 @@
 				@enderror
 			</div>
 
-			<div class="form-group col-md-3">
-				<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required {{$this->suggested_dosage ? $this->suggested_dosage:'' }} *</label>
+			<div class="form-group col-6 col-md-3">
+				<label for="inputDosesRequired" class="form-label font-weight-normal">Doses required *</label>
 				<input wire:model.lazy="doses_required"
 					type="number"
 					class="form-control form-control-sm
 					{{ $errors->has('doses_required') ? 'is-invalid':'' }}
 					{{ $errors->has('doses_required') == false && $this->doses_required != null ? 'is-valid border-success':'' }}"
 					id="inputDosesRequired"
-					placeholder="3"
+					placeholder="{{number_format($this->suggested_doses)}}"
 					aria-describedby="inputDosesRequiredFeedback">
 
 				@error('doses_required')
@@ -110,11 +109,11 @@
 				<label for="inputDone" class="form-label font-weight-normal">Done *</label>
 				<input wire:model.lazy="done"
 					type="date"
-					class="form-control form-control-sm
+					class="form-control form-control-sm flatpickr
 					{{ $errors->has('done') ? 'is-invalid':'' }}
 					{{ $errors->has('done') == false && $this->done != null ? 'is-valid border-success':'' }}"
 					id="inputDone"
-					placeholder="Done"
+					placeholder="Select date"
 					aria-describedby="inputDoneFeedback">
 
 				@error('done')
@@ -185,5 +184,5 @@
 		<!-- /. row -->
 
 	@include('common.modal-footer')
-
 </form>
+

@@ -23,66 +23,125 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-
-{{--             <!-- Buttons -->
-            <div class="form-row d-flex justify-content-end">
-                <div class="form-group col-md-3">
-                    @can('species_destroy')
-                        <button id="destroyMultiple" wire:click="destroyMultiple" type="button" class="btn bg-gradient-danger btn-block shadow {{ $this->select_page ? '' : 'd-none' }}">
-                            <i class="fas fa-fw fa-trash"></i>
-                            Delete <span id="contador" class="font-weight-bold">{{ count($this->selected) }}</span> species
-                        </button>
-                    @endcan
-                </div>
-                <div class="form-group col-md-3">
-                    @can('species_store')
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn bg-gradient-primary btn-block shadow" data-toggle="modal" data-target="#modalForm">
-                           <i class="fas fa-fw fa-plus"></i> Add Species
-                        </button>
-                    @endcan
-                </div>
-            </div>
- --}}
             <!--Datatable -->
             <div class="row">
                 <div class="col-12">
-
                     <!-- Datatable's filters when screen < md-->
                     @include('common.datatable-filters-smaller-md')
 
                     <!-- Datatable's filters when screen > md-->
                     @include('common.datatable-filters-wider-md')
 
-                    <div class="card">
-                        <div class="card-header bg-gradient-primary">
-                            <!-- Datatable's buttons -->
-                            <div class="form-row d-flex justify-content-between">
-                                <div class="col-12 col-sm-5 col-md-auto">
-                                    @include('common.destroy-multiple-button')
-                                </div>
+                    <!-- Datatable's buttons -->
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="col-auto">
+                            @include('common.destroy-multiple-and-undo-buttons')
+                        </div>
 
-                                <div class="col-12 col-sm-5 col-md-auto">
-                                    <!-- Add Button -->
-                                    @can('species_store')
-                                        @include('common.add-button')
-                                    @endcan
-                                </div>
-                            </div>
+                        <div class="col-auto">
+                            <!-- Add Button -->
+                            @can('species_store')
+                                @include('common.add-button')
+                            @endcan
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-gradient-olive">
+                            <h3 class="card-title">
+                                @if($this->select_page)
+                                    <span id="dynamicText{{$this->pageTitle}}">{{ count($this->selected) }} item(s) selected</span>
+                                @else
+                                    <span id="dynamicText{{$this->pageTitle}}">Species</span>
+                                @endif
+                            </h3>
                         </div>
                         <!-- /.card-header -->
 
-                         <!-- Datatable's when screen > md (card-body)-->
-                        <div class="card-body table-responsive p-0 d-none d-md-block">
+                        <!-- Datatable's when screen < md (card-body)-->
+                        <div class="card-body table-responsive p-0 d-md-none">
                             <table class="table table-head-fixed table-hover text-sm">
                                 <thead>
                                     <tr class="text-uppercase">
                                         <th>
-                                            <div class="icheck-pomegranate">
+                                            Name
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($species as $speciesItem)
+                                        <tr data-widget="expandable-table" aria-expanded="false">
+                                            <td>
+                                                {{ $speciesItem->name }} /
+                                                <span class="font-italic text-muted">{{ $speciesItem->scientific_name }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="expandable-body d-none">
+                                            <td colspan="1">
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold sr-only">Options</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right">
+                                                        <span>
+                                                            @can('species_update')
+                                                                <a href="javascript:void(0)"
+                                                                    data-toggle="modal"
+                                                                    wire:click.defer="edit({{ $speciesItem }})"
+                                                                    title="Edit"
+                                                                    class="btn btn-sm btn-link border border-0">
+                                                                        <i class="fas fa-edit text-muted"></i>
+                                                                </a>
+                                                            @endcan
+                                                            @can('species_destroy')
+                                                                <a href="javascript:void(0)"
+                                                                    wire:click.prevent="destroy({{ $speciesItem->id }})"
+                                                                    title="Delete"
+                                                                    class="btn btn-sm btn-link border border-0 icon">
+                                                                        <i class="fas fa-trash text-muted"></i>
+                                                                </a>
+                                                            @endcan
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <!-- COMMENT: Muestra cuando el componente esta readyToLoad -->
+                                        @if($readyToLoad == true)
+                                            <tr>
+                                                <td colspan="1">
+                                                    @include('common.datatable-feedback')
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforelse
+                                </tbody>
+                            </table>
+
+                            <!-- COMMENT: Muestra sppiner cuando el componente no está readyToLoad -->
+                            <div class="d-flex justify-content-center">
+                                <p wire:loading wire:target="loadItems" class="display-4 text-muted pt-3">
+                                    {{-- <i class="fas fa-fw fa-spinner fa-spin"></i> --}}
+                                    <span class="loader"></span>
+                                </p>
+                            </div>
+                        </div>
+                        <!-- /. Datatable's when screen < md (card-body) -->
+
+
+                        <!-- Datatable's when screen > md (card-body)-->
+                        <div class="card-body table-responsive p-0 d-none d-md-block">
+                            <table class="table table-head-fixed table-hover text-sm datatable">
+                                <thead>
+                                    <tr class="text-uppercase">
+                                        <th>
+                                            <div class="icheck-nephritis">
                                                 <input type="checkbox"
-                                                id="checkAll"
-                                                wire:model="select_page">
-                                                <label class="sr-only" for="checkAll">Click to check all items</label>
+                                                id="checkAll{{$this->pageTitle}}"
+                                                wire:model="select_page"
+                                                wire:loading.attr="disabled">
+                                                <label class="sr-only" for="checkAll{{$this->pageTitle}}">Click to check all items</label>
                                             </div>
                                         </th>
                                         <th wire:click="order('name')">
@@ -119,16 +178,16 @@
                                 </thead>
                                 <tbody>
                                     @forelse($species as $specie)
-                                        <tr id="rowcheck{{ $specie->id }}" class="{{ $this->select_page ? 'table-active font-weight-bold' : ''}}">
+                                        <tr id="rowcheck{{$this->pageTitle}}{{ $specie->id }}" class="{{ $this->select_page ? 'table-active text-muted' : ''}}">
                                             <td width="10px">
-                                                <div class="icheck-pomegranate">
+                                                <div class="icheck-nephritis">
                                                     <input type="checkbox"
-                                                    id="check{{$specie->id}}"
+                                                    id="check{{$this->pageTitle}}{{$specie->id}}"
                                                     wire:model.defer="selected"
                                                     value="{{$specie->id}}"
-                                                    onchange="updateInterface(this.id)"
-                                                    class="counter">
-                                                    <label class="sr-only" for="check{{$specie->id}}">Click to check</label>
+                                                    onchange="updateInterface(this.id, '{{$this->pageTitle}}')"
+                                                    class="counter{{$this->pageTitle}}">
+                                                    <label class="sr-only" for="check{{$this->pageTitle}}{{$specie->id}}">Click to check</label>
                                                 </div>
                                             </td>
                                             <td>
@@ -147,7 +206,7 @@
                                                         data-toggle="modal"
                                                         wire:click.defer="edit({{ $specie }})"
                                                         title="Edit"
-                                                        class="btn btn-sm btn-link border border-0">
+                                                        class="btn btn-sm btn-link border border-0 icon">
                                                             <i class="fas fa-edit text-muted"></i>
                                                     </a>
                                                 @endcan
@@ -155,47 +214,22 @@
                                             <td width="10px">
                                                 @can('species_destroy')
                                                     <a href="javascript:void(0)"
-                                                        onclick="confirm('{{ $specie->id }}', 'Are you sure you want delete this Item?', 'You won\'t be able to revert this!', 'Item', 'destroy')"
+                                                        wire:click.prevent="destroy({{ $specie->id }})"
                                                         title="Delete"
-                                                        class="btn btn-sm btn-link border border-0">
+                                                        class="btn btn-sm btn-link border border-0 icon">
                                                             <i class="fas fa-trash text-muted"></i>
                                                     </a>
                                                 @endcan
                                             </td>
                                         </tr>
                                     @empty
-                                    @if($readyToLoad == true)
-                                        <tr>
-                                            <td colspan="5">
-                                                @if(strlen($search) <= 0)
-                                                <!-- COMMENT: Muestra 'Empty' cuando no items en la DB-->
-                                                    <div class="col-12 d-flex justify-content-center align-items-center text-muted">
-                                                        <p>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                                                            </svg>
-                                                        </p>
-                                                        <p class="display-4">
-                                                            Empty
-                                                        </p>
-                                                    </div>
-                                                @else
-                                                <!-- COMMENT: Muestra 'No results' cuando no hay resultados en una búsqueda -->
-                                                    <div class="col-12 d-flex justify-content-center align-items-center text-muted">
-                                                        <p>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                                                            </svg>
-                                                        </p>
-                                                        <p>
-                                                            There Aren’t Any Great Matches for Your Search: <b>'{{$search}}'
-                                                        </p>
-                                                    </div>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endif
+                                        @if($readyToLoad == true)
+                                            <tr>
+                                                <td colspan="5">
+                                                    @include('common.datatable-feedback')
+                                                </td>
+                                            </tr>
+                                        @endif
                                     @endforelse
                                 </tbody>
                             </table>
@@ -226,7 +260,7 @@
                         <!-- /.card-footer -->
 
                         <!-- COMMENT: muestra overlay cuando se llama a los métodos apply, update, destroy-->
-                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, destroyMultiple">
+                        <div wire:loading.class="overlay dark" wire:target="store, update, destroy, destroyMultiple, undoMultiple">
                         </div>
                     </div>
                     <!-- /.card -->
@@ -257,49 +291,17 @@
         notify(event)
     });
 
+    window.addEventListener('restored', event => {
+        notify(event)
+    });
 
     document.addEventListener('DOMContentLoaded', function(){
         window.livewire.on('show-modal', msg =>  {
-            $('#modalForm').modal('show')
+            $('#modalForm{{$this->pageTitle}}').modal('show')
         });
         window.livewire.on('hide-modal', msg =>  {
-            $('#modalForm').modal('hide')
+            $('#modalForm{{$this->pageTitle}}').modal('hide')
         });
     });
-</script>
-
-<script type="text/javascript">
-
-    function updateInterface(id) {
-        uncheckAll();
-        trActive(id);
-        count();
-    }
-
-    function uncheckAll() {
-        // Desmarca check all si estaba seleccionado al hacer clic en una row
-        if (document.getElementById('checkAll').checked) {
-            document.getElementById('checkAll').checked = false
-        }
-    }
-
-    function trActive(id) {
-        // marca los TR como activados al hacer clic en una row
-        var row = document.getElementById("rowcheck"+document.getElementById(id).value)
-        row.classList.toggle("table-active")
-        row.classList.toggle("font-weight-bold")
-    }
-
-    function count() {
-        // Selecciona todos los input de tipo chechbox que tengan la clase counter y los cuenta
-        document.getElementById("counter").innerHTML = document.querySelectorAll('input[type="checkbox"]:checked.counter').length
-
-        if (document.querySelectorAll('input[type="checkbox"]:checked.counter').length < 1) {
-            document.getElementById("destroyMultiple").classList.add("d-none");
-        }
-        if (document.querySelectorAll('input[type="checkbox"]:checked.counter').length > 0) {
-            document.getElementById("destroyMultiple").classList.remove("d-none");
-        }
-    }
 
 </script>

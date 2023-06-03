@@ -16,7 +16,7 @@ class PetSeeder extends Seeder
     public function run()
     {
         $pet = Pet::create([
-            'user_id'               => 3,
+            'user_id'               => 5,
             'species_id'            => 2,
             'code'                  => '2045568978',
             'name'                  => 'Blanquita',
@@ -34,7 +34,7 @@ class PetSeeder extends Seeder
         ]);
 
         $pet = Pet::create([
-            'user_id'               => 3,
+            'user_id'               => 6,
             'species_id'            => 3,
             'code'                  => '5689451210',
             'name'                  => 'TOPDOG L-135M',
@@ -52,7 +52,7 @@ class PetSeeder extends Seeder
         ]);
 
         $pet = Pet::create([
-            'user_id'               => 1,
+            'user_id'               => 7,
             'species_id'            => 1,
             'code'                  => '1689451219',
             'name'                  => 'Canela',
@@ -69,6 +69,6 @@ class PetSeeder extends Seeder
             'status'                => 'Alive',
         ]);
 
-        Pet::factory(50)->create();
+        Pet::factory(10)->create();
     }
 }

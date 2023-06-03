@@ -94,4 +94,21 @@ class Consultation extends Model
     {
         return $this->hasMany(Prescription::class);
     }
+
+    /**
+     * Get the child consultations.
+     */
+    public function children()
+    {
+        return  $this->hasMany(Consultation::class, 'parent_id');
+    }
+
+    /**
+     * Get the parent consultation.
+     */
+    public  function parent()
+    {
+        return $this->belongsTo(Consultation::class, 'parent_id');
+    }
+
 }

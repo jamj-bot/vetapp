@@ -19,6 +19,6 @@ class Medicine extends Model
         'strength',
         'dosage_form',
         'quantity',
-        'instructions'
+        'therapeutic_properties'
     ];
 }

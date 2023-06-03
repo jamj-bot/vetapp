@@ -46,5 +46,4 @@ class Vaccination extends Model
         return $this->belongsTo(Vaccine::class);
     }
 
-
 }

@@ -5,7 +5,9 @@ use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\PetProfileController;
 use App\Http\Controllers\Admin\UserProfileController;
+use App\Http\Livewire\AdministratorController;
 use App\Http\Livewire\AssignPermissionsController;
+use App\Http\Livewire\CaseStudySearchController;
 use App\Http\Livewire\ConsultationController;
 use App\Http\Livewire\ConsultationDetailsController;
 use App\Http\Livewire\ParasiticideController;
@@ -18,15 +20,24 @@ use App\Http\Livewire\SpeciesController;
 use App\Http\Livewire\TrashController;
 use App\Http\Livewire\UserController;
 use App\Http\Livewire\VaccineController;
+use App\Http\Livewire\VeterinarianController;
+use App\Http\Livewire\VeterinarianProfileController;
 use Illuminate\Support\Facades\Route;
 
 
 
 Route::get('', [HomeController::class, 'index'])->name('admin.index');
 
-// User
-Route::get('users', UserController::class)->name('admin.users');
-Route::get('users/{user}', [UserProfileController::class, 'show'])->name('admin.users.show');
+Route::get('case-study-search', CaseStudySearchController::class)->name('admin.case-study-search');
+
+Route::get('users', UserController::class)->name('admin.users');// User (with role 'client')
+Route::get('users/{user}/{appointment?}', [UserProfileController::class, 'show'])->name('admin.users.show');
+
+Route::get('veterinarians', VeterinarianController::class)->name('admin.veterinarians');// User (with role 'Veterinarian')
+Route::get('veterinarians/{user}', VeterinarianProfileController::class)->name('admin.veterinarians.show');// User profile (when role 'Veterinarian')
+
+// User (with role 'Admin or superadmin')
+Route::get('administrators', AdministratorController::class)->name('admin.administrators');
 
 // Trash
 Route::get('trash', TrashController::class)->name('admin.recycle-bin');

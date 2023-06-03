@@ -118,6 +118,15 @@ class RoleController extends Component
             ->section('content');
     }
 
+    public function submit()
+    {
+        if ($this->selected_id) {
+            $this->update();
+        } else {
+            $this->store();
+        }
+    }
+
     public function store()
     {
         $this->authorize('roles_store');

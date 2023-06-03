@@ -34,8 +34,8 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header bg-gradient-primary">
-                            <h3 class="card-title">Index</h3>
+                        <div class="card-header bg-gradient-lightblue">
+                            <h3 class="card-title">Pets</h3>
                             <div class="card-tools">
                             </div>
                         </div>
@@ -57,10 +57,10 @@
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center mx-1">
                                                     <div>
-                                                        <img class="img-circle elevation-2 shadow border border-2"
+                                                        <img class="img-fluid rounded-circle elevation-2 shadow"
                                                             loading="lazy"
                                                             src="{{$pet->pet_profile_photo ? asset('storage/pet-profile-photos/' . $pet->pet_profile_photo) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}"
-                                                            style="width: 48px; height: 48px; object-fit: cover; background: antiquewhite;"
+                                                            style="width: 48px; height: 48px; object-fit: cover;"
                                                             alt="{{ $pet->name }}">
                                                     </div>
                                                     <div class="d-flex flex-column text-right">
@@ -96,20 +96,6 @@
                                             <td colspan="1">
                                                 <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
                                                     <div>
-                                                        <span class="text-uppercase font-weight-bold">Breed</span>
-                                                    </div>
-                                                    <div class="d-flex flex-column text-right">
-                                                        <span class="{{ !$pet->breed ? 'text-muted' : '' }}">
-                                                            {{ $pet->breed ? $pet->breed : 'Crossbreed / undetermined' }}
-                                                        </span>
-                                                        <span class="{{ !$pet->zootechnical_function ? 'text-muted' : '' }}">
-                                                            {{ $pet->zootechnical_function ? $pet->zootechnical_function : 'Undetermined function' }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
-                                                    <div>
                                                         <span class="text-uppercase font-weight-bold">Species</span>
                                                     </div>
                                                     <div class="d-flex flex-column text-right">
@@ -118,6 +104,20 @@
                                                         </span>
                                                         <span class="font-italic">
                                                             {{ $pet->scientific_name }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mx-3" style="display: none;">
+                                                    <div>
+                                                        <span class="text-uppercase font-weight-bold">Breed</span>
+                                                    </div>
+                                                    <div class="d-flex flex-column text-right">
+                                                        <span class="{{ !$pet->breed ? 'text-muted' : '' }}">
+                                                            {{ $pet->breed ? $pet->breed : 'Mixed / unknown breed' }}
+                                                        </span>
+                                                        <span class="{{ !$pet->zootechnical_function ? 'text-muted' : '' }}">
+                                                            {{ $pet->zootechnical_function ? $pet->zootechnical_function : 'Undetermined function' }}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -139,7 +139,10 @@
                                                     </div>
                                                     <div class="d-flex flex-column text-right">
                                                         <span>
-                                                            {{ $pet->user_name }}
+                                                            <a class="text-uppercase font-weight-bold"
+                                                                href="{{ route('admin.users.show', $pet->user_id) }}">
+                                                                {{ $pet->user_name }}
+                                                            </a>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -242,10 +245,10 @@
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <p class="pr-2 mb-0">
-                                                        <img class="img-circle elevation-2 shadow border border-2"
+                                                        <img class="img-fluid rounded-circle elevation-2 shadow"
                                                             loading="lazy"
                                                             src="{{$pet->pet_profile_photo ? asset('storage/pet-profile-photos/' . $pet->pet_profile_photo) : 'https://ui-avatars.com/api/?name='.$pet->name.'&color=FFF&background=random&size=128'}}"
-                                                            style="width: 48px; height: 48px; object-fit: cover; background: antiquewhite;"
+                                                            style="width: 48px; height: 48px; object-fit: cover;"
                                                             alt="{{ $pet->name }}">
                                                     </p>
                                                     <p class="d-flex flex-column text-right mb-0">
@@ -277,9 +280,9 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-column text-left mb-0 text-right">
+                                                <div class="d-flex flex-column text-right mb-0">
                                                     <span class="{{ !$pet->breed ? 'text-muted' : '' }}">
-                                                        {{ $pet->breed ? $pet->breed : 'Crossbreed / undetermined' }}
+                                                        {{ $pet->breed ? $pet->breed : 'Mixed / unknown breed' }}
                                                     </span>
                                                     <span class="{{ !$pet->zootechnical_function ? 'text-muted' : '' }} text-right">
                                                         {{ $pet->zootechnical_function ? $pet->zootechnical_function : 'Undetermined function' }}
@@ -302,7 +305,9 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                {{ $pet->user_name }}
+                                                <a class="text-uppercase font-weight-bold" href="{{ route('admin.users.show', $pet->user_id) }}">
+                                                    {{ $pet->user_name }}
+                                                </a>
                                             </td>
                                         </tr>
                                     @empty
